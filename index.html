@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Minha Associação — Painel</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <style>
   :root {
     --bg: #F7F5EF;
@@ -259,6 +260,9 @@
   .badge.pendente { background: rgba(184,134,11,0.14); color: var(--warning); }
   .badge.atrasado { background: rgba(178,58,58,0.12); color: var(--danger); }
   .badge.cancelado { background: var(--border); color: var(--text-muted); }
+  .badge.aguardando_confirmacao { background: rgba(52,152,219,0.14); color: #3498DB; }
+
+  #pix-qrcode-container svg { width: 220px; height: 220px; }
 
   select {
     width: 100%;
@@ -497,6 +501,10 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
       Meus Dados
     </button>
+    <button class="nav-item" id="aba-configuracoes" style="display:none;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Configurações
+    </button>
 
     <div class="sidebar-footer">
       <button class="theme-toggle" id="btn-tema" title="Alternar tema">☀</button>
@@ -596,6 +604,31 @@
         <div class="painel-header"><h3>Minhas cobranças</h3></div>
         <div id="tabela-minhas-cobrancas-container">
           <div class="vazio">Carregando...</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="secao-configuracoes" style="display:none;">
+      <div class="page-header"><h1>Configurações</h1></div>
+      <div class="painel">
+        <div class="painel-header"><h3>Chave Pix da associação</h3></div>
+        <div style="padding:22px;">
+          <p style="font-size:13px; color:var(--text-muted); margin-bottom:18px;">
+            Essa chave é usada para gerar o QR code Pix nas cobranças. Depois que o associado paga, ele envia o comprovante e a diretoria confirma manualmente.
+          </p>
+          <div class="campo">
+            <label>Chave Pix (CPF, CNPJ, e-mail, telefone ou chave aleatória)</label>
+            <input type="text" id="config-chave-pix" placeholder="ex: 00000000000">
+          </div>
+          <div class="campo">
+            <label>Nome do recebedor (máx. 25 caracteres)</label>
+            <input type="text" id="config-nome-pix" maxlength="25" placeholder="ex: ASSOCIACAO TESTE">
+          </div>
+          <div class="campo">
+            <label>Cidade (máx. 15 caracteres, sem acento)</label>
+            <input type="text" id="config-cidade-pix" maxlength="15" placeholder="ex: SAO PAULO">
+          </div>
+          <button class="btn" id="btn-salvar-config-pix">Salvar</button>
         </div>
       </div>
     </div>
@@ -742,6 +775,46 @@
   </div>
 </div>
 
+<!-- ===== MODAL PAGAR COM PIX (associado) ===== -->
+<div class="overlay" id="overlay-modal-pix">
+  <div class="modal">
+    <h3>Pagar com Pix</h3>
+    <input type="hidden" id="pix-cobranca-id" value="">
+    <p style="font-size:13px; color:var(--text-muted); margin-bottom:14px;" id="pix-descricao-valor"></p>
+
+    <div id="pix-qrcode-container" style="display:flex; justify-content:center; margin-bottom:14px;"></div>
+
+    <div class="campo">
+      <label>Pix Copia e Cola</label>
+      <input type="text" id="pix-copia-cola" readonly style="font-size:11px;">
+    </div>
+    <button class="btn btn-ghost" style="width:100%; margin-bottom:18px;" id="btn-copiar-pix">Copiar código</button>
+
+    <p style="font-size:13px; font-weight:600; margin-bottom:8px;">Já pagou? Envie o comprovante:</p>
+    <input type="file" id="input-comprovante" accept="image/*,application/pdf" style="display:none;">
+    <button class="btn btn-ghost" style="width:100%;" id="btn-selecionar-comprovante">Escolher arquivo</button>
+    <p id="nome-arquivo-comprovante" style="font-size:12px; color:var(--text-muted); margin-top:6px;"></p>
+
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="btn-fechar-modal-pix">Fechar</button>
+      <button class="btn" id="btn-enviar-comprovante">Enviar comprovante</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL VER COMPROVANTE (admin/diretoria) ===== -->
+<div class="overlay" id="overlay-modal-comprovante">
+  <div class="modal">
+    <h3>Comprovante enviado</h3>
+    <input type="hidden" id="comprovante-cobranca-id" value="">
+    <div id="comprovante-conteudo" style="margin-bottom:18px; text-align:center;"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="btn-fechar-modal-comprovante">Fechar</button>
+      <button class="btn" id="btn-confirmar-pagamento-comprovante">Confirmar pagamento</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -782,6 +855,65 @@
       limpo = partes.slice(0, -1).join('') + '.' + partes[partes.length - 1];
     }
     return parseFloat(limpo) || 0;
+  }
+
+  // ---------- Gerador de Pix estático (BR Code / EMV) ----------
+  function campoEMV(id, valor) {
+    var tamanho = String(valor.length).padStart(2, '0');
+    return id + tamanho + valor;
+  }
+
+  function removerAcentos(texto) {
+    return texto.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  }
+
+  function crc16(payload) {
+    var polinomio = 0x1021;
+    var resultado = 0xFFFF;
+
+    for (var i = 0; i < payload.length; i++) {
+      resultado ^= (payload.charCodeAt(i) << 8);
+      for (var j = 0; j < 8; j++) {
+        if ((resultado & 0x8000) !== 0) {
+          resultado = ((resultado << 1) ^ polinomio) & 0xFFFF;
+        } else {
+          resultado = (resultado << 1) & 0xFFFF;
+        }
+      }
+    }
+    return resultado.toString(16).toUpperCase().padStart(4, '0');
+  }
+
+  function gerarPayloadPix(config, valor, txid) {
+    var chave = config.chave_pix;
+    var nome = removerAcentos(config.nome_recebedor_pix).toUpperCase().substring(0, 25);
+    var cidade = removerAcentos(config.cidade_pix).toUpperCase().substring(0, 15);
+    var txidLimpo = ('COB' + txid).replace(/[^a-zA-Z0-9]/g, '').substring(0, 25);
+    var valorFormatado = Number(valor).toFixed(2);
+
+    var merchantAccountInfo = campoEMV('00', 'br.gov.bcb.pix') + campoEMV('01', chave);
+    var additionalData = campoEMV('05', txidLimpo);
+
+    var payload =
+      campoEMV('00', '01') +
+      campoEMV('26', merchantAccountInfo) +
+      campoEMV('52', '0000') +
+      campoEMV('53', '986') +
+      campoEMV('54', valorFormatado) +
+      campoEMV('58', 'BR') +
+      campoEMV('59', nome) +
+      campoEMV('60', cidade) +
+      campoEMV('62', additionalData) +
+      '6304';
+
+    return payload + crc16(payload);
+  }
+
+  function renderizarQrCode(containerId, texto) {
+    var qr = qrcode(0, 'M');
+    qr.addData(texto);
+    qr.make();
+    document.getElementById(containerId).innerHTML = qr.createSvgTag({ scalable: true });
   }
 
   // ---------- Tema ----------
@@ -950,6 +1082,7 @@
       } else {
         if (estado.papel === 'admin') {
           document.getElementById('aba-usuarios').style.display = 'flex';
+          document.getElementById('aba-configuracoes').style.display = 'flex';
         }
         carregarAssociados();
         carregarCobrancas();
@@ -1109,7 +1242,7 @@
 
   // ---------- Navegação (sidebar) ----------
   function ativarAba(idAtiva) {
-    ['associados', 'financeiro', 'comunicados', 'usuarios', 'meus-dados'].forEach(function(nome) {
+    ['associados', 'financeiro', 'comunicados', 'usuarios', 'meus-dados', 'configuracoes'].forEach(function(nome) {
       var item = document.getElementById('aba-' + nome);
       if (!item) return;
       item.classList.toggle('ativa', nome === idAtiva);
@@ -1121,6 +1254,49 @@
   document.getElementById('aba-comunicados').onclick = function() { ativarAba('comunicados'); carregarComunicados(); };
   document.getElementById('aba-usuarios').onclick = function() { ativarAba('usuarios'); carregarUsuarios(); };
   document.getElementById('aba-meus-dados').onclick = function() { ativarAba('meus-dados'); carregarMeusDados(); };
+  document.getElementById('aba-configuracoes').onclick = function() { ativarAba('configuracoes'); carregarConfigPix(); };
+
+  function carregarConfigPix() {
+    fetch(API_URL + '/configuracoes/pix', {
+      headers: { 'Authorization': 'Bearer ' + estado.token }
+    })
+    .then(function(resp) { return resp.json(); })
+    .then(function(config) {
+      document.getElementById('config-chave-pix').value = config.chave_pix || '';
+      document.getElementById('config-nome-pix').value = config.nome_recebedor_pix || '';
+      document.getElementById('config-cidade-pix').value = config.cidade_pix || '';
+    })
+    .catch(function() { mostrarToast('Erro ao carregar configuração de Pix', true); });
+  }
+
+  document.getElementById('btn-salvar-config-pix').onclick = function() {
+    var chave = document.getElementById('config-chave-pix').value.trim();
+    var nome = document.getElementById('config-nome-pix').value.trim();
+    var cidade = document.getElementById('config-cidade-pix').value.trim();
+
+    if (!chave || !nome || !cidade) {
+      mostrarToast('Preencha todos os campos', true);
+      return;
+    }
+
+    fetch(API_URL + '/configuracoes/pix', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + estado.token
+      },
+      body: JSON.stringify({ chave_pix: chave, nome_recebedor_pix: nome, cidade_pix: cidade })
+    })
+    .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
+    .then(function(res) {
+      if (!res.ok) {
+        mostrarToast(res.data.erro || 'Erro ao salvar configuração', true);
+        return;
+      }
+      mostrarToast('Configuração de Pix salva!');
+    })
+    .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
+  };
 
   // ---------- Financeiro: carregar cobranças ----------
   var cobrancasCache = [];
@@ -1148,6 +1324,9 @@
       var statusExibicao = c.status_exibicao || c.status;
       var valorFormatado = 'R$ ' + parseFloat(c.valor).toFixed(2).replace('.', ',');
       var acoes = '';
+      if (c.tem_comprovante && c.status !== 'pago') {
+        acoes += '<button class="btn-pequeno" onclick="abrirComprovante(\'' + c.id + '\')">Ver comprovante</button> ';
+      }
       if (c.status !== 'pago') {
         acoes += '<button class="btn-pequeno" onclick="marcarComoPago(\'' + c.id + '\')">Marcar como pago</button> ';
         acoes += '<button class="btn-pequeno" onclick="abrirEdicaoCobranca(\'' + c.id + '\')">Editar</button> ';
@@ -1160,7 +1339,7 @@
         '<td>' + escapeHtml(c.descricao) + '</td>' +
         '<td>' + valorFormatado + '</td>' +
         '<td>' + formatarData(c.vencimento) + '</td>' +
-        '<td><span class="badge ' + statusExibicao + '">' + statusExibicao + '</span></td>' +
+        '<td><span class="badge ' + statusExibicao + '">' + statusExibicao.replace('_', ' ') + '</span></td>' +
         '<td style="white-space:nowrap;">' + acoes + '</td>' +
         '</tr>';
     });
@@ -1220,6 +1399,42 @@
     })
     .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
   }
+
+  // ---------- Modal Ver comprovante (admin/diretoria) ----------
+  function abrirComprovante(cobrancaId) {
+    document.getElementById('comprovante-cobranca-id').value = cobrancaId;
+    var conteudo = document.getElementById('comprovante-conteudo');
+    conteudo.innerHTML = '<div class="vazio">Carregando...</div>';
+    document.getElementById('overlay-modal-comprovante').style.display = 'flex';
+
+    fetch(API_URL + '/cobrancas/' + cobrancaId + '/comprovante', {
+      headers: { 'Authorization': 'Bearer ' + estado.token }
+    })
+    .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
+    .then(function(res) {
+      if (!res.ok) {
+        conteudo.innerHTML = '<div class="vazio">' + escapeHtml(res.data.erro || 'Comprovante não encontrado') + '</div>';
+        return;
+      }
+      var arquivo = res.data.comprovante_base64;
+      if (arquivo.startsWith('data:application/pdf')) {
+        conteudo.innerHTML = '<a href="' + arquivo + '" target="_blank" class="btn btn-ghost">Abrir PDF do comprovante</a>';
+      } else {
+        conteudo.innerHTML = '<img src="' + arquivo + '" style="max-width:100%; border-radius:10px;">';
+      }
+    })
+    .catch(function() { conteudo.innerHTML = '<div class="vazio">Erro ao carregar comprovante</div>'; });
+  }
+
+  document.getElementById('btn-fechar-modal-comprovante').onclick = function() {
+    document.getElementById('overlay-modal-comprovante').style.display = 'none';
+  };
+
+  document.getElementById('btn-confirmar-pagamento-comprovante').onclick = function() {
+    var id = document.getElementById('comprovante-cobranca-id').value;
+    document.getElementById('overlay-modal-comprovante').style.display = 'none';
+    marcarComoPago(id);
+  };
 
   // ---------- Modal nova/editar cobrança ----------
   document.getElementById('btn-nova-cobranca').onclick = function() {
@@ -1681,29 +1896,155 @@
     .catch(function() { mostrarToast('Erro ao carregar suas cobranças', true); });
   }
 
+  var minhasCobrancasCache = [];
+
   function renderizarMinhasCobrancas(lista) {
+    minhasCobrancasCache = lista;
     var container = document.getElementById('tabela-minhas-cobrancas-container');
     if (!Array.isArray(lista) || lista.length === 0) {
       container.innerHTML = '<div class="vazio">Nenhuma cobrança encontrada.</div>';
       return;
     }
 
-    var html = '<table><thead><tr><th>Descrição</th><th>Valor</th><th>Vencimento</th><th>Status</th></tr></thead><tbody>';
+    var html = '<table><thead><tr><th>Descrição</th><th>Valor</th><th>Vencimento</th><th>Status</th><th></th></tr></thead><tbody>';
     lista.forEach(function(c) {
       var statusExibicao = c.status_exibicao || c.status;
       var valorFormatado = 'R$ ' + parseFloat(c.valor).toFixed(2).replace('.', ',');
+      var acao = '';
+      if (c.status === 'pendente' || statusExibicao === 'atrasado') {
+        acao = '<button class="btn-pequeno" onclick="abrirModalPix(\'' + c.id + '\')">Pagar com Pix</button>';
+      } else if (c.status === 'aguardando_confirmacao') {
+        acao = '<span style="font-size:12px; color:var(--text-muted);">Comprovante enviado</span>';
+      }
       html += '<tr>' +
         '<td>' + escapeHtml(c.descricao) + '</td>' +
         '<td>' + valorFormatado + '</td>' +
         '<td>' + formatarData(c.vencimento) + '</td>' +
-        '<td><span class="badge ' + statusExibicao + '">' + statusExibicao + '</span></td>' +
+        '<td><span class="badge ' + statusExibicao + '">' + statusExibicao.replace('_', ' ') + '</span></td>' +
+        '<td>' + acao + '</td>' +
         '</tr>';
     });
     html += '</tbody></table>';
     container.innerHTML = html;
   }
 
-  // ---------- Upload de foto (com redimensionamento no navegador) ----------
+  // ---------- Modal Pagar com Pix (associado) ----------
+  var comprovanteSelecionadoBase64 = null;
+
+  function abrirModalPix(cobrancaId) {
+    var cobranca = minhasCobrancasCache.find(function(c) { return c.id === cobrancaId; });
+    if (!cobranca) return;
+
+    document.getElementById('pix-cobranca-id').value = cobrancaId;
+    document.getElementById('pix-descricao-valor').textContent =
+      cobranca.descricao + ' — R$ ' + parseFloat(cobranca.valor).toFixed(2).replace('.', ',');
+    document.getElementById('nome-arquivo-comprovante').textContent = '';
+    comprovanteSelecionadoBase64 = null;
+
+    fetch(API_URL + '/configuracoes/pix', {
+      headers: { 'Authorization': 'Bearer ' + estado.token }
+    })
+    .then(function(resp) { return resp.json(); })
+    .then(function(config) {
+      if (!config.chave_pix) {
+        document.getElementById('pix-qrcode-container').innerHTML = '<p class="vazio">A diretoria ainda não configurou a chave Pix.</p>';
+        document.getElementById('pix-copia-cola').value = '';
+        document.getElementById('overlay-modal-pix').style.display = 'flex';
+        return;
+      }
+      var payload = gerarPayloadPix(config, cobranca.valor, cobranca.id);
+      renderizarQrCode('pix-qrcode-container', payload);
+      document.getElementById('pix-copia-cola').value = payload;
+      document.getElementById('overlay-modal-pix').style.display = 'flex';
+    })
+    .catch(function() { mostrarToast('Erro ao carregar dados do Pix', true); });
+  }
+
+  document.getElementById('btn-fechar-modal-pix').onclick = function() {
+    document.getElementById('overlay-modal-pix').style.display = 'none';
+  };
+
+  document.getElementById('btn-copiar-pix').onclick = function() {
+    var campo = document.getElementById('pix-copia-cola');
+    campo.select();
+    navigator.clipboard.writeText(campo.value).then(function() {
+      mostrarToast('Código Pix copiado!');
+    }).catch(function() {
+      mostrarToast('Não foi possível copiar automaticamente — selecione e copie manualmente.', true);
+    });
+  };
+
+  document.getElementById('btn-selecionar-comprovante').onclick = function() {
+    document.getElementById('input-comprovante').click();
+  };
+
+  document.getElementById('input-comprovante').onchange = function(e) {
+    var arquivo = e.target.files[0];
+    if (!arquivo) return;
+
+    document.getElementById('nome-arquivo-comprovante').textContent = arquivo.name;
+
+    if (arquivo.type === 'application/pdf') {
+      var leitorPdf = new FileReader();
+      leitorPdf.onload = function(evt) { comprovanteSelecionadoBase64 = evt.target.result; };
+      leitorPdf.readAsDataURL(arquivo);
+      return;
+    }
+
+    var leitor = new FileReader();
+    leitor.onload = function(evt) {
+      var img = new Image();
+      img.onload = function() {
+        var TAMANHO_MAX = 1000;
+        var largura = img.width;
+        var altura = img.height;
+        if (largura > altura && largura > TAMANHO_MAX) {
+          altura = Math.round(altura * (TAMANHO_MAX / largura));
+          largura = TAMANHO_MAX;
+        } else if (altura > TAMANHO_MAX) {
+          largura = Math.round(largura * (TAMANHO_MAX / altura));
+          altura = TAMANHO_MAX;
+        }
+        var canvas = document.createElement('canvas');
+        canvas.width = largura;
+        canvas.height = altura;
+        canvas.getContext('2d').drawImage(img, 0, 0, largura, altura);
+        comprovanteSelecionadoBase64 = canvas.toDataURL('image/jpeg', 0.85);
+      };
+      img.src = evt.target.result;
+    };
+    leitor.readAsDataURL(arquivo);
+  };
+
+  document.getElementById('btn-enviar-comprovante').onclick = function() {
+    var cobrancaId = document.getElementById('pix-cobranca-id').value;
+
+    if (!comprovanteSelecionadoBase64) {
+      mostrarToast('Escolha o arquivo do comprovante antes de enviar', true);
+      return;
+    }
+
+    fetch(API_URL + '/portal/minhas-cobrancas/' + cobrancaId + '/comprovante', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + estado.token
+      },
+      body: JSON.stringify({ comprovante_base64: comprovanteSelecionadoBase64 })
+    })
+    .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
+    .then(function(res) {
+      if (!res.ok) {
+        mostrarToast(res.data.erro || 'Erro ao enviar comprovante', true);
+        return;
+      }
+      document.getElementById('overlay-modal-pix').style.display = 'none';
+      mostrarToast('Comprovante enviado! Aguarde a confirmação da diretoria.');
+      carregarMeusDados();
+    })
+    .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
+  };
+
   document.getElementById('btn-trocar-foto').onclick = function() {
     document.getElementById('input-foto-associado').click();
   };
