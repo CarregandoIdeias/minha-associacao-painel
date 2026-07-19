@@ -578,29 +578,48 @@
 <!-- ===== MODAL NOVO USUÁRIO ===== -->
 <div class="overlay" id="overlay-modal-usuario">
   <div class="modal">
-    <h3>Convidar usuário</h3>
-    <div class="campo">
-      <label>Nome completo</label>
-      <input type="text" id="usuario-nome">
+    <h3 id="titulo-modal-usuario">Convidar usuário</h3>
+
+    <div id="form-usuario">
+      <div class="campo">
+        <label>Nome completo</label>
+        <input type="text" id="usuario-nome">
+      </div>
+      <div class="campo">
+        <label>E-mail</label>
+        <input type="email" id="usuario-email">
+      </div>
+      <div class="campo">
+        <label>Senha provisória</label>
+        <input type="password" id="usuario-senha" placeholder="mínimo 6 caracteres">
+      </div>
+      <div class="campo">
+        <label>Papel</label>
+        <select id="usuario-papel">
+          <option value="diretoria">Diretoria</option>
+          <option value="associado">Associado</option>
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" id="btn-cancelar-modal-usuario">Cancelar</button>
+        <button class="btn" id="btn-salvar-usuario">Convidar</button>
+      </div>
     </div>
-    <div class="campo">
-      <label>E-mail</label>
-      <input type="email" id="usuario-email">
-    </div>
-    <div class="campo">
-      <label>Senha provisória</label>
-      <input type="password" id="usuario-senha" placeholder="mínimo 6 caracteres">
-    </div>
-    <div class="campo">
-      <label>Papel</label>
-      <select id="usuario-papel">
-        <option value="diretoria">Diretoria</option>
-        <option value="associado">Associado</option>
-      </select>
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-ghost" id="btn-cancelar-modal-usuario">Cancelar</button>
-      <button class="btn" id="btn-salvar-usuario">Convidar</button>
+
+    <div id="resultado-usuario" style="display:none;">
+      <p style="font-size:13px; color:var(--text-muted); margin-bottom:10px;">
+        Usuário criado! Envie esse link para a pessoa entrar — o ID da associação já vem preenchido:
+      </p>
+      <div class="campo">
+        <input type="text" id="link-convite" readonly style="font-size:12px;">
+      </div>
+      <p style="font-size:12px; color:var(--text-muted); margin-bottom:16px;">
+        Informe também a senha provisória combinada por fora (esse link não a inclui, por segurança).
+      </p>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" id="btn-fechar-resultado-usuario">Fechar</button>
+        <button class="btn" id="btn-copiar-link-convite">Copiar link</button>
+      </div>
     </div>
   </div>
 </div>
@@ -610,6 +629,17 @@
 <script>
   var API_URL = 'https://minha-associacao-backend.onrender.com';
   var estado = { token: null, associacaoId: null, papel: null };
+
+  // Se o link tiver ?assoc=<id>, preenche e trava o campo de ID da associação
+  (function preencherAssociacaoDaURL() {
+    var params = new URLSearchParams(window.location.search);
+    var assoc = params.get('assoc');
+    if (assoc) {
+      var campo = document.getElementById('login-associacao');
+      campo.value = assoc;
+      campo.readOnly = true;
+    }
+  })();
   var associadosCache = [];
 
   // Converte texto tipo "150,00" ou "150.00" em número
@@ -1042,10 +1072,25 @@
 
   // ---------- Modal novo usuário ----------
   document.getElementById('btn-novo-usuario').onclick = function() {
+    document.getElementById('form-usuario').style.display = 'block';
+    document.getElementById('resultado-usuario').style.display = 'none';
+    document.getElementById('titulo-modal-usuario').textContent = 'Convidar usuário';
     document.getElementById('overlay-modal-usuario').style.display = 'flex';
   };
   document.getElementById('btn-cancelar-modal-usuario').onclick = function() {
     document.getElementById('overlay-modal-usuario').style.display = 'none';
+  };
+  document.getElementById('btn-fechar-resultado-usuario').onclick = function() {
+    document.getElementById('overlay-modal-usuario').style.display = 'none';
+  };
+  document.getElementById('btn-copiar-link-convite').onclick = function() {
+    var campo = document.getElementById('link-convite');
+    campo.select();
+    navigator.clipboard.writeText(campo.value).then(function() {
+      mostrarToast('Link copiado!');
+    }).catch(function() {
+      mostrarToast('Não foi possível copiar automaticamente — selecione e copie manualmente.', true);
+    });
   };
 
   document.getElementById('btn-salvar-usuario').onclick = function() {
@@ -1073,11 +1118,16 @@
         mostrarToast(res.data.erro || 'Erro ao convidar usuário', true);
         return;
       }
-      document.getElementById('overlay-modal-usuario').style.display = 'none';
       document.getElementById('usuario-nome').value = '';
       document.getElementById('usuario-email').value = '';
       document.getElementById('usuario-senha').value = '';
-      mostrarToast('Usuário criado! Compartilhe a senha provisória com essa pessoa.');
+
+      var link = window.location.origin + window.location.pathname + '?assoc=' + estado.associacaoId;
+      document.getElementById('link-convite').value = link;
+      document.getElementById('form-usuario').style.display = 'none';
+      document.getElementById('resultado-usuario').style.display = 'block';
+      document.getElementById('titulo-modal-usuario').textContent = 'Convite pronto';
+
       carregarUsuarios();
     })
     .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
