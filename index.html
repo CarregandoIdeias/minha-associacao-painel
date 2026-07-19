@@ -502,10 +502,11 @@
   </div>
 </div>
 
-<!-- ===== MODAL NOVO ASSOCIADO ===== -->
+<!-- ===== MODAL NOVO/EDITAR ASSOCIADO ===== -->
 <div class="overlay" id="overlay-modal">
   <div class="modal">
-    <h3>Novo associado</h3>
+    <h3 id="titulo-modal-associado">Novo associado</h3>
+    <input type="hidden" id="editar-associado-id" value="">
     <div class="campo">
       <label>Nome completo</label>
       <input type="text" id="novo-nome">
@@ -517,6 +518,15 @@
     <div class="campo">
       <label>Categoria (opcional)</label>
       <input type="text" id="novo-categoria" placeholder="ex: sócio patrimonial">
+    </div>
+    <div class="campo" id="campo-status-associado" style="display:none;">
+      <label>Status</label>
+      <select id="novo-status">
+        <option value="ativo">Ativo</option>
+        <option value="inadimplente">Inadimplente</option>
+        <option value="suspenso">Suspenso</option>
+        <option value="desligado">Desligado</option>
+      </select>
     </div>
     <div class="modal-actions">
       <button class="btn btn-ghost" id="btn-cancelar-modal">Cancelar</button>
@@ -748,7 +758,7 @@
       return;
     }
 
-    var html = '<table><thead><tr><th>Nome</th><th>CPF</th><th>Categoria</th><th>Status</th><th>Ingresso</th></tr></thead><tbody>';
+    var html = '<table><thead><tr><th>Nome</th><th>CPF</th><th>Categoria</th><th>Status</th><th>Ingresso</th><th></th></tr></thead><tbody>';
     lista.forEach(function(a) {
       html += '<tr>' +
         '<td>' + escapeHtml(a.nome_completo) + '</td>' +
@@ -756,10 +766,47 @@
         '<td>' + escapeHtml(a.categoria || '—') + '</td>' +
         '<td><span class="badge ' + a.status + '">' + a.status + '</span></td>' +
         '<td>' + formatarData(a.data_ingresso) + '</td>' +
+        '<td style="white-space:nowrap;">' +
+          '<button class="btn-pequeno" onclick="abrirEdicaoAssociado(\'' + a.id + '\')">Editar</button> ' +
+          '<button class="btn-pequeno" onclick="excluirAssociado(\'' + a.id + '\')">Excluir</button>' +
+        '</td>' +
         '</tr>';
     });
     html += '</tbody></table>';
     container.innerHTML = html;
+  }
+
+  function abrirEdicaoAssociado(id) {
+    var associado = associadosCache.find(function(a) { return a.id === id; });
+    if (!associado) return;
+
+    document.getElementById('titulo-modal-associado').textContent = 'Editar associado';
+    document.getElementById('editar-associado-id').value = associado.id;
+    document.getElementById('novo-nome').value = associado.nome_completo;
+    document.getElementById('novo-cpf').value = associado.cpf || '';
+    document.getElementById('novo-categoria').value = associado.categoria || '';
+    document.getElementById('novo-status').value = associado.status;
+    document.getElementById('campo-status-associado').style.display = 'block';
+    document.getElementById('overlay-modal').style.display = 'flex';
+  }
+
+  function excluirAssociado(id) {
+    if (!confirm('Tem certeza que deseja excluir esse associado? Isso também remove as cobranças relacionadas.')) return;
+
+    fetch(API_URL + '/associados/' + id, {
+      method: 'DELETE',
+      headers: { 'Authorization': 'Bearer ' + estado.token }
+    })
+    .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
+    .then(function(res) {
+      if (!res.ok) {
+        mostrarToast(res.data.erro || 'Erro ao excluir associado', true);
+        return;
+      }
+      mostrarToast('Associado excluído.');
+      carregarAssociados();
+    })
+    .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
   }
 
   function escapeHtml(texto) {
@@ -774,8 +821,14 @@
     return partes[2] + '/' + partes[1] + '/' + partes[0];
   }
 
-  // ---------- Modal novo associado ----------
+  // ---------- Modal novo/editar associado ----------
   document.getElementById('btn-novo-associado').onclick = function() {
+    document.getElementById('titulo-modal-associado').textContent = 'Novo associado';
+    document.getElementById('editar-associado-id').value = '';
+    document.getElementById('novo-nome').value = '';
+    document.getElementById('novo-cpf').value = '';
+    document.getElementById('novo-categoria').value = '';
+    document.getElementById('campo-status-associado').style.display = 'none';
     document.getElementById('overlay-modal').style.display = 'flex';
   };
   document.getElementById('btn-cancelar-modal').onclick = function() {
@@ -783,22 +836,30 @@
   };
 
   document.getElementById('btn-salvar-associado').onclick = function() {
+    var idEdicao = document.getElementById('editar-associado-id').value;
     var nome = document.getElementById('novo-nome').value.trim();
     var cpf = document.getElementById('novo-cpf').value.trim();
     var categoria = document.getElementById('novo-categoria').value.trim();
+    var status = document.getElementById('novo-status').value;
 
     if (!nome) {
       mostrarToast('Informe o nome completo', true);
       return;
     }
 
-    fetch(API_URL + '/associados', {
-      method: 'POST',
+    var url = API_URL + '/associados' + (idEdicao ? '/' + idEdicao : '');
+    var metodo = idEdicao ? 'PUT' : 'POST';
+    var corpo = idEdicao
+      ? { nome_completo: nome, cpf: cpf, categoria: categoria, status: status }
+      : { nome_completo: nome, cpf: cpf, categoria: categoria };
+
+    fetch(url, {
+      method: metodo,
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ' + estado.token
       },
-      body: JSON.stringify({ nome_completo: nome, cpf: cpf, categoria: categoria })
+      body: JSON.stringify(corpo)
     })
     .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
     .then(function(res) {
@@ -807,10 +868,7 @@
         return;
       }
       document.getElementById('overlay-modal').style.display = 'none';
-      document.getElementById('novo-nome').value = '';
-      document.getElementById('novo-cpf').value = '';
-      document.getElementById('novo-categoria').value = '';
-      mostrarToast('Associado cadastrado com sucesso!');
+      mostrarToast(idEdicao ? 'Associado atualizado!' : 'Associado cadastrado com sucesso!');
       carregarAssociados();
     })
     .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
