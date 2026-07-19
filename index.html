@@ -320,6 +320,27 @@
     min-height: 90px;
   }
 
+  .perfil-topo {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 18px;
+  }
+  .avatar-associado {
+    width: 84px;
+    height: 84px;
+    border-radius: 50%;
+    background: var(--accent-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+    border: 2px solid var(--border);
+  }
+  .avatar-associado img { width: 100%; height: 100%; object-fit: cover; }
+  .avatar-associado svg { width: 36px; height: 36px; color: var(--accent); }
+
   /* ---------- Modal ---------- */
   .overlay {
     display: none;
@@ -555,8 +576,20 @@
       <div class="page-header"><h1>Meus Dados</h1></div>
       <div class="painel" style="margin-bottom:24px;">
         <div class="painel-header"><h3>Meu cadastro</h3></div>
-        <div id="perfil-associado-container" style="padding:22px;">
-          <div class="vazio">Carregando...</div>
+        <div style="padding:22px;">
+          <div class="perfil-topo">
+            <div class="avatar-associado" id="avatar-associado">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+            <div>
+              <input type="file" id="input-foto-associado" accept="image/*" style="display:none;">
+              <button class="btn btn-ghost" id="btn-trocar-foto">Trocar foto</button>
+              <p style="font-size:12px; color:var(--text-muted); margin-top:6px;">JPG ou PNG, a imagem será redimensionada automaticamente.</p>
+            </div>
+          </div>
+          <div id="perfil-associado-container">
+            <div class="vazio">Carregando...</div>
+          </div>
         </div>
       </div>
       <div class="painel">
@@ -1632,6 +1665,11 @@
         '<p style="font-size:13px; color:var(--text-muted); margin-bottom:4px;">Categoria: ' + escapeHtml(a.categoria || '—') + '</p>' +
         '<p style="font-size:13px; color:var(--text-muted); margin-bottom:8px;">Ingresso: ' + formatarData(a.data_ingresso) + '</p>' +
         '<span class="badge ' + a.status + '">' + a.status + '</span>';
+
+      var avatar = document.getElementById('avatar-associado');
+      if (a.foto_base64) {
+        avatar.innerHTML = '<img src="' + a.foto_base64 + '" alt="Foto de perfil">';
+      }
     })
     .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
 
@@ -1663,6 +1701,71 @@
     });
     html += '</tbody></table>';
     container.innerHTML = html;
+  }
+
+  // ---------- Upload de foto (com redimensionamento no navegador) ----------
+  document.getElementById('btn-trocar-foto').onclick = function() {
+    document.getElementById('input-foto-associado').click();
+  };
+
+  document.getElementById('input-foto-associado').onchange = function(e) {
+    var arquivo = e.target.files[0];
+    if (!arquivo) return;
+
+    if (!arquivo.type.startsWith('image/')) {
+      mostrarToast('Selecione um arquivo de imagem (JPG ou PNG)', true);
+      return;
+    }
+
+    var leitor = new FileReader();
+    leitor.onload = function(evt) {
+      var img = new Image();
+      img.onload = function() {
+        var TAMANHO_MAX = 300;
+        var largura = img.width;
+        var altura = img.height;
+
+        if (largura > altura && largura > TAMANHO_MAX) {
+          altura = Math.round(altura * (TAMANHO_MAX / largura));
+          largura = TAMANHO_MAX;
+        } else if (altura > TAMANHO_MAX) {
+          largura = Math.round(largura * (TAMANHO_MAX / altura));
+          altura = TAMANHO_MAX;
+        }
+
+        var canvas = document.createElement('canvas');
+        canvas.width = largura;
+        canvas.height = altura;
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, largura, altura);
+
+        var fotoRedimensionada = canvas.toDataURL('image/jpeg', 0.85);
+        salvarFotoAssociado(fotoRedimensionada);
+      };
+      img.src = evt.target.result;
+    };
+    leitor.readAsDataURL(arquivo);
+  };
+
+  function salvarFotoAssociado(fotoBase64) {
+    fetch(API_URL + '/portal/minha-foto', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + estado.token
+      },
+      body: JSON.stringify({ foto_base64: fotoBase64 })
+    })
+    .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
+    .then(function(res) {
+      if (!res.ok) {
+        mostrarToast(res.data.erro || 'Erro ao salvar foto', true);
+        return;
+      }
+      document.getElementById('avatar-associado').innerHTML = '<img src="' + fotoBase64 + '" alt="Foto de perfil">';
+      mostrarToast('Foto atualizada!');
+    })
+    .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
   }
 </script>
 
