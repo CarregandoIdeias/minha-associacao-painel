@@ -472,6 +472,10 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/><circle cx="19" cy="8" r="2"/><circle cx="5" cy="8" r="2"/></svg>
       Usuários
     </button>
+    <button class="nav-item" id="aba-meus-dados" style="display:none;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Meus Dados
+    </button>
 
     <div class="sidebar-footer">
       <button class="theme-toggle" id="btn-tema" title="Alternar tema">☀</button>
@@ -542,6 +546,22 @@
           <button class="btn" id="btn-novo-usuario">+ Convidar usuário</button>
         </div>
         <div id="tabela-usuarios-container">
+          <div class="vazio">Carregando...</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="secao-meus-dados" style="display:none;">
+      <div class="page-header"><h1>Meus Dados</h1></div>
+      <div class="painel" style="margin-bottom:24px;">
+        <div class="painel-header"><h3>Meu cadastro</h3></div>
+        <div id="perfil-associado-container" style="padding:22px;">
+          <div class="vazio">Carregando...</div>
+        </div>
+      </div>
+      <div class="painel">
+        <div class="painel-header"><h3>Minhas cobranças</h3></div>
+        <div id="tabela-minhas-cobrancas-container">
           <div class="vazio">Carregando...</div>
         </div>
       </div>
@@ -660,6 +680,10 @@
           <option value="diretoria">Diretoria</option>
           <option value="associado">Associado</option>
         </select>
+      </div>
+      <div class="campo" id="campo-usuario-associado" style="display:none;">
+        <label>Vincular ao associado</label>
+        <select id="usuario-associado-vinculo"></select>
       </div>
       <div class="modal-actions">
         <button class="btn btn-ghost" id="btn-cancelar-modal-usuario">Cancelar</button>
@@ -879,11 +903,24 @@
       estado.papel = res.data.usuario.papel;
       document.getElementById('tela-login').style.display = 'none';
       document.getElementById('tela-dashboard').style.display = 'flex';
-      if (estado.papel === 'admin') {
-        document.getElementById('aba-usuarios').style.display = 'flex';
+
+      if (estado.papel === 'associado') {
+        // Associado só vê seus próprios dados — esconde as abas administrativas
+        ['aba-associados', 'aba-financeiro', 'aba-usuarios'].forEach(function(id) {
+          document.getElementById(id).style.display = 'none';
+        });
+        document.getElementById('aba-meus-dados').style.display = 'flex';
+        document.getElementById('btn-novo-comunicado').style.display = 'none';
+        ativarAba('meus-dados');
+        carregarMeusDados();
+        carregarComunicados();
+      } else {
+        if (estado.papel === 'admin') {
+          document.getElementById('aba-usuarios').style.display = 'flex';
+        }
+        carregarAssociados();
+        carregarCobrancas();
       }
-      carregarAssociados();
-      carregarCobrancas();
     })
     .catch(function() {
       erroEl.textContent = 'Não foi possível conectar ao servidor. Verifique se o backend está rodando.';
@@ -1039,7 +1076,7 @@
 
   // ---------- Navegação (sidebar) ----------
   function ativarAba(idAtiva) {
-    ['associados', 'financeiro', 'comunicados', 'usuarios'].forEach(function(nome) {
+    ['associados', 'financeiro', 'comunicados', 'usuarios', 'meus-dados'].forEach(function(nome) {
       var item = document.getElementById('aba-' + nome);
       if (!item) return;
       item.classList.toggle('ativa', nome === idAtiva);
@@ -1050,6 +1087,7 @@
   document.getElementById('aba-financeiro').onclick = function() { ativarAba('financeiro'); carregarCobrancas(); };
   document.getElementById('aba-comunicados').onclick = function() { ativarAba('comunicados'); carregarComunicados(); };
   document.getElementById('aba-usuarios').onclick = function() { ativarAba('usuarios'); carregarUsuarios(); };
+  document.getElementById('aba-meus-dados').onclick = function() { ativarAba('meus-dados'); carregarMeusDados(); };
 
   // ---------- Financeiro: carregar cobranças ----------
   var cobrancasCache = [];
@@ -1241,10 +1279,11 @@
         '</div>' +
         '<div class="comunicado-conteudo">' + escapeHtml(c.conteudo) + '</div>' +
         (c.categoria_alvo ? '<span class="comunicado-categoria">' + escapeHtml(c.categoria_alvo) + '</span>' : '') +
-        '<div style="margin-top:10px;">' +
-          '<button class="btn-pequeno" onclick="abrirEdicaoComunicado(\'' + c.id + '\')">Editar</button> ' +
-          '<button class="btn-pequeno" onclick="excluirComunicado(\'' + c.id + '\')">Excluir</button>' +
-        '</div>' +
+        (estado.papel !== 'associado' ?
+          '<div style="margin-top:10px;">' +
+            '<button class="btn-pequeno" onclick="abrirEdicaoComunicado(\'' + c.id + '\')">Editar</button> ' +
+            '<button class="btn-pequeno" onclick="excluirComunicado(\'' + c.id + '\')">Excluir</button>' +
+          '</div>' : '') +
         '</div>';
     });
     container.innerHTML = html;
@@ -1414,6 +1453,7 @@
     document.getElementById('usuario-papel').value = u.papel;
     document.getElementById('campo-usuario-email').style.display = 'none';
     document.getElementById('campo-usuario-senha').style.display = 'none';
+    document.getElementById('campo-usuario-associado').style.display = 'none';
     document.getElementById('form-usuario').style.display = 'block';
     document.getElementById('resultado-usuario').style.display = 'none';
     document.getElementById('btn-salvar-usuario').textContent = 'Salvar';
@@ -1439,14 +1479,44 @@
     .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
   }
 
+  function atualizarCampoVinculoAssociado() {
+    var papel = document.getElementById('usuario-papel').value;
+    var campo = document.getElementById('campo-usuario-associado');
+    var idEdicao = document.getElementById('editar-usuario-id').value;
+
+    if (papel === 'associado' && !idEdicao) {
+      campo.style.display = 'block';
+      fetch(API_URL + '/usuarios/associados-sem-login', {
+        headers: { 'Authorization': 'Bearer ' + estado.token }
+      })
+      .then(function(resp) { return resp.json(); })
+      .then(function(lista) {
+        var select = document.getElementById('usuario-associado-vinculo');
+        if (lista.length === 0) {
+          select.innerHTML = '<option value="">Nenhum associado disponível</option>';
+          return;
+        }
+        select.innerHTML = lista.map(function(a) {
+          return '<option value="' + a.id + '">' + escapeHtml(a.nome_completo) + '</option>';
+        }).join('');
+      })
+      .catch(function() { mostrarToast('Erro ao carregar associados disponíveis', true); });
+    } else {
+      campo.style.display = 'none';
+    }
+  }
+  document.getElementById('usuario-papel').onchange = atualizarCampoVinculoAssociado;
+
   // ---------- Modal novo/editar usuário ----------
   document.getElementById('btn-novo-usuario').onclick = function() {
     document.getElementById('editar-usuario-id').value = '';
     document.getElementById('usuario-nome').value = '';
     document.getElementById('usuario-email').value = '';
     document.getElementById('usuario-senha').value = '';
+    document.getElementById('usuario-papel').value = 'diretoria';
     document.getElementById('campo-usuario-email').style.display = 'block';
     document.getElementById('campo-usuario-senha').style.display = 'block';
+    document.getElementById('campo-usuario-associado').style.display = 'none';
     document.getElementById('btn-salvar-usuario').textContent = 'Convidar';
     document.getElementById('form-usuario').style.display = 'block';
     document.getElementById('resultado-usuario').style.display = 'none';
@@ -1503,9 +1573,14 @@
 
     var email = document.getElementById('usuario-email').value.trim();
     var senha = document.getElementById('usuario-senha').value;
+    var associadoVinculo = document.getElementById('usuario-associado-vinculo').value;
 
     if (!nome || !email || senha.length < 6) {
       mostrarToast('Preencha nome, e-mail e uma senha com 6+ caracteres', true);
+      return;
+    }
+    if (papel === 'associado' && !associadoVinculo) {
+      mostrarToast('Selecione a qual associado esse login pertence', true);
       return;
     }
 
@@ -1515,7 +1590,7 @@
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ' + estado.token
       },
-      body: JSON.stringify({ nome: nome, email: email, senha: senha, papel: papel })
+      body: JSON.stringify({ nome: nome, email: email, senha: senha, papel: papel, associado_id: papel === 'associado' ? associadoVinculo : undefined })
     })
     .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
     .then(function(res) {
@@ -1537,6 +1612,58 @@
     })
     .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
   };
+
+  // ---------- Portal do associado ----------
+  function carregarMeusDados() {
+    fetch(API_URL + '/portal/meus-dados', {
+      headers: { 'Authorization': 'Bearer ' + estado.token }
+    })
+    .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
+    .then(function(res) {
+      var container = document.getElementById('perfil-associado-container');
+      if (!res.ok) {
+        container.innerHTML = '<div class="vazio">' + escapeHtml(res.data.erro || 'Erro ao carregar seus dados') + '</div>';
+        return;
+      }
+      var a = res.data;
+      container.innerHTML =
+        '<p style="margin-bottom:8px;"><strong>' + escapeHtml(a.nome_completo) + '</strong></p>' +
+        '<p style="font-size:13px; color:var(--text-muted); margin-bottom:4px;">CPF: ' + escapeHtml(a.cpf || '—') + '</p>' +
+        '<p style="font-size:13px; color:var(--text-muted); margin-bottom:4px;">Categoria: ' + escapeHtml(a.categoria || '—') + '</p>' +
+        '<p style="font-size:13px; color:var(--text-muted); margin-bottom:8px;">Ingresso: ' + formatarData(a.data_ingresso) + '</p>' +
+        '<span class="badge ' + a.status + '">' + a.status + '</span>';
+    })
+    .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
+
+    fetch(API_URL + '/portal/minhas-cobrancas', {
+      headers: { 'Authorization': 'Bearer ' + estado.token }
+    })
+    .then(function(resp) { return resp.json(); })
+    .then(function(lista) { renderizarMinhasCobrancas(lista); })
+    .catch(function() { mostrarToast('Erro ao carregar suas cobranças', true); });
+  }
+
+  function renderizarMinhasCobrancas(lista) {
+    var container = document.getElementById('tabela-minhas-cobrancas-container');
+    if (!Array.isArray(lista) || lista.length === 0) {
+      container.innerHTML = '<div class="vazio">Nenhuma cobrança encontrada.</div>';
+      return;
+    }
+
+    var html = '<table><thead><tr><th>Descrição</th><th>Valor</th><th>Vencimento</th><th>Status</th></tr></thead><tbody>';
+    lista.forEach(function(c) {
+      var statusExibicao = c.status_exibicao || c.status;
+      var valorFormatado = 'R$ ' + parseFloat(c.valor).toFixed(2).replace('.', ',');
+      html += '<tr>' +
+        '<td>' + escapeHtml(c.descricao) + '</td>' +
+        '<td>' + valorFormatado + '</td>' +
+        '<td>' + formatarData(c.vencimento) + '</td>' +
+        '<td><span class="badge ' + statusExibicao + '">' + statusExibicao + '</span></td>' +
+        '</tr>';
+    });
+    html += '</tbody></table>';
+    container.innerHTML = html;
+  }
 </script>
 
 </body>
