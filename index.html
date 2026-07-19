@@ -1408,7 +1408,8 @@
     document.getElementById('overlay-modal-comprovante').style.display = 'flex';
 
     fetch(API_URL + '/cobrancas/' + cobrancaId + '/comprovante', {
-      headers: { 'Authorization': 'Bearer ' + estado.token }
+      headers: { 'Authorization': 'Bearer ' + estado.token },
+      cache: 'no-store'
     })
     .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
     .then(function(res) {
