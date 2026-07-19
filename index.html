@@ -4,40 +4,42 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Minha Associação — Painel</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #f7f5f3;
+    --bg: #F7F5EF;
     --bg-card: #ffffff;
-    --text: #1a1a1a;
-    --text-muted: #6b6b6b;
-    --border: #e5e0dd;
-    --accent: #8B1A1A;
-    --accent-hover: #6f1414;
-    --accent-soft: rgba(139, 26, 26, 0.08);
-    --success: #2f7d4f;
-    --warning: #b8860b;
-    --danger: #b23a3a;
+    --text: #1A1712;
+    --text-muted: #6B6558;
+    --border: #E4E0D2;
+    --accent: #C9A84C;
+    --accent-hover: #E8CC80;
+    --accent-soft: rgba(201, 168, 76, 0.1);
+    --success: #2ECC71;
+    --warning: #D9A441;
+    --danger: #E74C3C;
     --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
   }
 
   [data-theme="dark"] {
-    --bg: #171514;
-    --bg-card: #221f1e;
-    --text: #f1efed;
-    --text-muted: #a8a29c;
-    --border: #35302e;
-    --accent: #c23c3c;
-    --accent-hover: #d95050;
-    --accent-soft: rgba(194, 60, 60, 0.12);
+    --bg: #0A0A0A;
+    --bg-card: #1A1A1A;
+    --text: #F9F8F5;
+    --text-muted: #888888;
+    --border: #1e1e1e;
+    --accent: #C9A84C;
+    --accent-hover: #E8CC80;
+    --accent-soft: rgba(201, 168, 76, 0.1);
+    --success: #2ECC71;
+    --warning: #D9A441;
+    --danger: #E74C3C;
     --shadow: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Inter', sans-serif;
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
@@ -61,14 +63,16 @@
   }
 
   .sidebar .logo {
-    font-weight: 700;
-    font-size: 17px;
+    font-family: 'Playfair Display', serif;
+    font-weight: 900;
+    font-size: 19px;
     padding: 0 10px 28px 10px;
     display: flex;
     align-items: center;
     gap: 8px;
+    color: var(--accent);
   }
-  .sidebar .logo span { color: var(--accent); }
+  .sidebar .logo span { color: var(--text); }
 
   .nav-item {
     display: flex;
@@ -128,19 +132,20 @@
     align-items: center;
     margin-bottom: 24px;
   }
-  .page-header h1 { font-size: 22px; font-weight: 600; }
+  .page-header h1 { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 700; }
 
   .btn {
     background: var(--accent);
-    color: #fff;
+    color: #0A0A0A;
     border: none;
     padding: 10px 18px;
     border-radius: 10px;
-    font-weight: 600;
+    font-weight: 700;
     font-size: 14px;
     cursor: pointer;
     transition: background 0.15s;
     font-family: inherit;
+    letter-spacing: 0.02em;
   }
   .btn:hover { background: var(--accent-hover); }
   .btn-ghost {
@@ -160,7 +165,7 @@
     padding: 36px;
     box-shadow: var(--shadow);
   }
-  #tela-login h2 { font-size: 20px; margin-bottom: 6px; }
+  #tela-login h2 { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; margin-bottom: 6px; }
   #tela-login p.sub { color: var(--text-muted); font-size: 13px; margin-bottom: 24px; }
 
   .campo { margin-bottom: 16px; }
@@ -206,8 +211,8 @@
     padding: 20px;
     box-shadow: var(--shadow);
   }
-  .kpi-card .valor { font-size: 28px; font-weight: 700; margin-top: 4px; }
-  .kpi-card .rotulo { font-size: 13px; color: var(--text-muted); }
+  .kpi-card .valor { font-family: 'JetBrains Mono', monospace; font-size: 26px; font-weight: 600; margin-top: 4px; color: var(--accent); }
+  .kpi-card .rotulo { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); }
   .kpi-card.ativo .valor { color: var(--success); }
   .kpi-card.inadimplente .valor { color: var(--warning); }
 
@@ -341,11 +346,11 @@
     bottom: 24px;
     right: 24px;
     background: var(--accent);
-    color: #fff;
+    color: #0A0A0A;
     padding: 12px 20px;
     border-radius: 10px;
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 600;
     box-shadow: var(--shadow);
     opacity: 0;
     transform: translateY(10px);
@@ -353,7 +358,7 @@
     z-index: 100;
   }
   .toast.show { opacity: 1; transform: translateY(0); }
-  .toast.erro { background: var(--danger); }
+  .toast.erro { background: var(--danger); color: #fff; }
 
   @media (max-width: 720px) {
     .app-layout { flex-direction: column; }
