@@ -538,8 +538,9 @@
 <!-- ===== MODAL NOVA COBRANÇA ===== -->
 <div class="overlay" id="overlay-modal-cobranca">
   <div class="modal">
-    <h3>Nova cobrança</h3>
-    <div class="campo">
+    <h3 id="titulo-modal-cobranca">Nova cobrança</h3>
+    <input type="hidden" id="editar-cobranca-id" value="">
+    <div class="campo" id="campo-cobranca-associado">
       <label>Associado</label>
       <select id="cobranca-associado"></select>
     </div>
@@ -565,7 +566,8 @@
 <!-- ===== MODAL NOVO COMUNICADO ===== -->
 <div class="overlay" id="overlay-modal-comunicado">
   <div class="modal">
-    <h3>Novo comunicado</h3>
+    <h3 id="titulo-modal-comunicado">Novo comunicado</h3>
+    <input type="hidden" id="editar-comunicado-id" value="">
     <div class="campo">
       <label>Título</label>
       <input type="text" id="comunicado-titulo">
@@ -591,15 +593,16 @@
     <h3 id="titulo-modal-usuario">Convidar usuário</h3>
 
     <div id="form-usuario">
+      <input type="hidden" id="editar-usuario-id" value="">
       <div class="campo">
         <label>Nome completo</label>
         <input type="text" id="usuario-nome">
       </div>
-      <div class="campo">
+      <div class="campo" id="campo-usuario-email">
         <label>E-mail</label>
         <input type="email" id="usuario-email">
       </div>
-      <div class="campo">
+      <div class="campo" id="campo-usuario-senha">
         <label>Senha provisória</label>
         <input type="password" id="usuario-senha" placeholder="mínimo 6 caracteres">
       </div>
@@ -889,6 +892,8 @@
   document.getElementById('aba-usuarios').onclick = function() { ativarAba('usuarios'); carregarUsuarios(); };
 
   // ---------- Financeiro: carregar cobranças ----------
+  var cobrancasCache = [];
+
   function carregarCobrancas() {
     fetch(API_URL + '/cobrancas', {
       headers: { 'Authorization': 'Bearer ' + estado.token }
@@ -899,6 +904,7 @@
   }
 
   function renderizarCobrancas(lista) {
+    cobrancasCache = lista;
     var container = document.getElementById('tabela-cobrancas-container');
 
     if (lista.length === 0) {
@@ -910,13 +916,21 @@
     lista.forEach(function(c) {
       var statusExibicao = c.status_exibicao || c.status;
       var valorFormatado = 'R$ ' + parseFloat(c.valor).toFixed(2).replace('.', ',');
+      var acoes = '';
+      if (c.status !== 'pago') {
+        acoes += '<button class="btn-pequeno" onclick="marcarComoPago(\'' + c.id + '\')">Marcar como pago</button> ';
+        acoes += '<button class="btn-pequeno" onclick="abrirEdicaoCobranca(\'' + c.id + '\')">Editar</button> ';
+      }
+      if (estado.papel === 'admin') {
+        acoes += '<button class="btn-pequeno" onclick="excluirCobranca(\'' + c.id + '\')">Excluir</button>';
+      }
       html += '<tr>' +
         '<td>' + escapeHtml(c.associado_nome) + '</td>' +
         '<td>' + escapeHtml(c.descricao) + '</td>' +
         '<td>' + valorFormatado + '</td>' +
         '<td>' + formatarData(c.vencimento) + '</td>' +
         '<td><span class="badge ' + statusExibicao + '">' + statusExibicao + '</span></td>' +
-        '<td>' + (c.status === 'pago' ? '' : '<button class="btn-pequeno" data-id="' + c.id + '" onclick="marcarComoPago(\'' + c.id + '\')">Marcar como pago</button>') + '</td>' +
+        '<td style="white-space:nowrap;">' + acoes + '</td>' +
         '</tr>';
     });
     html += '</tbody></table>';
@@ -944,7 +958,39 @@
     .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
   }
 
-  // ---------- Modal nova cobrança ----------
+  function abrirEdicaoCobranca(id) {
+    var cobranca = cobrancasCache.find(function(c) { return c.id === id; });
+    if (!cobranca) return;
+
+    document.getElementById('titulo-modal-cobranca').textContent = 'Editar cobrança';
+    document.getElementById('editar-cobranca-id').value = cobranca.id;
+    document.getElementById('campo-cobranca-associado').style.display = 'none';
+    document.getElementById('cobranca-descricao').value = cobranca.descricao;
+    document.getElementById('cobranca-valor').value = String(cobranca.valor).replace('.', ',');
+    document.getElementById('cobranca-vencimento').value = cobranca.vencimento.substring(0, 10);
+    document.getElementById('overlay-modal-cobranca').style.display = 'flex';
+  }
+
+  function excluirCobranca(id) {
+    if (!confirm('Tem certeza que deseja excluir essa cobrança?')) return;
+
+    fetch(API_URL + '/cobrancas/' + id, {
+      method: 'DELETE',
+      headers: { 'Authorization': 'Bearer ' + estado.token }
+    })
+    .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
+    .then(function(res) {
+      if (!res.ok) {
+        mostrarToast(res.data.erro || 'Erro ao excluir cobrança', true);
+        return;
+      }
+      mostrarToast('Cobrança excluída.');
+      carregarCobrancas();
+    })
+    .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
+  }
+
+  // ---------- Modal nova/editar cobrança ----------
   document.getElementById('btn-nova-cobranca').onclick = function() {
     var select = document.getElementById('cobranca-associado');
     select.innerHTML = associadosCache.map(function(a) {
@@ -954,6 +1000,12 @@
       mostrarToast('Cadastre um associado antes de gerar cobrança', true);
       return;
     }
+    document.getElementById('titulo-modal-cobranca').textContent = 'Nova cobrança';
+    document.getElementById('editar-cobranca-id').value = '';
+    document.getElementById('campo-cobranca-associado').style.display = 'block';
+    document.getElementById('cobranca-descricao').value = 'Mensalidade';
+    document.getElementById('cobranca-valor').value = '';
+    document.getElementById('cobranca-vencimento').value = '';
     document.getElementById('overlay-modal-cobranca').style.display = 'flex';
   };
   document.getElementById('btn-cancelar-modal-cobranca').onclick = function() {
@@ -961,39 +1013,47 @@
   };
 
   document.getElementById('btn-salvar-cobranca').onclick = function() {
+    var idEdicao = document.getElementById('editar-cobranca-id').value;
     var associadoId = document.getElementById('cobranca-associado').value;
     var descricao = document.getElementById('cobranca-descricao').value.trim() || 'Mensalidade';
     var valor = parseMoney(document.getElementById('cobranca-valor').value);
     var vencimento = document.getElementById('cobranca-vencimento').value;
 
-    if (!associadoId || !vencimento || valor <= 0) {
+    if (!vencimento || valor <= 0 || (!idEdicao && !associadoId)) {
       mostrarToast('Preencha associado, valor e vencimento corretamente', true);
       return;
     }
 
-    fetch(API_URL + '/cobrancas', {
-      method: 'POST',
+    var url = API_URL + '/cobrancas' + (idEdicao ? '/' + idEdicao : '');
+    var metodo = idEdicao ? 'PUT' : 'POST';
+    var corpo = idEdicao
+      ? { descricao: descricao, valor: valor, vencimento: vencimento }
+      : { associado_id: associadoId, descricao: descricao, valor: valor, vencimento: vencimento };
+
+    fetch(url, {
+      method: metodo,
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ' + estado.token
       },
-      body: JSON.stringify({ associado_id: associadoId, descricao: descricao, valor: valor, vencimento: vencimento })
+      body: JSON.stringify(corpo)
     })
     .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
     .then(function(res) {
       if (!res.ok) {
-        mostrarToast(res.data.erro || 'Erro ao criar cobrança', true);
+        mostrarToast(res.data.erro || 'Erro ao salvar cobrança', true);
         return;
       }
       document.getElementById('overlay-modal-cobranca').style.display = 'none';
-      document.getElementById('cobranca-valor').value = '';
-      mostrarToast('Cobrança criada com sucesso!');
+      mostrarToast(idEdicao ? 'Cobrança atualizada!' : 'Cobrança criada com sucesso!');
       carregarCobrancas();
     })
     .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
   };
 
   // ---------- Comunicados ----------
+  var comunicadosCache = [];
+
   function carregarComunicados() {
     fetch(API_URL + '/comunicados', {
       headers: { 'Authorization': 'Bearer ' + estado.token }
@@ -1004,6 +1064,7 @@
   }
 
   function renderizarComunicados(lista) {
+    comunicadosCache = lista;
     var container = document.getElementById('lista-comunicados-container');
 
     if (lista.length === 0) {
@@ -1020,9 +1081,44 @@
         '</div>' +
         '<div class="comunicado-conteudo">' + escapeHtml(c.conteudo) + '</div>' +
         (c.categoria_alvo ? '<span class="comunicado-categoria">' + escapeHtml(c.categoria_alvo) + '</span>' : '') +
+        '<div style="margin-top:10px;">' +
+          '<button class="btn-pequeno" onclick="abrirEdicaoComunicado(\'' + c.id + '\')">Editar</button> ' +
+          '<button class="btn-pequeno" onclick="excluirComunicado(\'' + c.id + '\')">Excluir</button>' +
+        '</div>' +
         '</div>';
     });
     container.innerHTML = html;
+  }
+
+  function abrirEdicaoComunicado(id) {
+    var c = comunicadosCache.find(function(x) { return x.id === id; });
+    if (!c) return;
+
+    document.getElementById('titulo-modal-comunicado').textContent = 'Editar comunicado';
+    document.getElementById('editar-comunicado-id').value = c.id;
+    document.getElementById('comunicado-titulo').value = c.titulo;
+    document.getElementById('comunicado-conteudo').value = c.conteudo;
+    document.getElementById('comunicado-categoria').value = c.categoria_alvo || '';
+    document.getElementById('overlay-modal-comunicado').style.display = 'flex';
+  }
+
+  function excluirComunicado(id) {
+    if (!confirm('Tem certeza que deseja excluir esse comunicado?')) return;
+
+    fetch(API_URL + '/comunicados/' + id, {
+      method: 'DELETE',
+      headers: { 'Authorization': 'Bearer ' + estado.token }
+    })
+    .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
+    .then(function(res) {
+      if (!res.ok) {
+        mostrarToast(res.data.erro || 'Erro ao excluir comunicado', true);
+        return;
+      }
+      mostrarToast('Comunicado excluído.');
+      carregarComunicados();
+    })
+    .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
   }
 
   function formatarDataHora(iso) {
@@ -1035,8 +1131,13 @@
     return dia + '/' + mes + '/' + d.getFullYear() + ' às ' + hora + ':' + min;
   }
 
-  // ---------- Modal novo comunicado ----------
+  // ---------- Modal novo/editar comunicado ----------
   document.getElementById('btn-novo-comunicado').onclick = function() {
+    document.getElementById('titulo-modal-comunicado').textContent = 'Novo comunicado';
+    document.getElementById('editar-comunicado-id').value = '';
+    document.getElementById('comunicado-titulo').value = '';
+    document.getElementById('comunicado-conteudo').value = '';
+    document.getElementById('comunicado-categoria').value = '';
     document.getElementById('overlay-modal-comunicado').style.display = 'flex';
   };
   document.getElementById('btn-cancelar-modal-comunicado').onclick = function() {
@@ -1044,6 +1145,7 @@
   };
 
   document.getElementById('btn-salvar-comunicado').onclick = function() {
+    var idEdicao = document.getElementById('editar-comunicado-id').value;
     var titulo = document.getElementById('comunicado-titulo').value.trim();
     var conteudo = document.getElementById('comunicado-conteudo').value.trim();
     var categoria = document.getElementById('comunicado-categoria').value.trim();
@@ -1053,8 +1155,11 @@
       return;
     }
 
-    fetch(API_URL + '/comunicados', {
-      method: 'POST',
+    var url = API_URL + '/comunicados' + (idEdicao ? '/' + idEdicao : '');
+    var metodo = idEdicao ? 'PUT' : 'POST';
+
+    fetch(url, {
+      method: metodo,
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ' + estado.token
@@ -1064,20 +1169,22 @@
     .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
     .then(function(res) {
       if (!res.ok) {
-        mostrarToast(res.data.erro || 'Erro ao publicar comunicado', true);
+        mostrarToast(res.data.erro || 'Erro ao salvar comunicado', true);
         return;
       }
       document.getElementById('overlay-modal-comunicado').style.display = 'none';
       document.getElementById('comunicado-titulo').value = '';
       document.getElementById('comunicado-conteudo').value = '';
       document.getElementById('comunicado-categoria').value = '';
-      mostrarToast('Comunicado publicado!');
+      mostrarToast(idEdicao ? 'Comunicado atualizado!' : 'Comunicado publicado!');
       carregarComunicados();
     })
     .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
   };
 
   // ---------- Usuários (multiusuário) ----------
+  var usuariosCache = [];
+
   function carregarUsuarios() {
     fetch(API_URL + '/usuarios', {
       headers: { 'Authorization': 'Bearer ' + estado.token }
@@ -1090,6 +1197,7 @@
   var rotuloPapel = { admin: 'Admin', diretoria: 'Diretoria', associado: 'Associado' };
 
   function renderizarUsuarios(lista) {
+    usuariosCache = lista;
     var container = document.getElementById('tabela-usuarios-container');
 
     if (lista.length === 0) {
@@ -1099,12 +1207,20 @@
 
     var html = '<table><thead><tr><th>Nome</th><th>E-mail</th><th>Papel</th><th>Status</th><th></th></tr></thead><tbody>';
     lista.forEach(function(u) {
+      var acoes = '';
+      if (u.papel !== 'admin') {
+        acoes += '<button class="btn-pequeno" onclick="abrirEdicaoUsuario(\'' + u.id + '\')">Editar</button> ';
+        if (u.ativo) {
+          acoes += '<button class="btn-pequeno" onclick="desativarUsuario(\'' + u.id + '\')">Desativar</button> ';
+        }
+        acoes += '<button class="btn-pequeno" onclick="excluirUsuario(\'' + u.id + '\')">Excluir</button>';
+      }
       html += '<tr>' +
         '<td>' + escapeHtml(u.nome) + '</td>' +
         '<td>' + escapeHtml(u.email) + '</td>' +
         '<td><span class="comunicado-categoria">' + (rotuloPapel[u.papel] || u.papel) + '</span></td>' +
         '<td><span class="badge ' + (u.ativo ? 'ativo' : 'desligado') + '">' + (u.ativo ? 'ativo' : 'inativo') + '</span></td>' +
-        '<td>' + (u.papel !== 'admin' && u.ativo ? '<button class="btn-pequeno" onclick="desativarUsuario(\'' + u.id + '\')">Desativar</button>' : '') + '</td>' +
+        '<td style="white-space:nowrap;">' + acoes + '</td>' +
         '</tr>';
     });
     html += '</tbody></table>';
@@ -1128,8 +1244,50 @@
     .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
   }
 
-  // ---------- Modal novo usuário ----------
+  function abrirEdicaoUsuario(id) {
+    var u = usuariosCache.find(function(x) { return x.id === id; });
+    if (!u) return;
+
+    document.getElementById('titulo-modal-usuario').textContent = 'Editar usuário';
+    document.getElementById('editar-usuario-id').value = u.id;
+    document.getElementById('usuario-nome').value = u.nome;
+    document.getElementById('usuario-papel').value = u.papel;
+    document.getElementById('campo-usuario-email').style.display = 'none';
+    document.getElementById('campo-usuario-senha').style.display = 'none';
+    document.getElementById('form-usuario').style.display = 'block';
+    document.getElementById('resultado-usuario').style.display = 'none';
+    document.getElementById('btn-salvar-usuario').textContent = 'Salvar';
+    document.getElementById('overlay-modal-usuario').style.display = 'flex';
+  }
+
+  function excluirUsuario(id) {
+    if (!confirm('Tem certeza que deseja excluir esse usuário permanentemente?')) return;
+
+    fetch(API_URL + '/usuarios/' + id, {
+      method: 'DELETE',
+      headers: { 'Authorization': 'Bearer ' + estado.token }
+    })
+    .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
+    .then(function(res) {
+      if (!res.ok) {
+        mostrarToast(res.data.erro || 'Erro ao excluir usuário', true);
+        return;
+      }
+      mostrarToast('Usuário excluído.');
+      carregarUsuarios();
+    })
+    .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
+  }
+
+  // ---------- Modal novo/editar usuário ----------
   document.getElementById('btn-novo-usuario').onclick = function() {
+    document.getElementById('editar-usuario-id').value = '';
+    document.getElementById('usuario-nome').value = '';
+    document.getElementById('usuario-email').value = '';
+    document.getElementById('usuario-senha').value = '';
+    document.getElementById('campo-usuario-email').style.display = 'block';
+    document.getElementById('campo-usuario-senha').style.display = 'block';
+    document.getElementById('btn-salvar-usuario').textContent = 'Convidar';
     document.getElementById('form-usuario').style.display = 'block';
     document.getElementById('resultado-usuario').style.display = 'none';
     document.getElementById('titulo-modal-usuario').textContent = 'Convidar usuário';
@@ -1152,10 +1310,39 @@
   };
 
   document.getElementById('btn-salvar-usuario').onclick = function() {
+    var idEdicao = document.getElementById('editar-usuario-id').value;
     var nome = document.getElementById('usuario-nome').value.trim();
+    var papel = document.getElementById('usuario-papel').value;
+
+    if (idEdicao) {
+      if (!nome) {
+        mostrarToast('Informe o nome', true);
+        return;
+      }
+      fetch(API_URL + '/usuarios/' + idEdicao, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + estado.token
+        },
+        body: JSON.stringify({ nome: nome, papel: papel })
+      })
+      .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
+      .then(function(res) {
+        if (!res.ok) {
+          mostrarToast(res.data.erro || 'Erro ao salvar usuário', true);
+          return;
+        }
+        document.getElementById('overlay-modal-usuario').style.display = 'none';
+        mostrarToast('Usuário atualizado!');
+        carregarUsuarios();
+      })
+      .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
+      return;
+    }
+
     var email = document.getElementById('usuario-email').value.trim();
     var senha = document.getElementById('usuario-senha').value;
-    var papel = document.getElementById('usuario-papel').value;
 
     if (!nome || !email || senha.length < 6) {
       mostrarToast('Preencha nome, e-mail e uma senha com 6+ caracteres', true);
