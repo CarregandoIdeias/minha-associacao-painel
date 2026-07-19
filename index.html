@@ -420,6 +420,10 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
       Comunicados
     </button>
+    <button class="nav-item" id="aba-usuarios" style="display:none;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/><circle cx="19" cy="8" r="2"/><circle cx="5" cy="8" r="2"/></svg>
+      Usuários
+    </button>
 
     <div class="sidebar-footer">
       <button class="theme-toggle" id="btn-tema" title="Alternar tema">☀</button>
@@ -477,6 +481,19 @@
           <button class="btn" id="btn-novo-comunicado">+ Novo comunicado</button>
         </div>
         <div id="lista-comunicados-container">
+          <div class="vazio">Carregando...</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="secao-usuarios" style="display:none;">
+      <div class="page-header"><h1>Usuários</h1></div>
+      <div class="painel">
+        <div class="painel-header">
+          <h3>Pessoas com acesso ao sistema</h3>
+          <button class="btn" id="btn-novo-usuario">+ Convidar usuário</button>
+        </div>
+        <div id="tabela-usuarios-container">
           <div class="vazio">Carregando...</div>
         </div>
       </div>
@@ -558,11 +575,41 @@
   </div>
 </div>
 
+<!-- ===== MODAL NOVO USUÁRIO ===== -->
+<div class="overlay" id="overlay-modal-usuario">
+  <div class="modal">
+    <h3>Convidar usuário</h3>
+    <div class="campo">
+      <label>Nome completo</label>
+      <input type="text" id="usuario-nome">
+    </div>
+    <div class="campo">
+      <label>E-mail</label>
+      <input type="email" id="usuario-email">
+    </div>
+    <div class="campo">
+      <label>Senha provisória</label>
+      <input type="password" id="usuario-senha" placeholder="mínimo 6 caracteres">
+    </div>
+    <div class="campo">
+      <label>Papel</label>
+      <select id="usuario-papel">
+        <option value="diretoria">Diretoria</option>
+        <option value="associado">Associado</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="btn-cancelar-modal-usuario">Cancelar</button>
+      <button class="btn" id="btn-salvar-usuario">Convidar</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
   var API_URL = 'https://minha-associacao-backend.onrender.com';
-  var estado = { token: null, associacaoId: null };
+  var estado = { token: null, associacaoId: null, papel: null };
   var associadosCache = [];
 
   // Converte texto tipo "150,00" ou "150.00" em número
@@ -626,8 +673,12 @@
       }
       estado.token = res.data.token;
       estado.associacaoId = associacaoId;
+      estado.papel = res.data.usuario.papel;
       document.getElementById('tela-login').style.display = 'none';
       document.getElementById('tela-dashboard').style.display = 'flex';
+      if (estado.papel === 'admin') {
+        document.getElementById('aba-usuarios').style.display = 'flex';
+      }
       carregarAssociados();
       carregarCobrancas();
     })
@@ -737,14 +788,17 @@
 
   // ---------- Navegação (sidebar) ----------
   function ativarAba(idAtiva) {
-    ['associados', 'financeiro', 'comunicados'].forEach(function(nome) {
-      document.getElementById('aba-' + nome).className = (nome === idAtiva) ? 'nav-item ativa' : 'nav-item';
+    ['associados', 'financeiro', 'comunicados', 'usuarios'].forEach(function(nome) {
+      var item = document.getElementById('aba-' + nome);
+      if (!item) return;
+      item.classList.toggle('ativa', nome === idAtiva);
       document.getElementById('secao-' + nome).style.display = (nome === idAtiva) ? 'block' : 'none';
     });
   }
   document.getElementById('aba-associados').onclick = function() { ativarAba('associados'); };
   document.getElementById('aba-financeiro').onclick = function() { ativarAba('financeiro'); carregarCobrancas(); };
   document.getElementById('aba-comunicados').onclick = function() { ativarAba('comunicados'); carregarComunicados(); };
+  document.getElementById('aba-usuarios').onclick = function() { ativarAba('usuarios'); carregarUsuarios(); };
 
   // ---------- Financeiro: carregar cobranças ----------
   function carregarCobrancas() {
@@ -931,6 +985,100 @@
       document.getElementById('comunicado-categoria').value = '';
       mostrarToast('Comunicado publicado!');
       carregarComunicados();
+    })
+    .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
+  };
+
+  // ---------- Usuários (multiusuário) ----------
+  function carregarUsuarios() {
+    fetch(API_URL + '/usuarios', {
+      headers: { 'Authorization': 'Bearer ' + estado.token }
+    })
+    .then(function(resp) { return resp.json(); })
+    .then(function(lista) { renderizarUsuarios(lista); })
+    .catch(function() { mostrarToast('Erro ao carregar usuários', true); });
+  }
+
+  var rotuloPapel = { admin: 'Admin', diretoria: 'Diretoria', associado: 'Associado' };
+
+  function renderizarUsuarios(lista) {
+    var container = document.getElementById('tabela-usuarios-container');
+
+    if (lista.length === 0) {
+      container.innerHTML = '<div class="vazio">Nenhum usuário encontrado.</div>';
+      return;
+    }
+
+    var html = '<table><thead><tr><th>Nome</th><th>E-mail</th><th>Papel</th><th>Status</th><th></th></tr></thead><tbody>';
+    lista.forEach(function(u) {
+      html += '<tr>' +
+        '<td>' + escapeHtml(u.nome) + '</td>' +
+        '<td>' + escapeHtml(u.email) + '</td>' +
+        '<td><span class="comunicado-categoria">' + (rotuloPapel[u.papel] || u.papel) + '</span></td>' +
+        '<td><span class="badge ' + (u.ativo ? 'ativo' : 'desligado') + '">' + (u.ativo ? 'ativo' : 'inativo') + '</span></td>' +
+        '<td>' + (u.papel !== 'admin' && u.ativo ? '<button class="btn-pequeno" onclick="desativarUsuario(\'' + u.id + '\')">Desativar</button>' : '') + '</td>' +
+        '</tr>';
+    });
+    html += '</tbody></table>';
+    container.innerHTML = html;
+  }
+
+  function desativarUsuario(id) {
+    fetch(API_URL + '/usuarios/' + id + '/desativar', {
+      method: 'PATCH',
+      headers: { 'Authorization': 'Bearer ' + estado.token }
+    })
+    .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
+    .then(function(res) {
+      if (!res.ok) {
+        mostrarToast(res.data.erro || 'Erro ao desativar', true);
+        return;
+      }
+      mostrarToast('Usuário desativado.');
+      carregarUsuarios();
+    })
+    .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
+  }
+
+  // ---------- Modal novo usuário ----------
+  document.getElementById('btn-novo-usuario').onclick = function() {
+    document.getElementById('overlay-modal-usuario').style.display = 'flex';
+  };
+  document.getElementById('btn-cancelar-modal-usuario').onclick = function() {
+    document.getElementById('overlay-modal-usuario').style.display = 'none';
+  };
+
+  document.getElementById('btn-salvar-usuario').onclick = function() {
+    var nome = document.getElementById('usuario-nome').value.trim();
+    var email = document.getElementById('usuario-email').value.trim();
+    var senha = document.getElementById('usuario-senha').value;
+    var papel = document.getElementById('usuario-papel').value;
+
+    if (!nome || !email || senha.length < 6) {
+      mostrarToast('Preencha nome, e-mail e uma senha com 6+ caracteres', true);
+      return;
+    }
+
+    fetch(API_URL + '/usuarios', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + estado.token
+      },
+      body: JSON.stringify({ nome: nome, email: email, senha: senha, papel: papel })
+    })
+    .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
+    .then(function(res) {
+      if (!res.ok) {
+        mostrarToast(res.data.erro || 'Erro ao convidar usuário', true);
+        return;
+      }
+      document.getElementById('overlay-modal-usuario').style.display = 'none';
+      document.getElementById('usuario-nome').value = '';
+      document.getElementById('usuario-email').value = '';
+      document.getElementById('usuario-senha').value = '';
+      mostrarToast('Usuário criado! Compartilhe a senha provisória com essa pessoa.');
+      carregarUsuarios();
     })
     .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
   };
