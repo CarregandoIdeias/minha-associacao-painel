@@ -249,42 +249,6 @@
   }
   .btn-pequeno:hover { background: var(--accent); color: #fff; }
 
-  .comunicado-card {
-    padding: 18px 22px;
-    border-bottom: 1px solid var(--border);
-  }
-  .comunicado-card:last-child { border-bottom: none; }
-  .comunicado-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 6px;
-  }
-  .comunicado-titulo { font-weight: 600; font-size: 15px; }
-  .comunicado-data { font-size: 12px; color: var(--text-muted); white-space: nowrap; margin-left: 12px; }
-  .comunicado-conteudo { font-size: 14px; color: var(--text); line-height: 1.5; }
-  .comunicado-categoria {
-    display: inline-block;
-    margin-top: 8px;
-    font-size: 11px;
-    padding: 2px 8px;
-    border-radius: 12px;
-    background: var(--accent-soft);
-    color: var(--accent);
-  }
-  textarea {
-    width: 100%;
-    padding: 11px 14px;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    background: var(--bg);
-    color: var(--text);
-    font-family: inherit;
-    font-size: 14px;
-    resize: vertical;
-    min-height: 90px;
-  }
-
   /* ---------- Modal ---------- */
   .overlay {
     display: none;
@@ -380,7 +344,6 @@
     <div class="abas">
       <button class="aba ativa" id="aba-associados">Associados</button>
       <button class="aba" id="aba-financeiro">Financeiro</button>
-      <button class="aba" id="aba-comunicados">Comunicados</button>
     </div>
 
     <div id="secao-associados">
@@ -402,18 +365,6 @@
           <button class="btn" id="btn-nova-cobranca">+ Nova cobrança</button>
         </div>
         <div id="tabela-cobrancas-container">
-          <div class="vazio">Carregando...</div>
-        </div>
-      </div>
-    </div>
-
-    <div id="secao-comunicados" style="display:none;">
-      <div class="painel">
-        <div class="painel-header">
-          <h3>Comunicados</h3>
-          <button class="btn" id="btn-novo-comunicado">+ Novo comunicado</button>
-        </div>
-        <div id="lista-comunicados-container">
           <div class="vazio">Carregando...</div>
         </div>
       </div>
@@ -468,29 +419,6 @@
     <div class="modal-actions">
       <button class="btn btn-ghost" id="btn-cancelar-modal-cobranca">Cancelar</button>
       <button class="btn" id="btn-salvar-cobranca">Salvar</button>
-    </div>
-  </div>
-</div>
-
-<!-- ===== MODAL NOVO COMUNICADO ===== -->
-<div class="overlay" id="overlay-modal-comunicado">
-  <div class="modal">
-    <h3>Novo comunicado</h3>
-    <div class="campo">
-      <label>Título</label>
-      <input type="text" id="comunicado-titulo">
-    </div>
-    <div class="campo">
-      <label>Conteúdo</label>
-      <textarea id="comunicado-conteudo"></textarea>
-    </div>
-    <div class="campo">
-      <label>Categoria-alvo (opcional — em branco = todos)</label>
-      <input type="text" id="comunicado-categoria" placeholder="ex: sócio patrimonial">
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-ghost" id="btn-cancelar-modal-comunicado">Cancelar</button>
-      <button class="btn" id="btn-salvar-comunicado">Publicar</button>
     </div>
   </div>
 </div>
@@ -675,15 +603,19 @@
   };
 
   // ---------- Abas ----------
-  function ativarAba(idAtiva) {
-    ['associados', 'financeiro', 'comunicados'].forEach(function(nome) {
-      document.getElementById('aba-' + nome).className = (nome === idAtiva) ? 'aba ativa' : 'aba';
-      document.getElementById('secao-' + nome).style.display = (nome === idAtiva) ? 'block' : 'none';
-    });
-  }
-  document.getElementById('aba-associados').onclick = function() { ativarAba('associados'); };
-  document.getElementById('aba-financeiro').onclick = function() { ativarAba('financeiro'); carregarCobrancas(); };
-  document.getElementById('aba-comunicados').onclick = function() { ativarAba('comunicados'); carregarComunicados(); };
+  document.getElementById('aba-associados').onclick = function() {
+    document.getElementById('aba-associados').className = 'aba ativa';
+    document.getElementById('aba-financeiro').className = 'aba';
+    document.getElementById('secao-associados').style.display = 'block';
+    document.getElementById('secao-financeiro').style.display = 'none';
+  };
+  document.getElementById('aba-financeiro').onclick = function() {
+    document.getElementById('aba-financeiro').className = 'aba ativa';
+    document.getElementById('aba-associados').className = 'aba';
+    document.getElementById('secao-financeiro').style.display = 'block';
+    document.getElementById('secao-associados').style.display = 'none';
+    carregarCobrancas();
+  };
 
   // ---------- Financeiro: carregar cobranças ----------
   function carregarCobrancas() {
@@ -786,90 +718,6 @@
       document.getElementById('cobranca-valor').value = '';
       mostrarToast('Cobrança criada com sucesso!');
       carregarCobrancas();
-    })
-    .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
-  };
-
-  // ---------- Comunicados ----------
-  function carregarComunicados() {
-    fetch(API_URL + '/comunicados', {
-      headers: { 'Authorization': 'Bearer ' + estado.token }
-    })
-    .then(function(resp) { return resp.json(); })
-    .then(function(lista) { renderizarComunicados(lista); })
-    .catch(function() { mostrarToast('Erro ao carregar comunicados', true); });
-  }
-
-  function renderizarComunicados(lista) {
-    var container = document.getElementById('lista-comunicados-container');
-
-    if (lista.length === 0) {
-      container.innerHTML = '<div class="vazio">Nenhum comunicado publicado ainda.</div>';
-      return;
-    }
-
-    var html = '';
-    lista.forEach(function(c) {
-      html += '<div class="comunicado-card">' +
-        '<div class="comunicado-header">' +
-          '<span class="comunicado-titulo">' + escapeHtml(c.titulo) + '</span>' +
-          '<span class="comunicado-data">' + formatarDataHora(c.publicado_em) + '</span>' +
-        '</div>' +
-        '<div class="comunicado-conteudo">' + escapeHtml(c.conteudo) + '</div>' +
-        (c.categoria_alvo ? '<span class="comunicado-categoria">' + escapeHtml(c.categoria_alvo) + '</span>' : '') +
-        '</div>';
-    });
-    container.innerHTML = html;
-  }
-
-  function formatarDataHora(iso) {
-    if (!iso) return '';
-    var d = new Date(iso);
-    var dia = String(d.getDate()).padStart(2, '0');
-    var mes = String(d.getMonth() + 1).padStart(2, '0');
-    var hora = String(d.getHours()).padStart(2, '0');
-    var min = String(d.getMinutes()).padStart(2, '0');
-    return dia + '/' + mes + '/' + d.getFullYear() + ' às ' + hora + ':' + min;
-  }
-
-  // ---------- Modal novo comunicado ----------
-  document.getElementById('btn-novo-comunicado').onclick = function() {
-    document.getElementById('overlay-modal-comunicado').style.display = 'flex';
-  };
-  document.getElementById('btn-cancelar-modal-comunicado').onclick = function() {
-    document.getElementById('overlay-modal-comunicado').style.display = 'none';
-  };
-
-  document.getElementById('btn-salvar-comunicado').onclick = function() {
-    var titulo = document.getElementById('comunicado-titulo').value.trim();
-    var conteudo = document.getElementById('comunicado-conteudo').value.trim();
-    var categoria = document.getElementById('comunicado-categoria').value.trim();
-
-    if (!titulo || !conteudo) {
-      mostrarToast('Preencha título e conteúdo', true);
-      return;
-    }
-
-    fetch(API_URL + '/comunicados', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + estado.token
-      },
-      body: JSON.stringify({ titulo: titulo, conteudo: conteudo, categoria_alvo: categoria || null })
-    })
-    .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
-    .then(function(res) {
-      if (!res.ok) {
-        mostrarToast(res.data.erro || 'Erro ao publicar comunicado', true);
-        return;
-      }
-      document.getElementById('overlay-modal-comunicado').style.display = 'none';
-      document.getElementById('comunicado-titulo').value = '';
-      document.getElementById('comunicado-conteudo').value = '';
-      document.getElementById('comunicado-categoria').value = '';
-      mostrarToast('Comunicado publicado!');
-      carregarComunicados();
     })
     .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
   };
