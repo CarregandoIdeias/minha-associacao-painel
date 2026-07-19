@@ -156,7 +156,7 @@
   .btn-ghost:hover { background: var(--accent-soft); color: var(--accent); }
 
   /* ---------- Tela de login ---------- */
-  #tela-login {
+  #tela-login, #tela-esqueci-senha, #tela-redefinir-senha {
     max-width: 420px;
     margin: 60px auto;
     background: var(--bg-card);
@@ -188,7 +188,7 @@
   }
   .campo input:focus { outline: none; border-color: var(--accent); }
 
-  #erro-login {
+  #erro-login, #erro-recuperar, #erro-redefinir {
     color: var(--danger);
     font-size: 13px;
     margin-top: 10px;
@@ -400,7 +400,55 @@
 
   <button class="btn" style="width:100%;" id="btn-login">Entrar</button>
   <p id="erro-login"></p>
+  <p style="text-align:center; margin-top:16px; font-size:13px;">
+    <a href="#" id="link-esqueci-senha" style="color:var(--accent); text-decoration:none;">Esqueci minha senha</a>
+  </p>
 </div>
+
+<div id="tela-esqueci-senha" style="display:none;">
+  <h2>Recuperar senha</h2>
+  <p class="sub">Informe seu e-mail e o ID da associação</p>
+
+  <div class="campo">
+    <label>ID da associação</label>
+    <input type="text" id="recuperar-associacao" placeholder="cole o associacao_id aqui">
+  </div>
+  <div class="campo">
+    <label>E-mail</label>
+    <input type="email" id="recuperar-email" placeholder="voce@exemplo.com">
+  </div>
+
+  <button class="btn" style="width:100%;" id="btn-gerar-recuperacao">Gerar link de redefinição</button>
+  <p id="erro-recuperar"></p>
+
+  <div id="resultado-recuperacao" style="display:none; margin-top:16px;">
+    <p style="font-size:13px; color:var(--text-muted); margin-bottom:10px;">
+      Link gerado (válido por 1 hora). Copie e envie para a pessoa:
+    </p>
+    <div class="campo">
+      <input type="text" id="link-recuperacao" readonly style="font-size:12px;">
+    </div>
+    <button class="btn btn-ghost" style="width:100%;" id="btn-copiar-link-recuperacao">Copiar link</button>
+  </div>
+
+  <p style="text-align:center; margin-top:16px; font-size:13px;">
+    <a href="#" id="link-voltar-login" style="color:var(--accent); text-decoration:none;">Voltar para o login</a>
+  </p>
+</div>
+
+<div id="tela-redefinir-senha" style="display:none;">
+  <h2>Definir nova senha</h2>
+  <p class="sub">Escolha uma nova senha para sua conta</p>
+
+  <div class="campo">
+    <label>Nova senha</label>
+    <input type="password" id="redefinir-senha-nova" placeholder="mínimo 6 caracteres">
+  </div>
+
+  <button class="btn" style="width:100%;" id="btn-confirmar-redefinicao">Salvar nova senha</button>
+  <p id="erro-redefinir"></p>
+</div>
+
 
 <!-- ===== DASHBOARD (com sidebar) ===== -->
 <div class="app-layout" id="tela-dashboard">
@@ -653,6 +701,19 @@
       campo.readOnly = true;
     }
   })();
+
+  var tokenRedefinicao = null;
+
+  // Se o link tiver ?reset=<token>, já abre a tela de definir nova senha
+  (function detectarTokenRedefinicao() {
+    var params = new URLSearchParams(window.location.search);
+    var token = params.get('reset');
+    if (token) {
+      tokenRedefinicao = token;
+      document.getElementById('tela-login').style.display = 'none';
+      document.getElementById('tela-redefinir-senha').style.display = 'block';
+    }
+  })();
   var associadosCache = [];
 
   // Converte texto tipo "150,00" ou "150.00" em número
@@ -687,6 +748,105 @@
     toast.className = 'toast show' + (erro ? ' erro' : '');
     setTimeout(function() { toast.className = 'toast'; }, 3000);
   }
+
+  // ---------- Navegação entre telas de autenticação ----------
+  document.getElementById('link-esqueci-senha').onclick = function(e) {
+    e.preventDefault();
+    document.getElementById('recuperar-associacao').value = document.getElementById('login-associacao').value;
+    document.getElementById('recuperar-email').value = document.getElementById('login-email').value;
+    document.getElementById('resultado-recuperacao').style.display = 'none';
+    document.getElementById('tela-login').style.display = 'none';
+    document.getElementById('tela-esqueci-senha').style.display = 'block';
+  };
+  document.getElementById('link-voltar-login').onclick = function(e) {
+    e.preventDefault();
+    document.getElementById('tela-esqueci-senha').style.display = 'none';
+    document.getElementById('tela-login').style.display = 'block';
+  };
+
+  // ---------- Solicitar redefinição ----------
+  document.getElementById('btn-gerar-recuperacao').onclick = function() {
+    var associacaoId = document.getElementById('recuperar-associacao').value.trim();
+    var email = document.getElementById('recuperar-email').value.trim();
+    var erroEl = document.getElementById('erro-recuperar');
+    erroEl.style.display = 'none';
+
+    if (!associacaoId || !email) {
+      erroEl.textContent = 'Preencha o ID da associação e o e-mail.';
+      erroEl.style.display = 'block';
+      return;
+    }
+
+    fetch(API_URL + '/auth/esqueci-senha', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, associacao_id: associacaoId })
+    })
+    .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
+    .then(function(res) {
+      if (!res.ok) {
+        erroEl.textContent = res.data.erro || 'Erro ao gerar link de redefinição';
+        erroEl.style.display = 'block';
+        return;
+      }
+      if (!res.data.token) {
+        mostrarToast(res.data.mensagem || 'Se o e-mail existir, um link foi gerado.');
+        return;
+      }
+      var link = window.location.origin + window.location.pathname + '?reset=' + res.data.token;
+      document.getElementById('link-recuperacao').value = link;
+      document.getElementById('resultado-recuperacao').style.display = 'block';
+    })
+    .catch(function() {
+      erroEl.textContent = 'Não foi possível conectar ao servidor.';
+      erroEl.style.display = 'block';
+    });
+  };
+
+  document.getElementById('btn-copiar-link-recuperacao').onclick = function() {
+    var campo = document.getElementById('link-recuperacao');
+    campo.select();
+    navigator.clipboard.writeText(campo.value).then(function() {
+      mostrarToast('Link copiado!');
+    }).catch(function() {
+      mostrarToast('Não foi possível copiar automaticamente — selecione e copie manualmente.', true);
+    });
+  };
+
+  // ---------- Confirmar nova senha ----------
+  document.getElementById('btn-confirmar-redefinicao').onclick = function() {
+    var novaSenha = document.getElementById('redefinir-senha-nova').value;
+    var erroEl = document.getElementById('erro-redefinir');
+    erroEl.style.display = 'none';
+
+    if (!novaSenha || novaSenha.length < 6) {
+      erroEl.textContent = 'A nova senha deve ter ao menos 6 caracteres.';
+      erroEl.style.display = 'block';
+      return;
+    }
+
+    fetch(API_URL + '/auth/redefinir-senha', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: tokenRedefinicao, senha_nova: novaSenha })
+    })
+    .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
+    .then(function(res) {
+      if (!res.ok) {
+        erroEl.textContent = res.data.erro || 'Erro ao redefinir senha';
+        erroEl.style.display = 'block';
+        return;
+      }
+      mostrarToast('Senha redefinida! Faça login com a nova senha.');
+      document.getElementById('tela-redefinir-senha').style.display = 'none';
+      document.getElementById('tela-login').style.display = 'block';
+      window.history.replaceState({}, '', window.location.pathname);
+    })
+    .catch(function() {
+      erroEl.textContent = 'Não foi possível conectar ao servidor.';
+      erroEl.style.display = 'block';
+    });
+  };
 
   // ---------- Login ----------
   document.getElementById('btn-login').onclick = function() {
