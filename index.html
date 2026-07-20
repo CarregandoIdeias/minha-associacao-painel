@@ -261,6 +261,7 @@
   .badge.atrasado { background: rgba(178,58,58,0.12); color: var(--danger); }
   .badge.cancelado { background: var(--border); color: var(--text-muted); }
   .badge.aguardando_confirmacao { background: rgba(52,152,219,0.14); color: #3498DB; }
+  .badge.vencendo_em_breve { background: rgba(217,164,65,0.16); color: var(--warning); }
 
   #pix-qrcode-container svg { width: 220px; height: 220px; }
 
@@ -553,6 +554,7 @@
 
     <div id="secao-financeiro" style="display:none;">
       <div class="page-header"><h1>Financeiro</h1></div>
+      <div id="banner-alerta-vencimento" style="display:none; background:var(--accent-soft); color:var(--warning); border:1px solid var(--warning); border-radius:10px; padding:12px 16px; margin-bottom:18px; font-size:13px; font-weight:600;"></div>
       <div class="painel">
         <div class="painel-header">
           <h3>Cobranças</h3>
@@ -639,6 +641,20 @@
             <input type="text" id="config-cidade-pix" maxlength="15" placeholder="ex: SAO PAULO">
           </div>
           <button class="btn" id="btn-salvar-config-pix">Salvar</button>
+        </div>
+      </div>
+
+      <div class="painel" style="margin-top:24px;">
+        <div class="painel-header"><h3>Alertas de vencimento</h3></div>
+        <div style="padding:22px;">
+          <p style="font-size:13px; color:var(--text-muted); margin-bottom:18px;">
+            Cobranças pendentes dentro desse prazo aparecem destacadas como "vencendo em breve" — tanto para a diretoria quanto para o associado.
+          </p>
+          <div class="campo">
+            <label>Avisar com quantos dias de antecedência?</label>
+            <input type="number" id="config-dias-alerta" min="0" max="30" placeholder="ex: 3">
+          </div>
+          <button class="btn" id="btn-salvar-config-alertas">Salvar</button>
         </div>
       </div>
     </div>
@@ -1320,7 +1336,44 @@
   document.getElementById('aba-comunicados').onclick = function() { ativarAba('comunicados'); carregarComunicados(); };
   document.getElementById('aba-usuarios').onclick = function() { ativarAba('usuarios'); carregarUsuarios(); };
   document.getElementById('aba-meus-dados').onclick = function() { ativarAba('meus-dados'); carregarMeusDados(); };
-  document.getElementById('aba-configuracoes').onclick = function() { ativarAba('configuracoes'); carregarConfigPix(); };
+  document.getElementById('aba-configuracoes').onclick = function() {
+    ativarAba('configuracoes');
+    carregarConfigPix();
+    carregarConfigAlertas();
+  };
+
+  function carregarConfigAlertas() {
+    fetch(API_URL + '/configuracoes/alertas', {
+      headers: { 'Authorization': 'Bearer ' + estado.token }
+    })
+    .then(function(resp) { return resp.json(); })
+    .then(function(config) {
+      document.getElementById('config-dias-alerta').value = config.dias_alerta_vencimento != null ? config.dias_alerta_vencimento : 3;
+    })
+    .catch(function() { mostrarToast('Erro ao carregar configuração de alertas', true); });
+  }
+
+  document.getElementById('btn-salvar-config-alertas').onclick = function() {
+    var dias = document.getElementById('config-dias-alerta').value;
+
+    fetch(API_URL + '/configuracoes/alertas', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + estado.token
+      },
+      body: JSON.stringify({ dias_alerta_vencimento: dias })
+    })
+    .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
+    .then(function(res) {
+      if (!res.ok) {
+        mostrarToast(res.data.erro || 'Erro ao salvar configuração', true);
+        return;
+      }
+      mostrarToast('Configuração de alertas salva!');
+    })
+    .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
+  };
 
   function carregarConfigPix() {
     fetch(API_URL + '/configuracoes/pix', {
@@ -1380,6 +1433,15 @@
     cobrancasCache = lista;
     var container = document.getElementById('tabela-cobrancas-container');
 
+    var vencendoEmBreve = lista.filter(function(c) { return c.status_exibicao === 'vencendo_em_breve'; });
+    var bannerAlerta = document.getElementById('banner-alerta-vencimento');
+    if (vencendoEmBreve.length > 0) {
+      bannerAlerta.style.display = 'block';
+      bannerAlerta.textContent = '⚠ ' + vencendoEmBreve.length + ' cobrança(s) vencendo em breve.';
+    } else {
+      bannerAlerta.style.display = 'none';
+    }
+
     if (lista.length === 0) {
       container.innerHTML = '<div class="vazio">Nenhuma cobrança cadastrada ainda.</div>';
       return;
@@ -1388,6 +1450,10 @@
     var html = '<table><thead><tr><th>Associado</th><th>Descrição</th><th>Valor</th><th>Vencimento</th><th>Status</th><th></th></tr></thead><tbody>';
     lista.forEach(function(c) {
       var statusExibicao = c.status_exibicao || c.status;
+      var statusTexto = statusExibicao.replace(/_/g, ' ');
+      if (statusExibicao === 'vencendo_em_breve' && c.dias_restantes != null) {
+        statusTexto += ' (' + c.dias_restantes + 'd)';
+      }
       var valorFormatado = 'R$ ' + parseFloat(c.valor).toFixed(2).replace('.', ',');
       var acoes = '';
       if (c.tem_comprovante && c.status !== 'pago') {
@@ -1409,7 +1475,7 @@
         '<td>' + escapeHtml(c.descricao) + '</td>' +
         '<td>' + valorFormatado + '</td>' +
         '<td>' + formatarData(c.vencimento) + '</td>' +
-        '<td><span class="badge ' + statusExibicao + '">' + statusExibicao.replace('_', ' ') + '</span></td>' +
+        '<td><span class="badge ' + statusExibicao + '">' + statusTexto + '</span></td>' +
         '<td style="white-space:nowrap;">' + acoes + '</td>' +
         '</tr>';
     });
@@ -2018,9 +2084,13 @@
     var html = '<table><thead><tr><th>Descrição</th><th>Valor</th><th>Vencimento</th><th>Status</th><th></th></tr></thead><tbody>';
     lista.forEach(function(c) {
       var statusExibicao = c.status_exibicao || c.status;
+      var statusTexto = statusExibicao.replace(/_/g, ' ');
+      if (statusExibicao === 'vencendo_em_breve' && c.dias_restantes != null) {
+        statusTexto = c.dias_restantes === 0 ? 'vence hoje' : 'vence em ' + c.dias_restantes + 'd';
+      }
       var valorFormatado = 'R$ ' + parseFloat(c.valor).toFixed(2).replace('.', ',');
       var acao = '';
-      if (c.status === 'pendente' || statusExibicao === 'atrasado') {
+      if (c.status === 'pendente' || statusExibicao === 'atrasado' || statusExibicao === 'vencendo_em_breve') {
         acao = '<button class="btn-pequeno" onclick="abrirModalPix(\'' + c.id + '\')">Pagar com Pix</button>';
       } else if (c.status === 'aguardando_confirmacao') {
         acao = '<span style="font-size:12px; color:var(--text-muted);">Comprovante enviado</span>';
@@ -2029,7 +2099,7 @@
         '<td>' + escapeHtml(c.descricao) + '</td>' +
         '<td>' + valorFormatado + '</td>' +
         '<td>' + formatarData(c.vencimento) + '</td>' +
-        '<td><span class="badge ' + statusExibicao + '">' + statusExibicao.replace('_', ' ') + '</span></td>' +
+        '<td><span class="badge ' + statusExibicao + '">' + statusTexto + '</span></td>' +
         '<td>' + acao + '</td>' +
         '</tr>';
     });
