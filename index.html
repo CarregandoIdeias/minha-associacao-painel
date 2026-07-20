@@ -371,6 +371,9 @@
     position: fixed;
     bottom: 24px;
     right: 24px;
+    left: 24px;
+    max-width: 380px;
+    margin-left: auto;
     background: var(--accent);
     color: #0A0A0A;
     padding: 12px 20px;
@@ -386,6 +389,27 @@
   .toast.show { opacity: 1; transform: translateY(0); }
   .toast.erro { background: var(--danger); color: #fff; }
 
+  /* ---------- Responsividade: tabelas com rolagem horizontal ---------- */
+  #tabela-container, #tabela-cobrancas-container, #tabela-usuarios-container,
+  #tabela-minhas-cobrancas-container, #lista-comunicados-container {
+    overflow-x: auto;
+  }
+  #tabela-container table, #tabela-cobrancas-container table,
+  #tabela-usuarios-container table, #tabela-minhas-cobrancas-container table {
+    min-width: 640px;
+  }
+
+  .painel-header { flex-wrap: wrap; gap: 10px; }
+
+  .busca-filtro-associado { display: flex; gap: 10px; padding: 16px 22px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .busca-filtro-associado input { flex: 1; min-width: 180px; padding: 10px 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text); font-family: inherit; font-size: 14px; }
+  .busca-filtro-associado select { padding: 10px 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text); font-family: inherit; font-size: 14px; }
+
+  @media (max-width: 900px) {
+    .content-area { padding: 24px; }
+    .kpis { gap: 12px; }
+  }
+
   @media (max-width: 720px) {
     .app-layout { flex-direction: column; }
     .sidebar {
@@ -400,7 +424,21 @@
     .sidebar .logo { display: none; }
     .nav-item { width: auto; white-space: nowrap; margin-bottom: 0; }
     .sidebar-footer { margin-top: 0; border-top: none; padding-top: 0; margin-left: auto; }
-    .content-area { padding: 20px; }
+    .content-area { padding: 16px; }
+    .page-header h1 { font-size: 19px; }
+    .kpi-card { padding: 14px; }
+    .kpi-card .valor { font-size: 21px; }
+    .painel-header { padding: 14px 16px; }
+    th, td { padding: 10px 14px; font-size: 13px; }
+    .perfil-topo { flex-direction: column; align-items: flex-start; text-align: left; }
+    .modal { padding: 20px; max-height: 90vh; overflow-y: auto; }
+  }
+
+  @media (max-width: 480px) {
+    #tela-login, #tela-esqueci-senha, #tela-redefinir-senha { padding: 24px; margin: 30px auto; width: 92%; }
+    .kpis { grid-template-columns: 1fr 1fr; }
+    .modal-actions { flex-direction: column-reverse; }
+    .modal-actions .btn, .modal-actions .btn-ghost { width: 100%; }
   }
 </style>
 </head>
@@ -536,9 +574,9 @@
           <h3>Lista de associados</h3>
           <button class="btn" id="btn-novo-associado">+ Novo associado</button>
         </div>
-        <div style="display:flex; gap:10px; padding:16px 22px; border-bottom:1px solid var(--border);">
-          <input type="text" id="busca-associado" placeholder="Buscar por nome ou CPF..." style="flex:1; padding:10px 14px; border:1px solid var(--border); border-radius:10px; background:var(--bg); color:var(--text); font-family:inherit; font-size:14px;">
-          <select id="filtro-status-associado" style="padding:10px 14px; border:1px solid var(--border); border-radius:10px; background:var(--bg); color:var(--text); font-family:inherit; font-size:14px;">
+        <div class="busca-filtro-associado">
+          <input type="text" id="busca-associado" placeholder="Buscar por nome ou CPF...">
+          <select id="filtro-status-associado">
             <option value="">Todos os status</option>
             <option value="ativo">Ativo</option>
             <option value="inadimplente">Inadimplente</option>
