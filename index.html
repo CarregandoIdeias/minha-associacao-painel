@@ -804,7 +804,7 @@
 
 <!-- ===== MODAL VER COMPROVANTE (admin/diretoria) ===== -->
 <div class="overlay" id="overlay-modal-comprovante">
-  <div class="modal">
+  <div class="modal" style="max-width:600px;">
     <h3>Comprovante enviado</h3>
     <input type="hidden" id="comprovante-cobranca-id" value="">
     <div id="comprovante-conteudo" style="margin-bottom:18px; text-align:center;"></div>
@@ -1401,6 +1401,22 @@
   }
 
   // ---------- Modal Ver comprovante (admin/diretoria) ----------
+  // Converte uma data URI (base64) em um blob: URL, que o navegador
+  // consegue exibir/abrir de forma confiável (data: URLs grandes costumam falhar)
+  function dataUrlParaBlobUrl(dataUrl) {
+    var partes = dataUrl.split(',');
+    var mimeMatch = partes[0].match(/:(.*?);/);
+    var mime = mimeMatch ? mimeMatch[1] : 'application/octet-stream';
+    var binario = atob(partes[1]);
+    var tamanho = binario.length;
+    var bytes = new Uint8Array(tamanho);
+    for (var i = 0; i < tamanho; i++) {
+      bytes[i] = binario.charCodeAt(i);
+    }
+    var blob = new Blob([bytes], { type: mime });
+    return URL.createObjectURL(blob);
+  }
+
   function abrirComprovante(cobrancaId) {
     document.getElementById('comprovante-cobranca-id').value = cobrancaId;
     var conteudo = document.getElementById('comprovante-conteudo');
@@ -1419,7 +1435,10 @@
       }
       var arquivo = res.data.comprovante_base64;
       if (arquivo.startsWith('data:application/pdf')) {
-        conteudo.innerHTML = '<a href="' + arquivo + '" target="_blank" class="btn btn-ghost">Abrir PDF do comprovante</a>';
+        var blobUrl = dataUrlParaBlobUrl(arquivo);
+        conteudo.innerHTML =
+          '<iframe src="' + blobUrl + '" style="width:100%; height:480px; border:1px solid var(--border); border-radius:10px;"></iframe>' +
+          '<p style="margin-top:10px;"><a href="' + blobUrl + '" target="_blank" style="color:var(--accent); font-size:13px;">Abrir em nova aba</a></p>';
       } else {
         conteudo.innerHTML = '<img src="' + arquivo + '" style="max-width:100%; border-radius:10px;">';
       }
