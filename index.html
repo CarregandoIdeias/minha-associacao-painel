@@ -1074,6 +1074,79 @@
   };
 
   // ---------- Login ----------
+  function entrarNoDashboard() {
+    document.getElementById('tela-login').style.display = 'none';
+    document.getElementById('tela-esqueci-senha').style.display = 'none';
+    document.getElementById('tela-dashboard').style.display = 'flex';
+
+    if (estado.papel === 'associado') {
+      // Associado só vê seus próprios dados — esconde as abas administrativas
+      ['aba-associados', 'aba-financeiro', 'aba-usuarios', 'aba-configuracoes'].forEach(function(id) {
+        document.getElementById(id).style.display = 'none';
+      });
+      document.getElementById('aba-meus-dados').style.display = 'flex';
+      document.getElementById('btn-novo-comunicado').style.display = 'none';
+      ativarAba('meus-dados');
+      carregarMeusDados();
+      carregarComunicados();
+    } else {
+      if (estado.papel === 'admin') {
+        document.getElementById('aba-usuarios').style.display = 'flex';
+        document.getElementById('aba-configuracoes').style.display = 'flex';
+      }
+      ativarAba('associados');
+      carregarAssociados();
+      carregarCobrancas();
+    }
+  }
+
+  function salvarSessao() {
+    localStorage.setItem('sessao_painel', JSON.stringify({
+      token: estado.token,
+      associacaoId: estado.associacaoId,
+      papel: estado.papel
+    }));
+  }
+
+  function limparSessao() {
+    localStorage.removeItem('sessao_painel');
+  }
+
+  // Ao carregar a página, tenta restaurar a sessão salva (evita logout ao atualizar/F5)
+  (function restaurarSessao() {
+    if (tokenRedefinicao) return;
+    var salva = localStorage.getItem('sessao_painel');
+    if (!salva) return;
+
+    try {
+      var dados = JSON.parse(salva);
+      if (!dados.token || !dados.associacaoId || !dados.papel) return;
+
+      estado.token = dados.token;
+      estado.associacaoId = dados.associacaoId;
+      estado.papel = dados.papel;
+
+      // Valida o token com uma chamada leve antes de assumir a sessão como válida
+      fetch(API_URL + '/configuracoes/pix', {
+        headers: { 'Authorization': 'Bearer ' + estado.token },
+        cache: 'no-store'
+      })
+      .then(function(resp) {
+        if (!resp.ok && resp.status === 401) {
+          limparSessao();
+          return;
+        }
+        entrarNoDashboard();
+      })
+      .catch(function() {
+        // Sem conexão momentânea — mantém a sessão e tenta mostrar o dashboard mesmo assim
+        entrarNoDashboard();
+      });
+    } catch (e) {
+      limparSessao();
+    }
+  })();
+
   document.getElementById('btn-login').onclick = function() {
     var associacaoId = document.getElementById('login-associacao').value.trim();
     var email = document.getElementById('login-email').value.trim();
@@ -1102,27 +1175,8 @@
       estado.token = res.data.token;
       estado.associacaoId = associacaoId;
       estado.papel = res.data.usuario.papel;
-      document.getElementById('tela-login').style.display = 'none';
-      document.getElementById('tela-dashboard').style.display = 'flex';
-
-      if (estado.papel === 'associado') {
-        // Associado só vê seus próprios dados — esconde as abas administrativas
-        ['aba-associados', 'aba-financeiro', 'aba-usuarios'].forEach(function(id) {
-          document.getElementById(id).style.display = 'none';
-        });
-        document.getElementById('aba-meus-dados').style.display = 'flex';
-        document.getElementById('btn-novo-comunicado').style.display = 'none';
-        ativarAba('meus-dados');
-        carregarMeusDados();
-        carregarComunicados();
-      } else {
-        if (estado.papel === 'admin') {
-          document.getElementById('aba-usuarios').style.display = 'flex';
-          document.getElementById('aba-configuracoes').style.display = 'flex';
-        }
-        carregarAssociados();
-        carregarCobrancas();
-      }
+      salvarSessao();
+      entrarNoDashboard();
     })
     .catch(function() {
       erroEl.textContent = 'Não foi possível conectar ao servidor. Verifique se o backend está rodando.';
@@ -1133,6 +1187,8 @@
   document.getElementById('btn-sair').onclick = function() {
     estado.token = null;
     estado.associacaoId = null;
+    estado.papel = null;
+    limparSessao();
     document.getElementById('tela-dashboard').style.display = 'none';
     document.getElementById('tela-login').style.display = 'block';
   };
