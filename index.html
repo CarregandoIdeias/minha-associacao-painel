@@ -517,15 +517,15 @@
     <div id="secao-associados">
       <div class="page-header"><h1>Associados</h1></div>
       <div class="kpis">
-        <div class="kpi-card">
+        <div class="kpi-card" id="kpi-card-total" style="cursor:pointer;">
           <div class="rotulo">Total de associados</div>
           <div class="valor" id="kpi-total">0</div>
         </div>
-        <div class="kpi-card ativo">
+        <div class="kpi-card ativo" id="kpi-card-ativos" style="cursor:pointer;">
           <div class="rotulo">Ativos</div>
           <div class="valor" id="kpi-ativos">0</div>
         </div>
-        <div class="kpi-card inadimplente">
+        <div class="kpi-card inadimplente" id="kpi-card-inadimplentes" style="cursor:pointer;">
           <div class="rotulo">Inadimplentes</div>
           <div class="valor" id="kpi-inadimplentes">0</div>
         </div>
@@ -534,6 +534,16 @@
         <div class="painel-header">
           <h3>Lista de associados</h3>
           <button class="btn" id="btn-novo-associado">+ Novo associado</button>
+        </div>
+        <div style="display:flex; gap:10px; padding:16px 22px; border-bottom:1px solid var(--border);">
+          <input type="text" id="busca-associado" placeholder="Buscar por nome ou CPF..." style="flex:1; padding:10px 14px; border:1px solid var(--border); border-radius:10px; background:var(--bg); color:var(--text); font-family:inherit; font-size:14px;">
+          <select id="filtro-status-associado" style="padding:10px 14px; border:1px solid var(--border); border-radius:10px; background:var(--bg); color:var(--text); font-family:inherit; font-size:14px;">
+            <option value="">Todos os status</option>
+            <option value="ativo">Ativo</option>
+            <option value="inadimplente">Inadimplente</option>
+            <option value="suspenso">Suspenso</option>
+            <option value="desligado">Desligado</option>
+          </select>
         </div>
         <div id="tabela-container">
           <div class="vazio">Carregando...</div>
@@ -650,8 +660,16 @@
       <input type="text" id="novo-cpf" placeholder="000.000.000-00">
     </div>
     <div class="campo">
+      <label>Telefone</label>
+      <input type="text" id="novo-telefone" placeholder="(00) 00000-0000">
+    </div>
+    <div class="campo">
       <label>Categoria (opcional)</label>
       <input type="text" id="novo-categoria" placeholder="ex: sócio patrimonial">
+    </div>
+    <div class="campo">
+      <label>Observação (opcional)</label>
+      <textarea id="novo-observacao" placeholder="anotações internas sobre esse associado"></textarea>
     </div>
     <div class="campo" id="campo-status-associado" style="display:none;">
       <label>Status</label>
@@ -1111,24 +1129,47 @@
     .catch(function() { mostrarToast('Erro ao carregar associados', true); });
   }
 
+  var filtroStatusAtivo = '';
+
   function renderizarTabela(lista) {
     associadosCache = lista;
-    var container = document.getElementById('tabela-container');
-
     document.getElementById('kpi-total').textContent = lista.length;
     document.getElementById('kpi-ativos').textContent = lista.filter(function(a) { return a.status === 'ativo'; }).length;
     document.getElementById('kpi-inadimplentes').textContent = lista.filter(function(a) { return a.status === 'inadimplente'; }).length;
+    aplicarFiltroAssociados();
+  }
 
-    if (lista.length === 0) {
+  function aplicarFiltroAssociados() {
+    var termo = document.getElementById('busca-associado').value.trim().toLowerCase();
+    var statusFiltro = document.getElementById('filtro-status-associado').value;
+    var container = document.getElementById('tabela-container');
+
+    var filtrada = associadosCache.filter(function(a) {
+      var bateStatus = !statusFiltro || a.status === statusFiltro;
+      if (!termo) return bateStatus;
+
+      var termoNumerico = termo.replace(/[^\d]/g, '');
+      var nomeBate = a.nome_completo.toLowerCase().indexOf(termo) !== -1;
+      var cpfBate = termoNumerico !== '' && (a.cpf || '').replace(/[^\d]/g, '').indexOf(termoNumerico) !== -1;
+
+      return bateStatus && (nomeBate || cpfBate);
+    });
+
+    if (associadosCache.length === 0) {
       container.innerHTML = '<div class="vazio">Nenhum associado cadastrado ainda.</div>';
       return;
     }
+    if (filtrada.length === 0) {
+      container.innerHTML = '<div class="vazio">Nenhum associado encontrado com esse filtro.</div>';
+      return;
+    }
 
-    var html = '<table><thead><tr><th>Nome</th><th>CPF</th><th>Categoria</th><th>Status</th><th>Ingresso</th><th></th></tr></thead><tbody>';
-    lista.forEach(function(a) {
+    var html = '<table><thead><tr><th>Nome</th><th>CPF</th><th>Telefone</th><th>Categoria</th><th>Status</th><th>Ingresso</th><th></th></tr></thead><tbody>';
+    filtrada.forEach(function(a) {
       html += '<tr>' +
-        '<td>' + escapeHtml(a.nome_completo) + '</td>' +
+        '<td>' + escapeHtml(a.nome_completo) + (a.observacao ? ' <span title="' + escapeHtml(a.observacao) + '" style="cursor:help; color:var(--text-muted);">📝</span>' : '') + '</td>' +
         '<td>' + escapeHtml(a.cpf || '—') + '</td>' +
+        '<td>' + escapeHtml(a.telefone || '—') + '</td>' +
         '<td>' + escapeHtml(a.categoria || '—') + '</td>' +
         '<td><span class="badge ' + a.status + '">' + a.status + '</span></td>' +
         '<td>' + formatarData(a.data_ingresso) + '</td>' +
@@ -1142,6 +1183,23 @@
     container.innerHTML = html;
   }
 
+  document.getElementById('busca-associado').oninput = aplicarFiltroAssociados;
+  document.getElementById('filtro-status-associado').onchange = aplicarFiltroAssociados;
+
+  document.getElementById('kpi-card-total').onclick = function() {
+    document.getElementById('filtro-status-associado').value = '';
+    document.getElementById('busca-associado').value = '';
+    aplicarFiltroAssociados();
+  };
+  document.getElementById('kpi-card-ativos').onclick = function() {
+    document.getElementById('filtro-status-associado').value = 'ativo';
+    aplicarFiltroAssociados();
+  };
+  document.getElementById('kpi-card-inadimplentes').onclick = function() {
+    document.getElementById('filtro-status-associado').value = 'inadimplente';
+    aplicarFiltroAssociados();
+  };
+
   function abrirEdicaoAssociado(id) {
     var associado = associadosCache.find(function(a) { return a.id === id; });
     if (!associado) return;
@@ -1150,7 +1208,9 @@
     document.getElementById('editar-associado-id').value = associado.id;
     document.getElementById('novo-nome').value = associado.nome_completo;
     document.getElementById('novo-cpf').value = associado.cpf || '';
+    document.getElementById('novo-telefone').value = associado.telefone || '';
     document.getElementById('novo-categoria').value = associado.categoria || '';
+    document.getElementById('novo-observacao').value = associado.observacao || '';
     document.getElementById('novo-status').value = associado.status;
     document.getElementById('campo-status-associado').style.display = 'block';
     document.getElementById('overlay-modal').style.display = 'flex';
@@ -1193,7 +1253,9 @@
     document.getElementById('editar-associado-id').value = '';
     document.getElementById('novo-nome').value = '';
     document.getElementById('novo-cpf').value = '';
+    document.getElementById('novo-telefone').value = '';
     document.getElementById('novo-categoria').value = '';
+    document.getElementById('novo-observacao').value = '';
     document.getElementById('campo-status-associado').style.display = 'none';
     document.getElementById('overlay-modal').style.display = 'flex';
   };
@@ -1205,7 +1267,9 @@
     var idEdicao = document.getElementById('editar-associado-id').value;
     var nome = document.getElementById('novo-nome').value.trim();
     var cpf = document.getElementById('novo-cpf').value.trim();
+    var telefone = document.getElementById('novo-telefone').value.trim();
     var categoria = document.getElementById('novo-categoria').value.trim();
+    var observacao = document.getElementById('novo-observacao').value.trim();
     var status = document.getElementById('novo-status').value;
 
     if (!nome) {
@@ -1216,8 +1280,8 @@
     var url = API_URL + '/associados' + (idEdicao ? '/' + idEdicao : '');
     var metodo = idEdicao ? 'PUT' : 'POST';
     var corpo = idEdicao
-      ? { nome_completo: nome, cpf: cpf, categoria: categoria, status: status }
-      : { nome_completo: nome, cpf: cpf, categoria: categoria };
+      ? { nome_completo: nome, cpf: cpf, telefone: telefone, categoria: categoria, status: status, observacao: observacao }
+      : { nome_completo: nome, cpf: cpf, telefone: telefone, categoria: categoria, observacao: observacao };
 
     fetch(url, {
       method: metodo,
