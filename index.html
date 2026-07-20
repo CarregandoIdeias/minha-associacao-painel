@@ -808,10 +808,12 @@
     </div>
     <button class="btn btn-ghost" style="width:100%; margin-bottom:18px;" id="btn-copiar-pix">Copiar código</button>
 
-    <p style="font-size:13px; font-weight:600; margin-bottom:8px;">Já pagou? Envie o comprovante:</p>
-    <input type="file" id="input-comprovante" accept="image/*,application/pdf" style="display:none;">
-    <button class="btn btn-ghost" style="width:100%;" id="btn-selecionar-comprovante">Escolher arquivo</button>
-    <p id="nome-arquivo-comprovante" style="font-size:12px; color:var(--text-muted); margin-top:6px;"></p>
+    <div id="bloco-envio-comprovante-pix">
+      <p style="font-size:13px; font-weight:600; margin-bottom:8px;">Já pagou? Envie o comprovante:</p>
+      <input type="file" id="input-comprovante" accept="image/*,application/pdf" style="display:none;">
+      <button class="btn btn-ghost" style="width:100%;" id="btn-selecionar-comprovante">Escolher arquivo</button>
+      <p id="nome-arquivo-comprovante" style="font-size:12px; color:var(--text-muted); margin-top:6px;"></p>
+    </div>
 
     <div class="modal-actions">
       <button class="btn btn-ghost" id="btn-fechar-modal-pix">Fechar</button>
@@ -1392,8 +1394,12 @@
         acoes += '<button class="btn-pequeno" onclick="abrirComprovante(\'' + c.id + '\')">Ver comprovante</button> ';
       }
       if (c.status !== 'pago') {
+        acoes += '<button class="btn-pequeno" onclick="abrirModalPix(\'' + c.id + '\', true)">Pix</button> ';
         acoes += '<button class="btn-pequeno" onclick="marcarComoPago(\'' + c.id + '\')">Marcar como pago</button> ';
         acoes += '<button class="btn-pequeno" onclick="abrirEdicaoCobranca(\'' + c.id + '\')">Editar</button> ';
+      }
+      if (c.status === 'pago' && estado.papel === 'admin') {
+        acoes += '<button class="btn-pequeno" onclick="estornarPagamento(\'' + c.id + '\')">Estornar</button> ';
       }
       if (estado.papel === 'admin') {
         acoes += '<button class="btn-pequeno" onclick="excluirCobranca(\'' + c.id + '\')">Excluir</button>';
@@ -1459,6 +1465,25 @@
         return;
       }
       mostrarToast('Cobrança excluída.');
+      carregarCobrancas();
+    })
+    .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
+  }
+
+  function estornarPagamento(id) {
+    if (!confirm('Estornar esse pagamento? A cobrança volta para "pendente" e o associado poderá pagar novamente.')) return;
+
+    fetch(API_URL + '/cobrancas/' + id + '/estornar', {
+      method: 'PATCH',
+      headers: { 'Authorization': 'Bearer ' + estado.token }
+    })
+    .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
+    .then(function(res) {
+      if (!res.ok) {
+        mostrarToast(res.data.erro || 'Erro ao estornar pagamento', true);
+        return;
+      }
+      mostrarToast('Pagamento estornado. A cobrança voltou para pendente.');
       carregarCobrancas();
     })
     .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
@@ -2015,15 +2040,20 @@
   // ---------- Modal Pagar com Pix (associado) ----------
   var comprovanteSelecionadoBase64 = null;
 
-  function abrirModalPix(cobrancaId) {
-    var cobranca = minhasCobrancasCache.find(function(c) { return c.id === cobrancaId; });
+  function abrirModalPix(cobrancaId, modoAdmin) {
+    var origem = modoAdmin ? cobrancasCache : minhasCobrancasCache;
+    var cobranca = origem.find(function(c) { return c.id === cobrancaId; });
     if (!cobranca) return;
 
     document.getElementById('pix-cobranca-id').value = cobrancaId;
     document.getElementById('pix-descricao-valor').textContent =
+      (modoAdmin ? cobranca.associado_nome + ' — ' : '') +
       cobranca.descricao + ' — R$ ' + parseFloat(cobranca.valor).toFixed(2).replace('.', ',');
     document.getElementById('nome-arquivo-comprovante').textContent = '';
     comprovanteSelecionadoBase64 = null;
+
+    document.getElementById('bloco-envio-comprovante-pix').style.display = modoAdmin ? 'none' : 'block';
+    document.getElementById('btn-enviar-comprovante').style.display = modoAdmin ? 'none' : 'inline-block';
 
     fetch(API_URL + '/configuracoes/pix', {
       headers: { 'Authorization': 'Bearer ' + estado.token }
