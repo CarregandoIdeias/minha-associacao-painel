@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Super Admin — Carregando Ideias</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F7F5EF; --bg-card: #ffffff; --text: #1A1712; --text-muted: #6B6558;
+    --border: #E4E0D2; --accent: #C9A84C; --accent-hover: #E8CC80;
+    --accent-soft: rgba(201, 168, 76, 0.1); --success: #2ECC71; --warning: #D9A441; --danger: #E74C3C;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  }
+  [data-theme="dark"] {
+    --bg: #0A0A0A; --bg-card: #1A1A1A; --text: #F9F8F5; --text-muted: #888888;
+    --border: #1e1e1e; --accent: #C9A84C; --accent-hover: #E8CC80;
+    --accent-soft: rgba(201, 168, 76, 0.1); --success: #2ECC71; --warning: #D9A441; --danger: #E74C3C;
+    --shadow: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; transition: background .2s, color .2s; }
+
+  #tela-login { max-width: 420px; margin: 80px auto; background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 36px; box-shadow: var(--shadow); }
+  #tela-login h2 { font-family: 'Playfair Display', serif; font-size: 22px; margin-bottom: 6px; }
+  #tela-login p.sub { color: var(--text-muted); font-size: 13px; margin-bottom: 24px; }
+  #erro-login { color: var(--danger); font-size: 13px; margin-top: 10px; display: none; }
+
+  .campo { margin-bottom: 16px; }
+  .campo label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; color: var(--text-muted); }
+  .campo input, .campo select { width: 100%; padding: 11px 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text); font-family: inherit; font-size: 14px; }
+  .campo input:focus, .campo select:focus { outline: none; border-color: var(--accent); }
+
+  .btn { background: var(--accent); color: #0A0A0A; border: none; padding: 10px 18px; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer; font-family: inherit; }
+  .btn:hover { background: var(--accent-hover); }
+  .btn-ghost { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
+  .btn-ghost:hover { background: var(--accent-soft); color: var(--accent); }
+  .btn-pequeno { background: var(--accent-soft); color: var(--accent); border: none; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; }
+  .btn-pequeno:hover { background: var(--accent); color: #0A0A0A; }
+
+  header { display: flex; justify-content: space-between; align-items: center; padding: 18px 32px; background: var(--bg-card); border-bottom: 1px solid var(--border); }
+  .logo { font-family: 'Playfair Display', serif; font-weight: 900; font-size: 19px; color: var(--accent); }
+  .logo span { color: var(--text); }
+  .theme-toggle { background: var(--accent-soft); border: none; border-radius: 10px; width: 38px; height: 38px; font-size: 16px; cursor: pointer; color: var(--accent); }
+
+  main { max-width: 1200px; margin: 0 auto; padding: 32px; }
+  #tela-dashboard { display: none; }
+
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-bottom: 28px; }
+  .kpi-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 18px; box-shadow: var(--shadow); }
+  .kpi-card .rotulo { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); }
+  .kpi-card .valor { font-family: 'JetBrains Mono', monospace; font-size: 24px; font-weight: 600; margin-top: 4px; color: var(--accent); }
+  .kpi-card.alerta .valor { color: var(--warning); }
+  .kpi-card.perigo .valor { color: var(--danger); }
+
+  .painel { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow); overflow: hidden; }
+  .painel-header { display: flex; justify-content: space-between; align-items: center; padding: 18px 22px; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 10px; }
+  .painel-header h3 { font-size: 15px; font-weight: 600; }
+
+  #tabela-associacoes-container { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; min-width: 800px; }
+  th, td { text-align: left; padding: 14px 22px; font-size: 14px; border-bottom: 1px solid var(--border); }
+  th { color: var(--text-muted); font-weight: 500; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
+  tr:last-child td { border-bottom: none; }
+
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+  .badge.ativo { background: rgba(46,204,113,0.12); color: var(--success); }
+  .badge.inativo { background: var(--border); color: var(--text-muted); }
+
+  .vazio { padding: 40px; text-align: center; color: var(--text-muted); font-size: 14px; }
+
+  .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); align-items: center; justify-content: center; z-index: 50; }
+  .modal { background: var(--bg-card); border-radius: 16px; padding: 28px; width: 92%; max-width: 480px; box-shadow: var(--shadow); max-height: 90vh; overflow-y: auto; }
+  .modal h3 { font-family: 'Playfair Display', serif; margin-bottom: 18px; font-size: 18px; }
+  .modal-actions { display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end; }
+
+  .toast { position: fixed; bottom: 24px; right: 24px; left: 24px; max-width: 380px; margin-left: auto; background: var(--accent); color: #0A0A0A; padding: 12px 20px; border-radius: 10px; font-size: 14px; font-weight: 600; box-shadow: var(--shadow); opacity: 0; transform: translateY(10px); transition: all .25s; z-index: 100; }
+  .toast.show { opacity: 1; transform: translateY(0); }
+  .toast.erro { background: var(--danger); color: #fff; }
+
+  @media (max-width: 640px) {
+    #tela-login { margin: 40px auto; padding: 24px; width: 90%; }
+    main { padding: 16px; }
+    .painel-header { padding: 14px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="tela-login">
+  <h2>Painel <span style="color:var(--accent)">Super Admin</span></h2>
+  <p class="sub">Acesso restrito — gestão das associações-clientes</p>
+  <div class="campo"><label>E-mail</label><input type="email" id="login-email"></div>
+  <div class="campo"><label>Senha</label><input type="password" id="login-senha"></div>
+  <button class="btn" style="width:100%;" id="btn-login">Entrar</button>
+  <p id="erro-login"></p>
+</div>
+
+<div id="tela-dashboard">
+  <header>
+    <div class="logo">Carregando<span>Ideias</span> · Super Admin</div>
+    <div style="display:flex; gap:10px; align-items:center;">
+      <button class="theme-toggle" id="btn-tema">☀</button>
+      <button class="btn btn-ghost" id="btn-sair">Sair</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="kpis">
+      <div class="kpi-card"><div class="rotulo">Associações</div><div class="valor" id="kpi-total-associacoes">0</div></div>
+      <div class="kpi-card"><div class="rotulo">Ativas</div><div class="valor" id="kpi-associacoes-ativas">0</div></div>
+      <div class="kpi-card"><div class="rotulo">Total de associados</div><div class="valor" id="kpi-total-associados">0</div></div>
+      <div class="kpi-card alerta"><div class="rotulo">Cobranças pendentes</div><div class="valor" id="kpi-total-pendentes">0</div></div>
+      <div class="kpi-card perigo"><div class="rotulo">Cobranças atrasadas</div><div class="valor" id="kpi-total-atrasadas">0</div></div>
+      <div class="kpi-card"><div class="rotulo">Aguardando confirmação</div><div class="valor" id="kpi-total-aguardando">0</div></div>
+    </div>
+
+    <div class="painel">
+      <div class="painel-header">
+        <h3>Associações cadastradas</h3>
+        <button class="btn" id="btn-nova-associacao">+ Nova associação</button>
+      </div>
+      <div id="tabela-associacoes-container"><div class="vazio">Carregando...</div></div>
+    </div>
+  </main>
+</div>
+
+<!-- ===== MODAL NOVA/EDITAR ASSOCIAÇÃO ===== -->
+<div class="overlay" id="overlay-modal-associacao">
+  <div class="modal">
+    <h3 id="titulo-modal-associacao">Nova associação</h3>
+    <input type="hidden" id="editar-associacao-id" value="">
+
+    <div class="campo"><label>Nome da associação</label><input type="text" id="assoc-nome"></div>
+    <div class="campo">
+      <label>Tipo</label>
+      <select id="assoc-tipo">
+        <option value="moradores">Moradores/bairro</option>
+        <option value="classe_profissional">Classe/profissional</option>
+        <option value="esportiva_recreativa">Esportiva/recreativa</option>
+        <option value="ong_beneficente">ONG/beneficente</option>
+        <option value="outra" selected>Outra</option>
+      </select>
+    </div>
+    <div class="campo"><label>E-mail</label><input type="email" id="assoc-email"></div>
+    <div class="campo"><label>Telefone</label><input type="text" id="assoc-telefone"></div>
+    <div class="campo"><label>Endereço</label><input type="text" id="assoc-endereco"></div>
+    <div class="campo"><label>Número de cadastro (CNPJ)</label><input type="text" id="assoc-cnpj"></div>
+
+    <div id="bloco-admin-inicial">
+      <hr style="border-color:var(--border); margin:18px 0;">
+      <p style="font-size:13px; font-weight:600; margin-bottom:12px;">Admin inicial dessa associação</p>
+      <div class="campo"><label>Nome do admin</label><input type="text" id="assoc-nome-admin"></div>
+      <div class="campo"><label>E-mail do admin (login)</label><input type="email" id="assoc-email-admin"></div>
+      <div class="campo"><label>Senha provisória</label><input type="password" id="assoc-senha-admin" placeholder="mínimo 6 caracteres"></div>
+    </div>
+
+    <div class="campo" id="campo-ativo-associacao" style="display:none; align-items:center; gap:10px; display:flex;">
+      <input type="checkbox" id="assoc-ativo" style="width:auto;">
+      <label for="assoc-ativo" style="margin-bottom:0;">Associação ativa</label>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="btn-cancelar-modal-associacao">Cancelar</button>
+      <button class="btn" id="btn-salvar-associacao">Criar associação</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL CREDENCIAIS GERADAS ===== -->
+<div class="overlay" id="overlay-modal-credenciais">
+  <div class="modal">
+    <h3>Associação criada!</h3>
+    <p style="font-size:13px; color:var(--text-muted); margin-bottom:16px;">Envie esses dados para o responsável pela associação. O ID da associação é necessário para o login dele.</p>
+    <div class="campo"><label>ID da associação</label><input type="text" id="cred-associacao-id" readonly></div>
+    <div class="campo"><label>E-mail do admin</label><input type="text" id="cred-email-admin" readonly></div>
+    <div class="modal-actions">
+      <button class="btn" id="btn-fechar-credenciais">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  var API_URL = 'https://minha-associacao-backend.onrender.com';
+  var estado = { token: null };
+  var associacoesCache = [];
+
+  function aplicarTema(tema) {
+    document.documentElement.setAttribute('data-theme', tema);
+    document.getElementById('btn-tema').textContent = tema === 'dark' ? '☾' : '☀';
+    localStorage.setItem('tema-superadmin', tema);
+  }
+  aplicarTema(localStorage.getItem('tema-superadmin') || 'light');
+  document.getElementById('btn-tema').onclick = function() {
+    aplicarTema(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  };
+
+  function mostrarToast(msg, erro) {
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast show' + (erro ? ' erro' : '');
+    setTimeout(function() { t.className = 'toast'; }, 3000);
+  }
+
+  function escapeHtml(texto) {
+    var div = document.createElement('div');
+    div.textContent = texto || '';
+    return div.innerHTML;
+  }
+
+  function salvarSessao() { localStorage.setItem('sessao_superadmin', estado.token); }
+  function limparSessao() { localStorage.removeItem('sessao_superadmin'); }
+
+  function entrarNoDashboard() {
+    document.getElementById('tela-login').style.display = 'none';
+    document.getElementById('tela-dashboard').style.display = 'block';
+    carregarDashboard();
+    carregarAssociacoes();
+  }
+
+  (function restaurarSessao() {
+    var token = localStorage.getItem('sessao_superadmin');
+    if (!token) return;
+    estado.token = token;
+    fetch(API_URL + '/superadmin/dashboard', { headers: { 'Authorization': 'Bearer ' + token }, cache: 'no-store' })
+      .then(function(resp) {
+        if (!resp.ok) { limparSessao(); return; }
+        entrarNoDashboard();
+      })
+      .catch(function() { entrarNoDashboard(); });
+  })();
+
+  document.getElementById('btn-login').onclick = function() {
+    var email = document.getElementById('login-email').value.trim();
+    var senha = document.getElementById('login-senha').value;
+    var erroEl = document.getElementById('erro-login');
+    erroEl.style.display = 'none';
+
+    if (!email || !senha) {
+      erroEl.textContent = 'Preencha e-mail e senha.';
+      erroEl.style.display = 'block';
+      return;
+    }
+
+    fetch(API_URL + '/superadmin/login', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, senha: senha })
+    })
+    .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
+    .then(function(res) {
+      if (!res.ok) {
+        erroEl.textContent = res.data.erro || 'Erro ao entrar';
+        erroEl.style.display = 'block';
+        return;
+      }
+      estado.token = res.data.token;
+      salvarSessao();
+      entrarNoDashboard();
+    })
+    .catch(function() {
+      erroEl.textContent = 'Não foi possível conectar ao servidor.';
+      erroEl.style.display = 'block';
+    });
+  };
+
+  document.getElementById('btn-sair').onclick = function() {
+    estado.token = null;
+    limparSessao();
+    document.getElementById('tela-dashboard').style.display = 'none';
+    document.getElementById('tela-login').style.display = 'block';
+  };
+
+  function carregarDashboard() {
+    fetch(API_URL + '/superadmin/dashboard', { headers: { 'Authorization': 'Bearer ' + estado.token }, cache: 'no-store' })
+    .then(function(resp) { return resp.json(); })
+    .then(function(d) {
+      document.getElementById('kpi-total-associacoes').textContent = d.total_associacoes || 0;
+      document.getElementById('kpi-associacoes-ativas').textContent = d.associacoes_ativas || 0;
+      document.getElementById('kpi-total-associados').textContent = d.total_associados || 0;
+      document.getElementById('kpi-total-pendentes').textContent = d.total_pendentes || 0;
+      document.getElementById('kpi-total-atrasadas').textContent = d.total_atrasadas || 0;
+      document.getElementById('kpi-total-aguardando').textContent = d.total_aguardando_confirmacao || 0;
+    })
+    .catch(function() { mostrarToast('Erro ao carregar dashboard', true); });
+  }
+
+  function carregarAssociacoes() {
+    fetch(API_URL + '/superadmin/associacoes', { headers: { 'Authorization': 'Bearer ' + estado.token }, cache: 'no-store' })
+    .then(function(resp) { return resp.json(); })
+    .then(function(lista) { renderizarAssociacoes(lista); })
+    .catch(function() { mostrarToast('Erro ao carregar associações', true); });
+  }
+
+  function renderizarAssociacoes(lista) {
+    associacoesCache = lista;
+    var container = document.getElementById('tabela-associacoes-container');
+    if (lista.length === 0) {
+      container.innerHTML = '<div class="vazio">Nenhuma associação cadastrada ainda.</div>';
+      return;
+    }
+    var html = '<table><thead><tr><th>Nome</th><th>Contato</th><th>Associados</th><th>Pendentes</th><th>Atrasadas</th><th>Status</th><th></th></tr></thead><tbody>';
+    lista.forEach(function(a) {
+      html += '<tr>' +
+        '<td>' + escapeHtml(a.nome) + '</td>' +
+        '<td>' + escapeHtml(a.email || '—') + '<br><span style="color:var(--text-muted); font-size:12px;">' + escapeHtml(a.telefone || '—') + '</span></td>' +
+        '<td>' + a.total_associados + '</td>' +
+        '<td>' + a.cobrancas_pendentes + '</td>' +
+        '<td>' + a.cobrancas_atrasadas + '</td>' +
+        '<td><span class="badge ' + (a.ativo ? 'ativo' : 'inativo') + '">' + (a.ativo ? 'ativo' : 'inativo') + '</span></td>' +
+        '<td style="white-space:nowrap;">' +
+          '<button class="btn-pequeno" onclick="abrirEdicaoAssociacao(\'' + a.id + '\')">Editar</button> ' +
+          '<button class="btn-pequeno" onclick="excluirAssociacao(\'' + a.id + '\')">Excluir</button>' +
+        '</td>' +
+        '</tr>';
+    });
+    html += '</tbody></table>';
+    container.innerHTML = html;
+  }
+
+  document.getElementById('btn-nova-associacao').onclick = function() {
+    document.getElementById('titulo-modal-associacao').textContent = 'Nova associação';
+    document.getElementById('editar-associacao-id').value = '';
+    ['assoc-nome','assoc-email','assoc-telefone','assoc-endereco','assoc-cnpj','assoc-nome-admin','assoc-email-admin','assoc-senha-admin'].forEach(function(id) {
+      document.getElementById(id).value = '';
+    });
+    document.getElementById('assoc-tipo').value = 'outra';
+    document.getElementById('bloco-admin-inicial').style.display = 'block';
+    document.getElementById('campo-ativo-associacao').style.display = 'none';
+    document.getElementById('btn-salvar-associacao').textContent = 'Criar associação';
+    document.getElementById('overlay-modal-associacao').style.display = 'flex';
+  };
+
+  document.getElementById('btn-cancelar-modal-associacao').onclick = function() {
+    document.getElementById('overlay-modal-associacao').style.display = 'none';
+  };
+
+  function abrirEdicaoAssociacao(id) {
+    var a = associacoesCache.find(function(x) { return x.id === id; });
+    if (!a) return;
+    document.getElementById('titulo-modal-associacao').textContent = 'Editar associação';
+    document.getElementById('editar-associacao-id').value = a.id;
+    document.getElementById('assoc-nome').value = a.nome;
+    document.getElementById('assoc-tipo').value = a.tipo || 'outra';
+    document.getElementById('assoc-email').value = a.email || '';
+    document.getElementById('assoc-telefone').value = a.telefone || '';
+    document.getElementById('assoc-endereco').value = a.endereco || '';
+    document.getElementById('assoc-cnpj').value = a.cnpj || '';
+    document.getElementById('assoc-ativo').checked = !!a.ativo;
+    document.getElementById('bloco-admin-inicial').style.display = 'none';
+    document.getElementById('campo-ativo-associacao').style.display = 'flex';
+    document.getElementById('btn-salvar-associacao').textContent = 'Salvar';
+    document.getElementById('overlay-modal-associacao').style.display = 'flex';
+  }
+
+  function excluirAssociacao(id) {
+    if (!confirm('Excluir essa associação? Isso remove PERMANENTEMENTE todos os associados, cobranças, comunicados e usuários dela. Não pode ser desfeito.')) return;
+    fetch(API_URL + '/superadmin/associacoes/' + id, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + estado.token } })
+    .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
+    .then(function(res) {
+      if (!res.ok) { mostrarToast(res.data.erro || 'Erro ao excluir', true); return; }
+      mostrarToast('Associação excluída.');
+      carregarAssociacoes();
+      carregarDashboard();
+    })
+    .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
+  }
+
+  document.getElementById('btn-salvar-associacao').onclick = function() {
+    var idEdicao = document.getElementById('editar-associacao-id').value;
+    var nome = document.getElementById('assoc-nome').value.trim();
+    var tipo = document.getElementById('assoc-tipo').value;
+    var email = document.getElementById('assoc-email').value.trim();
+    var telefone = document.getElementById('assoc-telefone').value.trim();
+    var endereco = document.getElementById('assoc-endereco').value.trim();
+    var cnpj = document.getElementById('assoc-cnpj').value.trim();
+
+    if (!nome) { mostrarToast('Informe o nome da associação', true); return; }
+
+    if (idEdicao) {
+      var ativo = document.getElementById('assoc-ativo').checked;
+      fetch(API_URL + '/superadmin/associacoes/' + idEdicao, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + estado.token },
+        body: JSON.stringify({ nome: nome, tipo: tipo, email: email, telefone: telefone, endereco: endereco, cnpj: cnpj, ativo: ativo })
+      })
+      .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
+      .then(function(res) {
+        if (!res.ok) { mostrarToast(res.data.erro || 'Erro ao salvar', true); return; }
+        document.getElementById('overlay-modal-associacao').style.display = 'none';
+        mostrarToast('Associação atualizada!');
+        carregarAssociacoes();
+      })
+      .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
+      return;
+    }
+
+    var nomeAdmin = document.getElementById('assoc-nome-admin').value.trim();
+    var emailAdmin = document.getElementById('assoc-email-admin').value.trim();
+    var senhaAdmin = document.getElementById('assoc-senha-admin').value;
+
+    if (!nomeAdmin || !emailAdmin || senhaAdmin.length < 6) {
+      mostrarToast('Preencha nome, e-mail e senha (6+ caracteres) do admin inicial', true);
+      return;
+    }
+
+    fetch(API_URL + '/superadmin/associacoes', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + estado.token },
+      body: JSON.stringify({
+        nome_associacao: nome, tipo: tipo, email: email, telefone: telefone, endereco: endereco, cnpj: cnpj,
+        nome_admin: nomeAdmin, email_admin: emailAdmin, senha_admin: senhaAdmin
+      })
+    })
+    .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
+    .then(function(res) {
+      if (!res.ok) { mostrarToast(res.data.erro || 'Erro ao criar associação', true); return; }
+      document.getElementById('overlay-modal-associacao').style.display = 'none';
+      document.getElementById('cred-associacao-id').value = res.data.associacao_id;
+      document.getElementById('cred-email-admin').value = res.data.admin.email;
+      document.getElementById('overlay-modal-credenciais').style.display = 'flex';
+      carregarAssociacoes();
+      carregarDashboard();
+    })
+    .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
+  };
+
+  document.getElementById('btn-fechar-credenciais').onclick = function() {
+    document.getElementById('overlay-modal-credenciais').style.display = 'none';
+  };
+</script>
+
+</body>
+</html>
