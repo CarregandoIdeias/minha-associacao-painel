@@ -91,6 +91,28 @@
     main { padding: 16px; }
     .painel-header { padding: 14px 16px; }
   }
+
+  .filtros-associacoes { display: flex; gap: 10px; padding: 16px 22px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .filtros-associacoes input, .filtros-associacoes select {
+    padding: 10px 14px; border: 1px solid var(--border); border-radius: 10px;
+    background: var(--bg); color: var(--text); font-family: inherit; font-size: 14px;
+  }
+  .filtros-associacoes input { flex: 1; min-width: 160px; }
+
+  #tela-detalhe-associacao { display: none; }
+  .detalhe-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+  .detalhe-header h1 { font-family: 'Playfair Display', serif; font-size: 22px; }
+
+  .abas-detalhe { display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 1px solid var(--border); overflow-x: auto; }
+  .aba-detalhe {
+    background: none; border: none; padding: 10px 16px; font-family: inherit; font-size: 13px; font-weight: 500;
+    color: var(--text-muted); cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap;
+  }
+  .aba-detalhe.ativa { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+
+  .info-linha { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+  .info-linha:last-child { border-bottom: none; }
+  .info-linha span:first-child { color: var(--text-muted); }
 </style>
 </head>
 <body>
@@ -143,7 +165,87 @@
         <h3>Associações cadastradas</h3>
         <button class="btn" id="btn-nova-associacao">+ Nova associação</button>
       </div>
+      <div class="filtros-associacoes">
+        <input type="text" id="filtro-busca-assoc" placeholder="Buscar por nome...">
+        <input type="text" id="filtro-cidade-assoc" placeholder="Cidade..." style="max-width:160px;">
+        <select id="filtro-plano-assoc">
+          <option value="">Todos os planos</option>
+          <option value="trial">Trial</option>
+          <option value="basico">Básico</option>
+          <option value="profissional">Profissional</option>
+          <option value="enterprise">Enterprise</option>
+        </select>
+        <select id="filtro-status-assoc">
+          <option value="">Todos os status</option>
+          <option value="ativo">Ativas</option>
+          <option value="inativo">Bloqueadas</option>
+        </select>
+      </div>
       <div id="tabela-associacoes-container"><div class="vazio">Carregando...</div></div>
+    </div>
+  </main>
+</div>
+
+<div id="tela-detalhe-associacao">
+  <main>
+    <div class="detalhe-header">
+      <div>
+        <h1 id="detalhe-nome-associacao">—</h1>
+        <span class="badge" id="detalhe-badge-status">—</span>
+      </div>
+      <button class="btn btn-ghost" id="btn-voltar-lista">← Voltar</button>
+    </div>
+
+    <div class="abas-detalhe">
+      <button class="aba-detalhe ativa" data-aba="informacoes">Informações</button>
+      <button class="aba-detalhe" data-aba="usuario">Usuário</button>
+      <button class="aba-detalhe" data-aba="financeiro">Financeiro</button>
+      <button class="aba-detalhe" data-aba="associados">Associados</button>
+      <button class="aba-detalhe" data-aba="cobrancas">Cobranças</button>
+      <button class="aba-detalhe" data-aba="configuracoes-assoc">Configurações</button>
+    </div>
+
+    <div id="conteudo-aba-informacoes" class="conteudo-aba-detalhe">
+      <div class="painel"><div id="lista-informacoes" style="padding:0 22px;"></div></div>
+    </div>
+
+    <div id="conteudo-aba-usuario" class="conteudo-aba-detalhe" style="display:none;">
+      <div class="painel">
+        <div style="padding:22px;">
+          <div class="info-linha"><span>Nome</span><span id="usuario-detalhe-nome">—</span></div>
+          <div class="info-linha"><span>E-mail (login)</span><span id="usuario-detalhe-email">—</span></div>
+          <div class="info-linha"><span>Status</span><span id="usuario-detalhe-status">—</span></div>
+          <div class="info-linha"><span>Criado em</span><span id="usuario-detalhe-criado">—</span></div>
+          <div style="margin-top:20px;">
+            <div class="campo"><label>Definir nova senha para o admin</label><input type="password" id="nova-senha-admin" placeholder="mínimo 6 caracteres"></div>
+            <button class="btn" id="btn-resetar-senha-admin">Enviar nova senha</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="conteudo-aba-financeiro" class="conteudo-aba-detalhe" style="display:none;">
+      <div class="kpis" style="margin-bottom:0;">
+        <div class="kpi-card"><div class="rotulo">Total recebido</div><div class="valor" id="fin-total-recebido">R$ 0</div></div>
+        <div class="kpi-card alerta"><div class="rotulo">A receber (pendente)</div><div class="valor" id="fin-total-a-receber">R$ 0</div></div>
+        <div class="kpi-card"><div class="rotulo">Próximo vencimento</div><div class="valor" id="fin-proximo-vencimento" style="font-size:16px;">—</div></div>
+      </div>
+    </div>
+
+    <div id="conteudo-aba-associados" class="conteudo-aba-detalhe" style="display:none;">
+      <div class="painel"><div id="tabela-detalhe-associados"><div class="vazio">Carregando...</div></div></div>
+    </div>
+
+    <div id="conteudo-aba-cobrancas" class="conteudo-aba-detalhe" style="display:none;">
+      <div class="painel"><div id="tabela-detalhe-cobrancas"><div class="vazio">Carregando...</div></div></div>
+    </div>
+
+    <div id="conteudo-aba-configuracoes-assoc" class="conteudo-aba-detalhe" style="display:none;">
+      <div class="painel">
+        <div style="padding:22px;">
+          <button class="btn btn-ghost" id="btn-editar-associacao-detalhe">Editar dados da associação</button>
+        </div>
+      </div>
     </div>
   </main>
 </div>
@@ -168,6 +270,10 @@
     <div class="campo"><label>E-mail</label><input type="email" id="assoc-email"></div>
     <div class="campo"><label>Telefone</label><input type="text" id="assoc-telefone"></div>
     <div class="campo"><label>Endereço</label><input type="text" id="assoc-endereco"></div>
+    <div style="display:flex; gap:10px;">
+      <div class="campo" style="flex:1;"><label>Cidade</label><input type="text" id="assoc-cidade"></div>
+      <div class="campo" style="width:80px;"><label>UF</label><input type="text" id="assoc-estado" maxlength="2" style="text-transform:uppercase;"></div>
+    </div>
     <div class="campo"><label>Número de cadastro (CNPJ)</label><input type="text" id="assoc-cnpj"></div>
 
     <div id="bloco-admin-inicial">
@@ -398,29 +504,49 @@
   }
 
   function carregarAssociacoes() {
-    fetch(API_URL + '/superadmin/associacoes', { headers: { 'Authorization': 'Bearer ' + estado.token }, cache: 'no-store' })
+    var params = [];
+    var busca = document.getElementById('filtro-busca-assoc').value.trim();
+    var cidade = document.getElementById('filtro-cidade-assoc').value.trim();
+    var plano = document.getElementById('filtro-plano-assoc').value;
+    var status = document.getElementById('filtro-status-assoc').value;
+    if (busca) params.push('busca=' + encodeURIComponent(busca));
+    if (cidade) params.push('cidade=' + encodeURIComponent(cidade));
+    if (plano) params.push('plano=' + encodeURIComponent(plano));
+    if (status) params.push('status=' + encodeURIComponent(status));
+    var url = API_URL + '/superadmin/associacoes' + (params.length ? '?' + params.join('&') : '');
+
+    fetch(url, { headers: { 'Authorization': 'Bearer ' + estado.token }, cache: 'no-store' })
     .then(function(resp) { return resp.json(); })
     .then(function(lista) { renderizarAssociacoes(lista); })
     .catch(function() { mostrarToast('Erro ao carregar associações', true); });
   }
 
+  ['filtro-busca-assoc', 'filtro-cidade-assoc'].forEach(function(id) {
+    document.getElementById(id).oninput = function() { carregarAssociacoes(); };
+  });
+  ['filtro-plano-assoc', 'filtro-status-assoc'].forEach(function(id) {
+    document.getElementById(id).onchange = function() { carregarAssociacoes(); };
+  });
+
   function renderizarAssociacoes(lista) {
     associacoesCache = lista;
     var container = document.getElementById('tabela-associacoes-container');
     if (lista.length === 0) {
-      container.innerHTML = '<div class="vazio">Nenhuma associação cadastrada ainda.</div>';
+      container.innerHTML = '<div class="vazio">Nenhuma associação encontrada.</div>';
       return;
     }
-    var html = '<table><thead><tr><th>Nome</th><th>Contato</th><th>Associados</th><th>Pendentes</th><th>Atrasadas</th><th>Status</th><th></th></tr></thead><tbody>';
+    var html = '<table><thead><tr><th>Nome</th><th>Cidade</th><th>Contato</th><th>Associados</th><th>Pendentes</th><th>Atrasadas</th><th>Status</th><th></th></tr></thead><tbody>';
     lista.forEach(function(a) {
       html += '<tr>' +
-        '<td>' + escapeHtml(a.nome) + '</td>' +
+        '<td style="cursor:pointer;" onclick="abrirDetalheAssociacao(\'' + a.id + '\')"><strong>' + escapeHtml(a.nome) + '</strong></td>' +
+        '<td>' + escapeHtml((a.cidade || '—') + (a.estado ? '/' + a.estado : '')) + '</td>' +
         '<td>' + escapeHtml(a.email || '—') + '<br><span style="color:var(--text-muted); font-size:12px;">' + escapeHtml(a.telefone || '—') + '</span></td>' +
         '<td>' + a.total_associados + '</td>' +
         '<td>' + a.cobrancas_pendentes + '</td>' +
         '<td>' + a.cobrancas_atrasadas + '</td>' +
-        '<td><span class="badge ' + (a.ativo ? 'ativo' : 'inativo') + '">' + (a.ativo ? 'ativo' : 'inativo') + '</span></td>' +
+        '<td><span class="badge ' + (a.ativo ? 'ativo' : 'inativo') + '">' + (a.ativo ? 'ativo' : 'bloqueada') + '</span></td>' +
         '<td style="white-space:nowrap;">' +
+          '<button class="btn-pequeno" onclick="abrirDetalheAssociacao(\'' + a.id + '\')">Ver</button> ' +
           '<button class="btn-pequeno" onclick="abrirEdicaoAssociacao(\'' + a.id + '\')">Editar</button> ' +
           '<button class="btn-pequeno" onclick="excluirAssociacao(\'' + a.id + '\')">Excluir</button>' +
         '</td>' +
@@ -433,7 +559,7 @@
   document.getElementById('btn-nova-associacao').onclick = function() {
     document.getElementById('titulo-modal-associacao').textContent = 'Nova associação';
     document.getElementById('editar-associacao-id').value = '';
-    ['assoc-nome','assoc-email','assoc-telefone','assoc-endereco','assoc-cnpj','assoc-nome-admin','assoc-email-admin','assoc-senha-admin'].forEach(function(id) {
+    ['assoc-nome','assoc-email','assoc-telefone','assoc-endereco','assoc-cidade','assoc-estado','assoc-cnpj','assoc-nome-admin','assoc-email-admin','assoc-senha-admin'].forEach(function(id) {
       document.getElementById(id).value = '';
     });
     document.getElementById('assoc-tipo').value = 'outra';
@@ -457,6 +583,8 @@
     document.getElementById('assoc-email').value = a.email || '';
     document.getElementById('assoc-telefone').value = a.telefone || '';
     document.getElementById('assoc-endereco').value = a.endereco || '';
+    document.getElementById('assoc-cidade').value = a.cidade || '';
+    document.getElementById('assoc-estado').value = a.estado || '';
     document.getElementById('assoc-cnpj').value = a.cnpj || '';
     document.getElementById('assoc-ativo').checked = !!a.ativo;
     document.getElementById('bloco-admin-inicial').style.display = 'none';
@@ -485,6 +613,8 @@
     var email = document.getElementById('assoc-email').value.trim();
     var telefone = document.getElementById('assoc-telefone').value.trim();
     var endereco = document.getElementById('assoc-endereco').value.trim();
+    var cidade = document.getElementById('assoc-cidade').value.trim();
+    var uf = document.getElementById('assoc-estado').value.trim().toUpperCase();
     var cnpj = document.getElementById('assoc-cnpj').value.trim();
 
     if (!nome) { mostrarToast('Informe o nome da associação', true); return; }
@@ -494,7 +624,7 @@
       fetch(API_URL + '/superadmin/associacoes/' + idEdicao, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + estado.token },
-        body: JSON.stringify({ nome: nome, tipo: tipo, email: email, telefone: telefone, endereco: endereco, cnpj: cnpj, ativo: ativo })
+        body: JSON.stringify({ nome: nome, tipo: tipo, email: email, telefone: telefone, endereco: endereco, cidade: cidade, estado: uf, cnpj: cnpj, ativo: ativo })
       })
       .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
       .then(function(res) {
@@ -520,7 +650,7 @@
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + estado.token },
       body: JSON.stringify({
-        nome_associacao: nome, tipo: tipo, email: email, telefone: telefone, endereco: endereco, cnpj: cnpj,
+        nome_associacao: nome, tipo: tipo, email: email, telefone: telefone, endereco: endereco, cidade: cidade, estado: uf, cnpj: cnpj,
         nome_admin: nomeAdmin, email_admin: emailAdmin, senha_admin: senhaAdmin
       })
     })
@@ -539,6 +669,129 @@
 
   document.getElementById('btn-fechar-credenciais').onclick = function() {
     document.getElementById('overlay-modal-credenciais').style.display = 'none';
+  };
+
+  // ---------- Tela de detalhe da associação ----------
+  var associacaoDetalheAtual = null;
+  var rotuloTipo = { moradores: 'Moradores', classe_profissional: 'Classe profissional', esportiva_recreativa: 'Esportiva/recreativa', ong_beneficente: 'ONG/beneficente', outra: 'Outra' };
+
+  function abrirDetalheAssociacao(id) {
+    associacaoDetalheAtual = id;
+    document.getElementById('tela-dashboard').style.display = 'none';
+    document.getElementById('tela-detalhe-associacao').style.display = 'block';
+    ativarAbaDetalhe('informacoes');
+
+    fetch(API_URL + '/superadmin/associacoes/' + id, { headers: { 'Authorization': 'Bearer ' + estado.token }, cache: 'no-store' })
+    .then(function(resp) { return resp.json(); })
+    .then(function(a) {
+      document.getElementById('detalhe-nome-associacao').textContent = a.nome;
+      var badge = document.getElementById('detalhe-badge-status');
+      badge.textContent = a.ativo ? 'ativa' : 'bloqueada';
+      badge.className = 'badge ' + (a.ativo ? 'ativo' : 'inativo');
+
+      document.getElementById('lista-informacoes').innerHTML =
+        linhaInfo('Nome', a.nome) + linhaInfo('Tipo', rotuloTipo[a.tipo] || a.tipo) +
+        linhaInfo('E-mail', a.email) + linhaInfo('Telefone', a.telefone) +
+        linhaInfo('Endereço', a.endereco) + linhaInfo('Cidade/UF', (a.cidade || '—') + (a.estado ? '/' + a.estado : '')) +
+        linhaInfo('CNPJ / nº cadastro', a.cnpj) + linhaInfo('Plano', a.plano) +
+        linhaInfo('Cadastrada em', new Date(a.criado_em).toLocaleDateString('pt-BR'));
+
+      if (a.admin) {
+        document.getElementById('usuario-detalhe-nome').textContent = a.admin.nome;
+        document.getElementById('usuario-detalhe-email').textContent = a.admin.email;
+        document.getElementById('usuario-detalhe-status').textContent = a.admin.ativo ? 'ativo' : 'inativo';
+        document.getElementById('usuario-detalhe-criado').textContent = new Date(a.admin.criado_em).toLocaleDateString('pt-BR');
+      }
+
+      document.getElementById('fin-total-recebido').textContent = formatarMoeda(a.financeiro.total_recebido);
+      document.getElementById('fin-total-a-receber').textContent = formatarMoeda(a.financeiro.total_a_receber);
+      document.getElementById('fin-proximo-vencimento').textContent = a.financeiro.proximo_vencimento
+        ? new Date(a.financeiro.proximo_vencimento).toLocaleDateString('pt-BR') : 'Nenhuma cobrança pendente';
+    })
+    .catch(function() { mostrarToast('Erro ao carregar detalhes', true); });
+  }
+
+  function linhaInfo(rotulo, valor) {
+    return '<div class="info-linha"><span>' + rotulo + '</span><span>' + escapeHtml(valor || '—') + '</span></div>';
+  }
+
+  document.getElementById('btn-voltar-lista').onclick = function() {
+    document.getElementById('tela-detalhe-associacao').style.display = 'none';
+    document.getElementById('tela-dashboard').style.display = 'block';
+    carregarAssociacoes();
+  };
+
+  document.querySelectorAll('.aba-detalhe').forEach(function(btn) {
+    btn.onclick = function() { ativarAbaDetalhe(btn.getAttribute('data-aba')); };
+  });
+
+  function ativarAbaDetalhe(nome) {
+    document.querySelectorAll('.aba-detalhe').forEach(function(b) {
+      b.classList.toggle('ativa', b.getAttribute('data-aba') === nome);
+    });
+    document.querySelectorAll('.conteudo-aba-detalhe').forEach(function(c) {
+      c.style.display = (c.id === 'conteudo-aba-' + nome) ? 'block' : 'none';
+    });
+    if (nome === 'associados') carregarAssociadosDetalhe();
+    if (nome === 'cobrancas') carregarCobrancasDetalhe();
+  }
+
+  function carregarAssociadosDetalhe() {
+    var container = document.getElementById('tabela-detalhe-associados');
+    container.innerHTML = '<div class="vazio">Carregando...</div>';
+    fetch(API_URL + '/superadmin/associacoes/' + associacaoDetalheAtual + '/associados', { headers: { 'Authorization': 'Bearer ' + estado.token }, cache: 'no-store' })
+    .then(function(resp) { return resp.json(); })
+    .then(function(lista) {
+      if (lista.length === 0) { container.innerHTML = '<div class="vazio">Nenhum associado cadastrado.</div>'; return; }
+      var html = '<table><thead><tr><th>Nome</th><th>CPF</th><th>Categoria</th><th>Status</th></tr></thead><tbody>';
+      lista.forEach(function(a) {
+        html += '<tr><td>' + escapeHtml(a.nome_completo) + '</td><td>' + escapeHtml(a.cpf || '—') + '</td><td>' + escapeHtml(a.categoria || '—') + '</td><td><span class="badge ' + (a.status === 'ativo' ? 'ativo' : 'inativo') + '">' + a.status + '</span></td></tr>';
+      });
+      html += '</tbody></table>';
+      container.innerHTML = html;
+    })
+    .catch(function() { container.innerHTML = '<div class="vazio">Erro ao carregar associados.</div>'; });
+  }
+
+  function carregarCobrancasDetalhe() {
+    var container = document.getElementById('tabela-detalhe-cobrancas');
+    container.innerHTML = '<div class="vazio">Carregando...</div>';
+    fetch(API_URL + '/superadmin/associacoes/' + associacaoDetalheAtual + '/cobrancas', { headers: { 'Authorization': 'Bearer ' + estado.token }, cache: 'no-store' })
+    .then(function(resp) { return resp.json(); })
+    .then(function(lista) {
+      if (lista.length === 0) { container.innerHTML = '<div class="vazio">Nenhuma cobrança cadastrada.</div>'; return; }
+      var html = '<table><thead><tr><th>Associado</th><th>Descrição</th><th>Valor</th><th>Vencimento</th><th>Status</th></tr></thead><tbody>';
+      lista.forEach(function(c) {
+        html += '<tr><td>' + escapeHtml(c.associado_nome) + '</td><td>' + escapeHtml(c.descricao) + '</td><td>' + formatarMoeda(c.valor) + '</td><td>' + new Date(c.vencimento).toLocaleDateString('pt-BR') + '</td><td><span class="badge ' + (c.status === 'pago' ? 'ativo' : 'inativo') + '">' + c.status.replace(/_/g,' ') + '</span></td></tr>';
+      });
+      html += '</tbody></table>';
+      container.innerHTML = html;
+    })
+    .catch(function() { container.innerHTML = '<div class="vazio">Erro ao carregar cobranças.</div>'; });
+  }
+
+  document.getElementById('btn-resetar-senha-admin').onclick = function() {
+    var novaSenha = document.getElementById('nova-senha-admin').value;
+    if (!novaSenha || novaSenha.length < 6) {
+      mostrarToast('Informe uma senha com 6+ caracteres', true);
+      return;
+    }
+    fetch(API_URL + '/superadmin/associacoes/' + associacaoDetalheAtual + '/resetar-senha-admin', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + estado.token },
+      body: JSON.stringify({ nova_senha: novaSenha })
+    })
+    .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
+    .then(function(res) {
+      if (!res.ok) { mostrarToast(res.data.erro || 'Erro ao redefinir senha', true); return; }
+      mostrarToast('Senha redefinida! Informe a nova senha para o admin (' + res.data.email + ').');
+      document.getElementById('nova-senha-admin').value = '';
+    })
+    .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
+  };
+
+  document.getElementById('btn-editar-associacao-detalhe').onclick = function() {
+    abrirEdicaoAssociacao(associacaoDetalheAtual);
   };
 </script>
 
