@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Super Admin — Carregando Ideias</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
   :root {
     --bg: #F7F5EF; --bg-card: #ffffff; --text: #1A1712; --text-muted: #6B6558;
@@ -38,10 +39,17 @@
   .btn-pequeno { background: var(--accent-soft); color: var(--accent); border: none; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; }
   .btn-pequeno:hover { background: var(--accent); color: #0A0A0A; }
 
-  header { display: flex; justify-content: space-between; align-items: center; padding: 18px 32px; background: var(--bg-card); border-bottom: 1px solid var(--border); }
-  .logo { font-family: 'Playfair Display', serif; font-weight: 900; font-size: 19px; color: var(--accent); }
+  header { display: flex; justify-content: space-between; align-items: center; padding: 18px 32px; background: var(--bg-card); border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 10px; }
+  .saudacao { font-family: 'Playfair Display', serif; font-size: 19px; font-weight: 700; }
+  .saudacao .data { font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 400; color: var(--text-muted); margin-top: 2px; }
+  .logo { font-family: 'Playfair Display', serif; font-weight: 900; font-size: 14px; color: var(--accent); }
   .logo span { color: var(--text); }
   .theme-toggle { background: var(--accent-soft); border: none; border-radius: 10px; width: 38px; height: 38px; font-size: 16px; cursor: pointer; color: var(--accent); }
+
+  .graficos { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 28px; }
+  .grafico-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 20px; box-shadow: var(--shadow); }
+  .grafico-card h4 { font-size: 14px; font-weight: 600; margin-bottom: 14px; }
+  @media (max-width: 800px) { .graficos { grid-template-columns: 1fr; } }
 
   main { max-width: 1200px; margin: 0 auto; padding: 32px; }
   #tela-dashboard { display: none; }
@@ -98,8 +106,12 @@
 
 <div id="tela-dashboard">
   <header>
-    <div class="logo">Carregando<span>Ideias</span> · Super Admin</div>
-    <div style="display:flex; gap:10px; align-items:center;">
+    <div>
+      <div class="saudacao" id="texto-saudacao">Olá</div>
+      <div class="data" id="texto-data"></div>
+    </div>
+    <div style="display:flex; gap:14px; align-items:center;">
+      <div class="logo">Carregando<span>Ideias</span></div>
       <button class="theme-toggle" id="btn-tema">☀</button>
       <button class="btn btn-ghost" id="btn-sair">Sair</button>
     </div>
@@ -107,12 +119,23 @@
 
   <main>
     <div class="kpis">
-      <div class="kpi-card"><div class="rotulo">Associações</div><div class="valor" id="kpi-total-associacoes">0</div></div>
-      <div class="kpi-card"><div class="rotulo">Ativas</div><div class="valor" id="kpi-associacoes-ativas">0</div></div>
-      <div class="kpi-card"><div class="rotulo">Total de associados</div><div class="valor" id="kpi-total-associados">0</div></div>
-      <div class="kpi-card alerta"><div class="rotulo">Cobranças pendentes</div><div class="valor" id="kpi-total-pendentes">0</div></div>
-      <div class="kpi-card perigo"><div class="rotulo">Cobranças atrasadas</div><div class="valor" id="kpi-total-atrasadas">0</div></div>
-      <div class="kpi-card"><div class="rotulo">Aguardando confirmação</div><div class="valor" id="kpi-total-aguardando">0</div></div>
+      <div class="kpi-card"><div class="rotulo">🏢 Associações</div><div class="valor" id="kpi-total-associacoes">0</div></div>
+      <div class="kpi-card"><div class="rotulo">👥 Associados</div><div class="valor" id="kpi-total-associados">0</div></div>
+      <div class="kpi-card"><div class="rotulo">💰 Receita mensal</div><div class="valor" id="kpi-receita-mensal">R$ 0</div></div>
+      <div class="kpi-card alerta"><div class="rotulo">⚠️ Mensalidades vencidas</div><div class="valor" id="kpi-total-atrasadas">0</div></div>
+      <div class="kpi-card"><div class="rotulo">🟢 Associações ativas</div><div class="valor" id="kpi-associacoes-ativas">0</div></div>
+      <div class="kpi-card perigo"><div class="rotulo">🔴 Bloqueadas</div><div class="valor" id="kpi-associacoes-bloqueadas">0</div></div>
+    </div>
+
+    <div class="graficos">
+      <div class="grafico-card">
+        <h4>Crescimento de associações</h4>
+        <canvas id="grafico-crescimento" height="180"></canvas>
+      </div>
+      <div class="grafico-card">
+        <h4>Novos associados cadastrados</h4>
+        <canvas id="grafico-associados" height="180"></canvas>
+      </div>
     </div>
 
     <div class="painel">
@@ -184,8 +207,23 @@
 
 <script>
   var API_URL = 'https://minha-associacao-backend.onrender.com';
-  var estado = { token: null };
+  var estado = { token: null, nome: null };
   var associacoesCache = [];
+  var graficoCrescimento = null;
+  var graficoAssociados = null;
+
+  var MESES_PT = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+  var DIAS_PT = ['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
+
+  function atualizarSaudacao() {
+    var agora = new Date();
+    var hora = agora.getHours();
+    var periodo = hora < 12 ? 'Bom dia' : (hora < 18 ? 'Boa tarde' : 'Boa noite');
+    var nome = estado.nome || 'Administrador';
+    document.getElementById('texto-saudacao').textContent = periodo + ', ' + nome;
+    var dataTexto = DIAS_PT[agora.getDay()] + ', ' + agora.getDate() + ' de ' + MESES_PT[agora.getMonth()] + ' de ' + agora.getFullYear();
+    document.getElementById('texto-data').textContent = dataTexto.charAt(0).toUpperCase() + dataTexto.slice(1);
+  }
 
   function aplicarTema(tema) {
     document.documentElement.setAttribute('data-theme', tema);
@@ -195,6 +233,7 @@
   aplicarTema(localStorage.getItem('tema-superadmin') || 'light');
   document.getElementById('btn-tema').onclick = function() {
     aplicarTema(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+    if (estado.token && graficoCrescimento) carregarDashboard();
   };
 
   function mostrarToast(msg, erro) {
@@ -210,21 +249,28 @@
     return div.innerHTML;
   }
 
-  function salvarSessao() { localStorage.setItem('sessao_superadmin', estado.token); }
+  function salvarSessao() { localStorage.setItem('sessao_superadmin', JSON.stringify({ token: estado.token, nome: estado.nome })); }
   function limparSessao() { localStorage.removeItem('sessao_superadmin'); }
 
   function entrarNoDashboard() {
     document.getElementById('tela-login').style.display = 'none';
     document.getElementById('tela-dashboard').style.display = 'block';
+    atualizarSaudacao();
     carregarDashboard();
     carregarAssociacoes();
   }
 
   (function restaurarSessao() {
-    var token = localStorage.getItem('sessao_superadmin');
-    if (!token) return;
-    estado.token = token;
-    fetch(API_URL + '/superadmin/dashboard', { headers: { 'Authorization': 'Bearer ' + token }, cache: 'no-store' })
+    var salva = localStorage.getItem('sessao_superadmin');
+    if (!salva) return;
+    try {
+      var dados = JSON.parse(salva);
+      if (!dados.token) return;
+      estado.token = dados.token;
+      estado.nome = dados.nome;
+    } catch (e) { return; }
+
+    fetch(API_URL + '/superadmin/dashboard', { headers: { 'Authorization': 'Bearer ' + estado.token }, cache: 'no-store' })
       .then(function(resp) {
         if (!resp.ok) { limparSessao(); return; }
         entrarNoDashboard();
@@ -256,6 +302,7 @@
         return;
       }
       estado.token = res.data.token;
+      estado.nome = res.data.nome;
       salvarSessao();
       entrarNoDashboard();
     })
@@ -267,10 +314,29 @@
 
   document.getElementById('btn-sair').onclick = function() {
     estado.token = null;
+    estado.nome = null;
     limparSessao();
     document.getElementById('tela-dashboard').style.display = 'none';
     document.getElementById('tela-login').style.display = 'block';
   };
+
+  function formatarMoeda(valor) {
+    return 'R$ ' + parseFloat(valor || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function formatarMesLabel(mesIso) {
+    var partes = mesIso.split('-');
+    return MESES_PT[parseInt(partes[1], 10) - 1].substring(0, 3).replace(/^./, function(c) { return c.toUpperCase(); });
+  }
+
+  function coresGrafico() {
+    var estiloEscuro = document.documentElement.getAttribute('data-theme') === 'dark';
+    return {
+      grade: estiloEscuro ? '#2a2a2a' : '#E4E0D2',
+      texto: estiloEscuro ? '#888888' : '#6B6558',
+      linha: '#C9A84C'
+    };
+  }
 
   function carregarDashboard() {
     fetch(API_URL + '/superadmin/dashboard', { headers: { 'Authorization': 'Bearer ' + estado.token }, cache: 'no-store' })
@@ -278,12 +344,57 @@
     .then(function(d) {
       document.getElementById('kpi-total-associacoes').textContent = d.total_associacoes || 0;
       document.getElementById('kpi-associacoes-ativas').textContent = d.associacoes_ativas || 0;
+      document.getElementById('kpi-associacoes-bloqueadas').textContent = d.associacoes_bloqueadas || 0;
       document.getElementById('kpi-total-associados').textContent = d.total_associados || 0;
-      document.getElementById('kpi-total-pendentes').textContent = d.total_pendentes || 0;
       document.getElementById('kpi-total-atrasadas').textContent = d.total_atrasadas || 0;
-      document.getElementById('kpi-total-aguardando').textContent = d.total_aguardando_confirmacao || 0;
+      document.getElementById('kpi-receita-mensal').textContent = formatarMoeda(d.receita_mensal);
+      desenharGraficos(d.crescimento_associacoes || [], d.novos_associados || []);
     })
     .catch(function() { mostrarToast('Erro ao carregar dashboard', true); });
+  }
+
+  function desenharGraficos(crescimento, novosAssociados) {
+    var cores = coresGrafico();
+    var labels = crescimento.map(function(l) { return formatarMesLabel(l.mes); });
+
+    if (graficoCrescimento) graficoCrescimento.destroy();
+    graficoCrescimento = new Chart(document.getElementById('grafico-crescimento'), {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          data: crescimento.map(function(l) { return parseInt(l.total, 10); }),
+          borderColor: cores.linha, backgroundColor: 'rgba(201,168,76,0.15)',
+          fill: true, tension: 0.3, pointRadius: 3
+        }]
+      },
+      options: {
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { color: cores.texto }, grid: { color: cores.grade } },
+          y: { ticks: { color: cores.texto, precision: 0 }, grid: { color: cores.grade }, beginAtZero: true }
+        }
+      }
+    });
+
+    if (graficoAssociados) graficoAssociados.destroy();
+    graficoAssociados = new Chart(document.getElementById('grafico-associados'), {
+      type: 'bar',
+      data: {
+        labels: novosAssociados.map(function(l) { return formatarMesLabel(l.mes); }),
+        datasets: [{
+          data: novosAssociados.map(function(l) { return parseInt(l.total, 10); }),
+          backgroundColor: cores.linha, borderRadius: 6
+        }]
+      },
+      options: {
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { color: cores.texto }, grid: { display: false } },
+          y: { ticks: { color: cores.texto, precision: 0 }, grid: { color: cores.grade }, beginAtZero: true }
+        }
+      }
+    });
   }
 
   function carregarAssociacoes() {
