@@ -52,7 +52,94 @@
   @media (max-width: 800px) { .graficos { grid-template-columns: 1fr; } }
 
   main { max-width: 1200px; margin: 0 auto; padding: 32px; }
+
+  /* ---------- Layout com sidebar (mesmo padrão do painel/index.html) ---------- */
+  .app-layout { display: flex; min-height: 100vh; }
   #tela-dashboard { display: none; }
+
+  .sidebar {
+    width: 240px; flex-shrink: 0; background: var(--bg-card); border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; padding: 24px 16px; position: sticky; top: 0; height: 100vh;
+    transition: width .2s ease;
+  }
+  .sidebar .logo { padding: 0 10px 20px 10px; }
+  .btn-recolher-sidebar {
+    background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 6px;
+    border-radius: 8px; align-self: flex-end; margin-bottom: 6px;
+  }
+  .btn-recolher-sidebar:hover { background: var(--accent-soft); color: var(--accent); }
+  .btn-recolher-sidebar svg { width: 16px; height: 16px; transition: transform .2s; display: block; }
+  .sidebar.recolhida { width: 76px; }
+  .sidebar.recolhida .btn-recolher-sidebar svg { transform: rotate(180deg); }
+  .sidebar.recolhida .logo .logo-texto,
+  .sidebar.recolhida .rotulo-nav { display: none; }
+  .sidebar.recolhida .nav-item { justify-content: center; padding: 11px; }
+  .sidebar.recolhida .sidebar-footer { flex-direction: column; }
+  .sidebar.recolhida .sidebar-footer .btn-ghost { width: 38px; padding: 0; }
+
+  .nav-item {
+    display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-radius: 10px;
+    color: var(--text-muted); font-size: 14px; font-weight: 500; cursor: pointer; border: none;
+    background: none; width: 100%; text-align: left; font-family: inherit; margin-bottom: 4px;
+    transition: background .15s, color .15s;
+  }
+  .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+  .nav-item:hover { background: var(--accent-soft); color: var(--accent); }
+  .nav-item.ativa { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+
+  .sidebar-footer { margin-top: auto; display: flex; align-items: center; gap: 8px; padding-top: 16px; border-top: 1px solid var(--border); }
+
+  .content-area { flex: 1; min-width: 0; padding: 32px 40px; max-width: 1300px; }
+  .secao-conteudo { display: none; }
+  .secao-conteudo.ativa { display: block; }
+
+  .topo-conteudo { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 14px; }
+  .topo-acoes { display: flex; align-items: center; gap: 12px; }
+
+  .btn-notificacao {
+    position: relative; background: var(--accent-soft); border: none; border-radius: 10px;
+    width: 38px; height: 38px; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--accent);
+  }
+  .btn-notificacao svg { width: 18px; height: 18px; }
+  .badge-notificacao {
+    position: absolute; top: -4px; right: -4px; background: var(--danger); color: #fff; font-size: 10px;
+    font-weight: 700; border-radius: 10px; min-width: 16px; height: 16px; display: flex; align-items: center;
+    justify-content: center; padding: 0 3px; line-height: 1;
+  }
+
+  .perfil-chip { display: flex; align-items: center; gap: 8px; padding: 6px 12px 6px 6px; border-radius: 20px; background: var(--accent-soft); }
+  .avatar-mini { width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: #0A0A0A; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; flex-shrink: 0; }
+  .nome-mini { font-size: 13px; font-weight: 600; }
+
+  .alerta-item { display: flex; align-items: flex-start; gap: 10px; padding: 12px 22px; border-bottom: 1px solid var(--border); font-size: 13.5px; }
+  .alerta-item:last-child { border-bottom: none; }
+  .alerta-ponto { width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+  .alerta-ponto.perigo { background: var(--danger); }
+  .alerta-ponto.alerta { background: var(--warning); }
+  .alerta-ponto.info { background: var(--accent); }
+
+  .badge.trial { background: var(--accent-soft); color: var(--accent); }
+  .badge.vencida { background: rgba(231,76,60,0.12); color: var(--danger); }
+  .badge.vencendo { background: rgba(217,164,65,0.15); color: var(--warning); }
+
+  .logo-upload { display: flex; align-items: center; gap: 12px; }
+  .logo-preview { width: 56px; height: 56px; border-radius: 12px; background: var(--accent-soft); display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; }
+  .logo-preview img { width: 100%; height: 100%; object-fit: cover; }
+
+  @media (max-width: 900px) {
+    .content-area { padding: 24px; }
+  }
+  @media (max-width: 720px) {
+    .app-layout { flex-direction: column; }
+    .sidebar { width: 100%; height: auto; position: static; flex-direction: row; align-items: center; overflow-x: auto; padding: 12px; }
+    .sidebar.recolhida { width: 100%; }
+    .sidebar .logo, .btn-recolher-sidebar { display: none; }
+    .nav-item { width: auto; white-space: nowrap; margin-bottom: 0; }
+    .sidebar.recolhida .rotulo-nav { display: inline; }
+    .sidebar-footer { margin-top: 0; border-top: none; padding-top: 0; margin-left: auto; }
+    .content-area { padding: 16px; }
+  }
 
   .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-bottom: 28px; }
   .kpi-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 18px; box-shadow: var(--shadow); }
@@ -66,7 +153,7 @@
   .painel-header h3 { font-size: 15px; font-weight: 600; }
 
   #tabela-associacoes-container { overflow-x: auto; }
-  table { width: 100%; border-collapse: collapse; min-width: 800px; }
+  table { width: 100%; border-collapse: collapse; min-width: 1100px; }
   th, td { text-align: left; padding: 14px 22px; font-size: 14px; border-bottom: 1px solid var(--border); }
   th { color: var(--text-muted); font-weight: 500; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
   tr:last-child td { border-bottom: none; }
@@ -126,64 +213,116 @@
   <p id="erro-login"></p>
 </div>
 
-<div id="tela-dashboard">
-  <header>
-    <div>
-      <div class="saudacao" id="texto-saudacao">Olá</div>
-      <div class="data" id="texto-data"></div>
-    </div>
-    <div style="display:flex; gap:14px; align-items:center;">
-      <div class="logo">Carregando<span>Ideias</span></div>
-      <button class="theme-toggle" id="btn-tema">☀</button>
-      <button class="btn btn-ghost" id="btn-sair">Sair</button>
-    </div>
-  </header>
+<div class="app-layout" id="tela-dashboard">
 
-  <main>
-    <div class="kpis">
-      <div class="kpi-card"><div class="rotulo">🏢 Associações</div><div class="valor" id="kpi-total-associacoes">0</div></div>
-      <div class="kpi-card"><div class="rotulo">👥 Associados</div><div class="valor" id="kpi-total-associados">0</div></div>
-      <div class="kpi-card"><div class="rotulo">💰 Receita mensal</div><div class="valor" id="kpi-receita-mensal">R$ 0</div></div>
-      <div class="kpi-card alerta"><div class="rotulo">⚠️ Mensalidades vencidas</div><div class="valor" id="kpi-total-atrasadas">0</div></div>
-      <div class="kpi-card"><div class="rotulo">🟢 Associações ativas</div><div class="valor" id="kpi-associacoes-ativas">0</div></div>
-      <div class="kpi-card perigo"><div class="rotulo">🔴 Bloqueadas</div><div class="valor" id="kpi-associacoes-bloqueadas">0</div></div>
+  <nav class="sidebar" id="sidebar-superadmin">
+    <button class="btn-recolher-sidebar" id="btn-recolher-sidebar" title="Recolher menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <div class="logo">Carregando<span class="logo-texto">Ideias</span></div>
+
+    <button class="nav-item ativa" id="aba-dashboard">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+      <span class="rotulo-nav">Dashboard</span>
+    </button>
+    <button class="nav-item" id="aba-associacoes">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 9h1"/><path d="M9 13h1"/><path d="M14 9h1"/><path d="M14 13h1"/><path d="M10 21v-4h4v4"/></svg>
+      <span class="rotulo-nav">Associações</span>
+    </button>
+
+    <div class="sidebar-footer">
+      <button class="theme-toggle" id="btn-tema" title="Alternar tema">☀</button>
+      <button class="btn btn-ghost" id="btn-sair" style="flex:1;">Sair</button>
+    </div>
+  </nav>
+
+  <div class="content-area">
+
+    <div class="topo-conteudo">
+      <div>
+        <div class="saudacao" id="texto-saudacao">Olá</div>
+        <div class="data" id="texto-data"></div>
+      </div>
+      <div class="topo-acoes">
+        <button class="btn-notificacao" id="btn-notificacoes" title="Alertas">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span class="badge-notificacao" id="badge-notificacoes" style="display:none;">0</span>
+        </button>
+        <div class="perfil-chip">
+          <div class="avatar-mini" id="avatar-superadmin">A</div>
+          <span class="nome-mini" id="nome-superadmin">Administrador</span>
+        </div>
+      </div>
     </div>
 
-    <div class="graficos">
-      <div class="grafico-card">
-        <h4>Crescimento de associações</h4>
-        <canvas id="grafico-crescimento" height="180"></canvas>
+    <div id="secao-dashboard" class="secao-conteudo ativa">
+      <div class="kpis">
+        <div class="kpi-card"><div class="rotulo">🏢 Associações</div><div class="valor" id="kpi-total-associacoes">0</div></div>
+        <div class="kpi-card"><div class="rotulo">👥 Associados</div><div class="valor" id="kpi-total-associados">0</div></div>
+        <div class="kpi-card"><div class="rotulo">💰 MRR (mensalidade recorrente)</div><div class="valor" id="kpi-mrr">R$ 0</div></div>
+        <div class="kpi-card alerta"><div class="rotulo">⚠️ Mensalidades vencidas</div><div class="valor" id="kpi-total-atrasadas">0</div></div>
+        <div class="kpi-card"><div class="rotulo">🟢 Associações ativas</div><div class="valor" id="kpi-associacoes-ativas">0</div></div>
+        <div class="kpi-card perigo"><div class="rotulo">🔴 Bloqueadas</div><div class="valor" id="kpi-associacoes-bloqueadas">0</div></div>
       </div>
-      <div class="grafico-card">
-        <h4>Novos associados cadastrados</h4>
-        <canvas id="grafico-associados" height="180"></canvas>
+
+      <div class="graficos">
+        <div class="grafico-card">
+          <h4>Crescimento de associações (12 meses)</h4>
+          <canvas id="grafico-crescimento" height="180"></canvas>
+        </div>
+        <div class="grafico-card">
+          <h4>Novos associados cadastrados (12 meses)</h4>
+          <canvas id="grafico-associados" height="180"></canvas>
+        </div>
+        <div class="grafico-card">
+          <h4>Receita recebida por mês</h4>
+          <canvas id="grafico-receita" height="180"></canvas>
+        </div>
+        <div class="grafico-card">
+          <h4>Distribuição por plano</h4>
+          <canvas id="grafico-planos" height="180"></canvas>
+        </div>
+      </div>
+
+      <div class="painel" style="margin-bottom: 20px;">
+        <div class="painel-header"><h3>Últimas associações cadastradas</h3></div>
+        <div id="tabela-ultimas-associacoes"><div class="vazio">Carregando...</div></div>
+      </div>
+
+      <div class="painel" id="painel-alertas">
+        <div class="painel-header"><h3>Alertas</h3></div>
+        <div id="lista-alertas"><div class="vazio">Carregando...</div></div>
       </div>
     </div>
 
-    <div class="painel">
-      <div class="painel-header">
-        <h3>Associações cadastradas</h3>
-        <button class="btn" id="btn-nova-associacao">+ Nova associação</button>
+    <div id="secao-associacoes" class="secao-conteudo">
+      <div class="painel">
+        <div class="painel-header">
+          <h3>Associações cadastradas</h3>
+          <button class="btn" id="btn-nova-associacao">+ Nova associação</button>
+        </div>
+        <div class="filtros-associacoes">
+          <input type="text" id="filtro-busca-assoc" placeholder="Buscar por nome...">
+          <input type="text" id="filtro-cidade-assoc" placeholder="Cidade..." style="max-width:160px;">
+          <input type="text" id="filtro-estado-assoc" placeholder="UF" maxlength="2" style="max-width:70px; text-transform:uppercase;">
+          <select id="filtro-plano-assoc">
+            <option value="">Todos os planos</option>
+            <option value="trial">Trial</option>
+            <option value="basico">Básico</option>
+            <option value="profissional">Profissional</option>
+            <option value="enterprise">Enterprise</option>
+          </select>
+          <select id="filtro-status-assoc">
+            <option value="">Todos os status</option>
+            <option value="ativo">Ativas</option>
+            <option value="inativo">Bloqueadas</option>
+          </select>
+        </div>
+        <div id="tabela-associacoes-container"><div class="vazio">Carregando...</div></div>
       </div>
-      <div class="filtros-associacoes">
-        <input type="text" id="filtro-busca-assoc" placeholder="Buscar por nome...">
-        <input type="text" id="filtro-cidade-assoc" placeholder="Cidade..." style="max-width:160px;">
-        <select id="filtro-plano-assoc">
-          <option value="">Todos os planos</option>
-          <option value="trial">Trial</option>
-          <option value="basico">Básico</option>
-          <option value="profissional">Profissional</option>
-          <option value="enterprise">Enterprise</option>
-        </select>
-        <select id="filtro-status-assoc">
-          <option value="">Todos os status</option>
-          <option value="ativo">Ativas</option>
-          <option value="inativo">Bloqueadas</option>
-        </select>
-      </div>
-      <div id="tabela-associacoes-container"><div class="vazio">Carregando...</div></div>
     </div>
-  </main>
+
+  </div>
 </div>
 
 <div id="tela-detalhe-associacao">
@@ -274,12 +413,52 @@
       <div class="campo" style="width:80px;"><label>UF</label><input type="text" id="assoc-estado" maxlength="2" style="text-transform:uppercase;"></div>
     </div>
     <div class="campo"><label>Número de cadastro (CNPJ)</label><input type="text" id="assoc-cnpj"></div>
+    <div class="campo"><label>Site</label><input type="text" id="assoc-site" placeholder="https://..."></div>
+    <div class="campo"><label>CEP</label><input type="text" id="assoc-cep" style="max-width:140px;"></div>
+    <div class="campo">
+      <label>Logo</label>
+      <div class="logo-upload">
+        <div class="logo-preview" id="logo-preview">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="24" height="24" style="color:var(--accent);"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/></svg>
+        </div>
+        <input type="file" id="input-logo-associacao" accept="image/*" style="display:none;">
+        <button type="button" class="btn btn-ghost" id="btn-selecionar-logo">Escolher logo</button>
+      </div>
+    </div>
 
     <div id="bloco-admin-inicial">
       <hr style="border-color:var(--border); margin:18px 0;">
       <p style="font-size:13px; font-weight:600; margin-bottom:12px;">Admin inicial dessa associação</p>
       <p style="font-size:12.5px; color:var(--text-muted); margin-bottom:12px;">Loga com o e-mail acima. A senha provisória é gerada automaticamente e aparece só uma vez, depois de criar.</p>
       <div class="campo"><label>Nome do admin</label><input type="text" id="assoc-nome-admin"></div>
+    </div>
+    <div class="campo"><label>CPF do responsável (opcional)</label><input type="text" id="assoc-cpf-responsavel"></div>
+
+    <hr style="border-color:var(--border); margin:18px 0;">
+    <p style="font-size:13px; font-weight:600; margin-bottom:12px;">Plano contratado</p>
+    <div class="campo">
+      <label>Plano</label>
+      <select id="assoc-plano">
+        <option value="trial">Trial</option>
+        <option value="basico">Básico</option>
+        <option value="profissional">Profissional</option>
+        <option value="enterprise">Enterprise</option>
+      </select>
+    </div>
+    <div style="display:flex; gap:10px;">
+      <div class="campo" style="flex:1;"><label>Valor da mensalidade</label><input type="number" step="0.01" min="0" id="assoc-valor-mensalidade" placeholder="calculado automaticamente"></div>
+      <div class="campo" style="flex:1;"><label>Vencimento da assinatura</label><input type="date" id="assoc-vencimento-assinatura"></div>
+    </div>
+    <div class="campo">
+      <label>Forma de cobrança</label>
+      <select id="assoc-forma-cobranca">
+        <option value="">—</option>
+        <option value="pix">Pix</option>
+        <option value="boleto">Boleto</option>
+        <option value="cartao">Cartão</option>
+        <option value="dinheiro">Dinheiro</option>
+        <option value="outro">Outro</option>
+      </select>
     </div>
 
     <div class="campo" id="campo-ativo-associacao" style="display:none; align-items:center; gap:10px; display:flex;">
@@ -316,6 +495,22 @@
   var associacoesCache = [];
   var graficoCrescimento = null;
   var graficoAssociados = null;
+  var graficoReceita = null;
+  var graficoPlanos = null;
+  var logoSelecionadaBase64 = null;
+
+  // Espelho do backend/utils/precos.js — só pra sugerir o valor da
+  // mensalidade no formulário antes de salvar (o cálculo real é sempre
+  // feito no servidor).
+  var PRECOS_PLANO = {
+    trial: { base: 0, porAssociado: 0 },
+    basico: { base: 49.90, porAssociado: 2.00 },
+    profissional: { base: 99.90, porAssociado: 1.50 },
+    enterprise: { base: 199.90, porAssociado: 1.00 }
+  };
+  var ROTULOS_PLANO = { trial: 'Trial', basico: 'Básico', profissional: 'Profissional', enterprise: 'Enterprise' };
+  // status_assinatura (backend) -> classe CSS do badge (reaproveita .badge.ativo/.inativo já existentes)
+  var CLASSE_BADGE_STATUS = { ativa: 'ativo', bloqueada: 'inativo', trial: 'trial', vencida: 'vencida', vencendo: 'vencendo' };
 
   var MESES_PT = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
   var DIAS_PT = ['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
@@ -357,12 +552,38 @@
   function salvarSessao() { localStorage.setItem('sessao_superadmin', JSON.stringify({ token: estado.token, nome: estado.nome })); }
   function limparSessao() { localStorage.removeItem('sessao_superadmin'); }
 
+  // ---------- Navegação (sidebar) ----------
+  function ativarSecaoSuperAdmin(nome) {
+    ['dashboard', 'associacoes'].forEach(function(secao) {
+      document.getElementById('aba-' + secao).classList.toggle('ativa', secao === nome);
+      document.getElementById('secao-' + secao).classList.toggle('ativa', secao === nome);
+    });
+    if (nome === 'associacoes') carregarAssociacoes();
+  }
+  document.getElementById('aba-dashboard').onclick = function() { ativarSecaoSuperAdmin('dashboard'); };
+  document.getElementById('aba-associacoes').onclick = function() { ativarSecaoSuperAdmin('associacoes'); };
+
+  document.getElementById('btn-recolher-sidebar').onclick = function() {
+    var recolhida = document.getElementById('sidebar-superadmin').classList.toggle('recolhida');
+    localStorage.setItem('sidebar-recolhida-superadmin', recolhida ? '1' : '0');
+  };
+  if (localStorage.getItem('sidebar-recolhida-superadmin') === '1') {
+    document.getElementById('sidebar-superadmin').classList.add('recolhida');
+  }
+
+  document.getElementById('btn-notificacoes').onclick = function() {
+    ativarSecaoSuperAdmin('dashboard');
+    document.getElementById('painel-alertas').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   function entrarNoDashboard() {
     document.getElementById('tela-login').style.display = 'none';
-    document.getElementById('tela-dashboard').style.display = 'block';
+    document.getElementById('tela-dashboard').style.display = 'flex';
+    document.getElementById('nome-superadmin').textContent = estado.nome || 'Administrador';
+    document.getElementById('avatar-superadmin').textContent = (estado.nome || 'A').charAt(0).toUpperCase();
     atualizarSaudacao();
+    ativarSecaoSuperAdmin('dashboard');
     carregarDashboard();
-    carregarAssociacoes();
   }
 
   (function restaurarSessao() {
@@ -452,13 +673,54 @@
       document.getElementById('kpi-associacoes-bloqueadas').textContent = d.associacoes_bloqueadas || 0;
       document.getElementById('kpi-total-associados').textContent = d.total_associados || 0;
       document.getElementById('kpi-total-atrasadas').textContent = d.total_atrasadas || 0;
-      document.getElementById('kpi-receita-mensal').textContent = formatarMoeda(d.receita_mensal);
-      desenharGraficos(d.crescimento_associacoes || [], d.novos_associados || []);
+      document.getElementById('kpi-mrr').textContent = formatarMoeda(d.receita_mrr);
+      desenharGraficos(d.crescimento_associacoes || [], d.novos_associados || [], d.receita_historico || [], d.distribuicao_planos || []);
+      renderizarUltimasAssociacoes(d.ultimas_associacoes || []);
+      renderizarAlertas(d.alertas || []);
     })
     .catch(function() { mostrarToast('Erro ao carregar dashboard', true); });
   }
 
-  function desenharGraficos(crescimento, novosAssociados) {
+  function renderizarUltimasAssociacoes(lista) {
+    var container = document.getElementById('tabela-ultimas-associacoes');
+    if (lista.length === 0) {
+      container.innerHTML = '<div class="vazio">Nenhuma associação cadastrada ainda.</div>';
+      return;
+    }
+    var html = '<table><thead><tr><th>Nome</th><th>Cidade</th><th>Plano</th><th>Cadastro</th><th>Status</th></tr></thead><tbody>';
+    lista.forEach(function(a) {
+      html += '<tr>' +
+        '<td><strong>' + escapeHtml(a.nome) + '</strong></td>' +
+        '<td>' + escapeHtml((a.cidade || '—') + (a.estado ? '/' + a.estado : '')) + '</td>' +
+        '<td>' + (ROTULOS_PLANO[a.plano] || a.plano) + '</td>' +
+        '<td>' + new Date(a.criado_em).toLocaleDateString('pt-BR') + '</td>' +
+        '<td><span class="badge ' + (a.ativo ? 'ativo' : 'inativo') + '">' + (a.ativo ? 'ativa' : 'bloqueada') + '</span></td>' +
+        '</tr>';
+    });
+    html += '</tbody></table>';
+    container.innerHTML = html;
+  }
+
+  function renderizarAlertas(alertas) {
+    var badge = document.getElementById('badge-notificacoes');
+    if (alertas.length > 0) {
+      badge.textContent = alertas.length;
+      badge.style.display = 'flex';
+    } else {
+      badge.style.display = 'none';
+    }
+
+    var container = document.getElementById('lista-alertas');
+    if (alertas.length === 0) {
+      container.innerHTML = '<div class="vazio">Nenhum alerta no momento.</div>';
+      return;
+    }
+    container.innerHTML = alertas.map(function(a) {
+      return '<div class="alerta-item"><span class="alerta-ponto ' + a.nivel + '"></span><span>' + escapeHtml(a.texto) + '</span></div>';
+    }).join('');
+  }
+
+  function desenharGraficos(crescimento, novosAssociados, receitaHistorico, distribuicaoPlanos) {
     var cores = coresGrafico();
     var labels = crescimento.map(function(l) { return formatarMesLabel(l.mes); });
 
@@ -500,16 +762,55 @@
         }
       }
     });
+
+    if (graficoReceita) graficoReceita.destroy();
+    graficoReceita = new Chart(document.getElementById('grafico-receita'), {
+      type: 'line',
+      data: {
+        labels: receitaHistorico.map(function(l) { return formatarMesLabel(l.mes); }),
+        datasets: [{
+          data: receitaHistorico.map(function(l) { return parseFloat(l.total); }),
+          borderColor: cores.linha, backgroundColor: 'rgba(201,168,76,0.15)',
+          fill: true, tension: 0.3, pointRadius: 3
+        }]
+      },
+      options: {
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(ctx) { return formatarMoeda(ctx.parsed.y); } } } },
+        scales: {
+          x: { ticks: { color: cores.texto }, grid: { color: cores.grade } },
+          y: { ticks: { color: cores.texto, callback: function(v) { return formatarMoeda(v); } }, grid: { color: cores.grade }, beginAtZero: true }
+        }
+      }
+    });
+
+    if (graficoPlanos) graficoPlanos.destroy();
+    var coresPlanos = ['#C9A84C', '#6B8FE8', '#2ECC71', '#E8834C'];
+    graficoPlanos = new Chart(document.getElementById('grafico-planos'), {
+      type: 'doughnut',
+      data: {
+        labels: distribuicaoPlanos.map(function(p) { return ROTULOS_PLANO[p.plano] || p.plano; }),
+        datasets: [{
+          data: distribuicaoPlanos.map(function(p) { return parseInt(p.total, 10); }),
+          backgroundColor: coresPlanos,
+          borderWidth: 0
+        }]
+      },
+      options: {
+        plugins: { legend: { position: 'bottom', labels: { color: cores.texto, boxWidth: 12, padding: 12 } } }
+      }
+    });
   }
 
   function carregarAssociacoes() {
     var params = [];
     var busca = document.getElementById('filtro-busca-assoc').value.trim();
     var cidade = document.getElementById('filtro-cidade-assoc').value.trim();
+    var uf = document.getElementById('filtro-estado-assoc').value.trim();
     var plano = document.getElementById('filtro-plano-assoc').value;
     var status = document.getElementById('filtro-status-assoc').value;
     if (busca) params.push('busca=' + encodeURIComponent(busca));
     if (cidade) params.push('cidade=' + encodeURIComponent(cidade));
+    if (uf) params.push('estado=' + encodeURIComponent(uf));
     if (plano) params.push('plano=' + encodeURIComponent(plano));
     if (status) params.push('status=' + encodeURIComponent(status));
     var url = API_URL + '/superadmin/associacoes' + (params.length ? '?' + params.join('&') : '');
@@ -520,7 +821,7 @@
     .catch(function() { mostrarToast('Erro ao carregar associações', true); });
   }
 
-  ['filtro-busca-assoc', 'filtro-cidade-assoc'].forEach(function(id) {
+  ['filtro-busca-assoc', 'filtro-cidade-assoc', 'filtro-estado-assoc'].forEach(function(id) {
     document.getElementById(id).oninput = function() { carregarAssociacoes(); };
   });
   ['filtro-plano-assoc', 'filtro-status-assoc'].forEach(function(id) {
@@ -534,16 +835,21 @@
       container.innerHTML = '<div class="vazio">Nenhuma associação encontrada.</div>';
       return;
     }
-    var html = '<table><thead><tr><th>Nome</th><th>Cidade</th><th>Contato</th><th>Associados</th><th>Pendentes</th><th>Atrasadas</th><th>Status</th><th></th></tr></thead><tbody>';
+    var html = '<table><thead><tr>' +
+      '<th>Nome</th><th>Cidade</th><th>Responsável</th><th>Plano</th><th>Associados</th>' +
+      '<th>Mensalidade</th><th>Status</th><th>Cadastro</th><th>Próx. vencimento</th><th></th>' +
+      '</tr></thead><tbody>';
     lista.forEach(function(a) {
       html += '<tr>' +
         '<td style="cursor:pointer;" onclick="abrirDetalheAssociacao(\'' + a.id + '\')"><strong>' + escapeHtml(a.nome) + '</strong></td>' +
         '<td>' + escapeHtml((a.cidade || '—') + (a.estado ? '/' + a.estado : '')) + '</td>' +
-        '<td>' + escapeHtml(a.email || '—') + '<br><span style="color:var(--text-muted); font-size:12px;">' + escapeHtml(a.telefone || '—') + '</span></td>' +
+        '<td>' + escapeHtml(a.responsavel_nome || '—') + '</td>' +
+        '<td>' + (ROTULOS_PLANO[a.plano] || a.plano) + '</td>' +
         '<td>' + a.total_associados + '</td>' +
-        '<td>' + a.cobrancas_pendentes + '</td>' +
-        '<td>' + a.cobrancas_atrasadas + '</td>' +
-        '<td><span class="badge ' + (a.ativo ? 'ativo' : 'inativo') + '">' + (a.ativo ? 'ativo' : 'bloqueada') + '</span></td>' +
+        '<td>' + formatarMoeda(a.valor_mensalidade) + '</td>' +
+        '<td><span class="badge ' + (CLASSE_BADGE_STATUS[a.status_assinatura] || '') + '">' + a.status_assinatura + '</span></td>' +
+        '<td>' + new Date(a.criado_em).toLocaleDateString('pt-BR') + '</td>' +
+        '<td>' + (a.vencimento_assinatura ? new Date(a.vencimento_assinatura).toLocaleDateString('pt-BR') : '—') + '</td>' +
         '<td style="white-space:nowrap;">' +
           '<button class="btn-pequeno" onclick="abrirDetalheAssociacao(\'' + a.id + '\')">Ver</button> ' +
           '<button class="btn-pequeno" onclick="abrirEdicaoAssociacao(\'' + a.id + '\')">Editar</button> ' +
@@ -555,13 +861,67 @@
     container.innerHTML = html;
   }
 
+  function resetarLogoPreview(logoUrl) {
+    logoSelecionadaBase64 = null;
+    var preview = document.getElementById('logo-preview');
+    if (logoUrl) {
+      preview.innerHTML = '<img src="' + logoUrl + '" alt="Logo">';
+    } else {
+      preview.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="24" height="24" style="color:var(--accent);"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/></svg>';
+    }
+  }
+
+  var totalAssociadosFormAtual = 0;
+  function atualizarPlaceholderMensalidade(totalAssociadosAtual) {
+    if (totalAssociadosAtual !== undefined) totalAssociadosFormAtual = totalAssociadosAtual;
+    var plano = document.getElementById('assoc-plano').value;
+    var precos = PRECOS_PLANO[plano] || PRECOS_PLANO.trial;
+    var sugestao = precos.base + precos.porAssociado * totalAssociadosFormAtual;
+    document.getElementById('assoc-valor-mensalidade').placeholder = 'sugerido: ' + formatarMoeda(sugestao);
+  }
+  document.getElementById('assoc-plano').onchange = function() { atualizarPlaceholderMensalidade(); };
+
+  document.getElementById('btn-selecionar-logo').onclick = function() {
+    document.getElementById('input-logo-associacao').click();
+  };
+  document.getElementById('input-logo-associacao').onchange = function(e) {
+    var arquivo = e.target.files[0];
+    if (!arquivo) return;
+    var leitor = new FileReader();
+    leitor.onload = function(evt) {
+      var img = new Image();
+      img.onload = function() {
+        var TAMANHO_MAX = 400;
+        var largura = img.width, altura = img.height;
+        if (largura > altura && largura > TAMANHO_MAX) {
+          altura = Math.round(altura * (TAMANHO_MAX / largura)); largura = TAMANHO_MAX;
+        } else if (altura > TAMANHO_MAX) {
+          largura = Math.round(largura * (TAMANHO_MAX / altura)); altura = TAMANHO_MAX;
+        }
+        var canvas = document.createElement('canvas');
+        canvas.width = largura; canvas.height = altura;
+        canvas.getContext('2d').drawImage(img, 0, 0, largura, altura);
+        logoSelecionadaBase64 = canvas.toDataURL('image/png');
+        document.getElementById('logo-preview').innerHTML = '<img src="' + logoSelecionadaBase64 + '" alt="Logo">';
+      };
+      img.src = evt.target.result;
+    };
+    leitor.readAsDataURL(arquivo);
+  };
+
   document.getElementById('btn-nova-associacao').onclick = function() {
     document.getElementById('titulo-modal-associacao').textContent = 'Nova associação';
     document.getElementById('editar-associacao-id').value = '';
-    ['assoc-nome','assoc-email','assoc-telefone','assoc-endereco','assoc-cidade','assoc-estado','assoc-cnpj','assoc-nome-admin'].forEach(function(id) {
-      document.getElementById(id).value = '';
-    });
+    [
+      'assoc-nome', 'assoc-email', 'assoc-telefone', 'assoc-endereco', 'assoc-cidade', 'assoc-estado',
+      'assoc-cnpj', 'assoc-site', 'assoc-cep', 'assoc-nome-admin', 'assoc-cpf-responsavel',
+      'assoc-valor-mensalidade', 'assoc-vencimento-assinatura'
+    ].forEach(function(id) { document.getElementById(id).value = ''; });
     document.getElementById('assoc-tipo').value = 'outra';
+    document.getElementById('assoc-plano').value = 'trial';
+    document.getElementById('assoc-forma-cobranca').value = '';
+    resetarLogoPreview(null);
+    atualizarPlaceholderMensalidade(0);
     document.getElementById('bloco-admin-inicial').style.display = 'block';
     document.getElementById('campo-ativo-associacao').style.display = 'none';
     document.getElementById('btn-salvar-associacao').textContent = 'Criar associação';
@@ -573,23 +933,35 @@
   };
 
   function abrirEdicaoAssociacao(id) {
-    var a = associacoesCache.find(function(x) { return x.id === id; });
-    if (!a) return;
-    document.getElementById('titulo-modal-associacao').textContent = 'Editar associação';
-    document.getElementById('editar-associacao-id').value = a.id;
-    document.getElementById('assoc-nome').value = a.nome;
-    document.getElementById('assoc-tipo').value = a.tipo || 'outra';
-    document.getElementById('assoc-email').value = a.email || '';
-    document.getElementById('assoc-telefone').value = a.telefone || '';
-    document.getElementById('assoc-endereco').value = a.endereco || '';
-    document.getElementById('assoc-cidade').value = a.cidade || '';
-    document.getElementById('assoc-estado').value = a.estado || '';
-    document.getElementById('assoc-cnpj').value = a.cnpj || '';
-    document.getElementById('assoc-ativo').checked = !!a.ativo;
-    document.getElementById('bloco-admin-inicial').style.display = 'none';
-    document.getElementById('campo-ativo-associacao').style.display = 'flex';
-    document.getElementById('btn-salvar-associacao').textContent = 'Salvar';
-    document.getElementById('overlay-modal-associacao').style.display = 'flex';
+    fetch(API_URL + '/superadmin/associacoes/' + id, { headers: { 'Authorization': 'Bearer ' + estado.token }, cache: 'no-store' })
+    .then(function(resp) { return resp.json(); })
+    .then(function(a) {
+      document.getElementById('titulo-modal-associacao').textContent = 'Editar associação';
+      document.getElementById('editar-associacao-id').value = a.id;
+      document.getElementById('assoc-nome').value = a.nome;
+      document.getElementById('assoc-tipo').value = a.tipo || 'outra';
+      document.getElementById('assoc-email').value = a.email || '';
+      document.getElementById('assoc-telefone').value = a.telefone || '';
+      document.getElementById('assoc-endereco').value = a.endereco || '';
+      document.getElementById('assoc-cidade').value = a.cidade || '';
+      document.getElementById('assoc-estado').value = a.estado || '';
+      document.getElementById('assoc-cnpj').value = a.cnpj || '';
+      document.getElementById('assoc-site').value = a.site || '';
+      document.getElementById('assoc-cep').value = a.cep || '';
+      document.getElementById('assoc-cpf-responsavel').value = (a.admin && a.admin.cpf) || '';
+      document.getElementById('assoc-plano').value = a.plano || 'trial';
+      document.getElementById('assoc-valor-mensalidade').value = a.valor_mensalidade_manual != null ? a.valor_mensalidade_manual : '';
+      document.getElementById('assoc-vencimento-assinatura').value = a.vencimento_assinatura ? a.vencimento_assinatura.substring(0, 10) : '';
+      document.getElementById('assoc-forma-cobranca').value = a.forma_cobranca || '';
+      document.getElementById('assoc-ativo').checked = !!a.ativo;
+      resetarLogoPreview(a.logo_url);
+      atualizarPlaceholderMensalidade(a.total_associados);
+      document.getElementById('bloco-admin-inicial').style.display = 'none';
+      document.getElementById('campo-ativo-associacao').style.display = 'flex';
+      document.getElementById('btn-salvar-associacao').textContent = 'Salvar';
+      document.getElementById('overlay-modal-associacao').style.display = 'flex';
+    })
+    .catch(function() { mostrarToast('Erro ao carregar dados da associação', true); });
   }
 
   function excluirAssociacao(id) {
@@ -615,16 +987,32 @@
     var cidade = document.getElementById('assoc-cidade').value.trim();
     var uf = document.getElementById('assoc-estado').value.trim().toUpperCase();
     var cnpj = document.getElementById('assoc-cnpj').value.trim();
+    var site = document.getElementById('assoc-site').value.trim();
+    var cep = document.getElementById('assoc-cep').value.trim();
+    var cpf = document.getElementById('assoc-cpf-responsavel').value.trim();
+    var plano = document.getElementById('assoc-plano').value;
+    var valorMensalidadeManual = document.getElementById('assoc-valor-mensalidade').value;
+    var vencimentoAssinatura = document.getElementById('assoc-vencimento-assinatura').value;
+    var formaCobranca = document.getElementById('assoc-forma-cobranca').value;
 
     if (!nome) { mostrarToast('Informe o nome da associação', true); return; }
     if (!idEdicao && !email) { mostrarToast('Informe o e-mail da associação (será o login do admin)', true); return; }
+
+    var dadosPlano = {
+      cep: cep, site: site, logo_base64: logoSelecionadaBase64,
+      plano: plano, valor_mensalidade_manual: valorMensalidadeManual ? parseFloat(valorMensalidadeManual) : null,
+      vencimento_assinatura: vencimentoAssinatura || null, forma_cobranca: formaCobranca || null,
+      cpf: cpf || null
+    };
 
     if (idEdicao) {
       var ativo = document.getElementById('assoc-ativo').checked;
       fetch(API_URL + '/superadmin/associacoes/' + idEdicao, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + estado.token },
-        body: JSON.stringify({ nome: nome, tipo: tipo, email: email, telefone: telefone, endereco: endereco, cidade: cidade, estado: uf, cnpj: cnpj, ativo: ativo })
+        body: JSON.stringify(Object.assign({
+          nome: nome, tipo: tipo, email: email, telefone: telefone, endereco: endereco, cidade: cidade, estado: uf, cnpj: cnpj, ativo: ativo
+        }, dadosPlano))
       })
       .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
       .then(function(res) {
@@ -632,6 +1020,7 @@
         document.getElementById('overlay-modal-associacao').style.display = 'none';
         mostrarToast('Associação atualizada!');
         carregarAssociacoes();
+        carregarDashboard();
       })
       .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
       return;
@@ -647,10 +1036,10 @@
     fetch(API_URL + '/superadmin/associacoes', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + estado.token },
-      body: JSON.stringify({
+      body: JSON.stringify(Object.assign({
         nome_associacao: nome, tipo: tipo, email: email, telefone: telefone, endereco: endereco, cidade: cidade, estado: uf, cnpj: cnpj,
         nome_admin: nomeAdmin
-      })
+      }, dadosPlano))
     })
     .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
     .then(function(res) {
@@ -694,14 +1083,17 @@
     .then(function(a) {
       document.getElementById('detalhe-nome-associacao').textContent = a.nome;
       var badge = document.getElementById('detalhe-badge-status');
-      badge.textContent = a.ativo ? 'ativa' : 'bloqueada';
-      badge.className = 'badge ' + (a.ativo ? 'ativo' : 'inativo');
+      badge.textContent = a.status_assinatura;
+      badge.className = 'badge ' + (CLASSE_BADGE_STATUS[a.status_assinatura] || '');
 
       document.getElementById('lista-informacoes').innerHTML =
         linhaInfo('Nome', a.nome) + linhaInfo('Tipo', rotuloTipo[a.tipo] || a.tipo) +
-        linhaInfo('E-mail', a.email) + linhaInfo('Telefone', a.telefone) +
+        linhaInfo('E-mail', a.email) + linhaInfo('Telefone', a.telefone) + linhaInfo('Site', a.site) +
         linhaInfo('Endereço', a.endereco) + linhaInfo('Cidade/UF', (a.cidade || '—') + (a.estado ? '/' + a.estado : '')) +
-        linhaInfo('CNPJ / nº cadastro', a.cnpj) + linhaInfo('Plano', a.plano) +
+        linhaInfo('CEP', a.cep) + linhaInfo('CNPJ / nº cadastro', a.cnpj) +
+        linhaInfo('Plano', ROTULOS_PLANO[a.plano] || a.plano) + linhaInfo('Associados', String(a.total_associados)) +
+        linhaInfo('Valor da mensalidade', formatarMoeda(a.valor_mensalidade)) +
+        linhaInfo('Vencimento da assinatura', a.vencimento_assinatura ? new Date(a.vencimento_assinatura).toLocaleDateString('pt-BR') : null) +
         linhaInfo('Cadastrada em', new Date(a.criado_em).toLocaleDateString('pt-BR'));
 
       if (a.admin) {
@@ -725,7 +1117,7 @@
 
   document.getElementById('btn-voltar-lista').onclick = function() {
     document.getElementById('tela-detalhe-associacao').style.display = 'none';
-    document.getElementById('tela-dashboard').style.display = 'block';
+    document.getElementById('tela-dashboard').style.display = 'flex';
     carregarAssociacoes();
   };
 
