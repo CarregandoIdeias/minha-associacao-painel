@@ -157,7 +157,7 @@
   .btn-ghost:hover { background: var(--accent-soft); color: var(--accent); }
 
   /* ---------- Tela de login ---------- */
-  #tela-login, #tela-esqueci-senha, #tela-redefinir-senha {
+  #tela-login, #tela-esqueci-senha, #tela-redefinir-senha, #tela-trocar-senha-obrigatoria {
     max-width: 420px;
     margin: 60px auto;
     background: var(--bg-card);
@@ -189,7 +189,7 @@
   }
   .campo input:focus { outline: none; border-color: var(--accent); }
 
-  #erro-login, #erro-recuperar, #erro-redefinir {
+  #erro-login, #erro-recuperar, #erro-redefinir, #erro-troca-obrigatoria {
     color: var(--danger);
     font-size: 13px;
     margin-top: 10px;
@@ -435,7 +435,7 @@
   }
 
   @media (max-width: 480px) {
-    #tela-login, #tela-esqueci-senha, #tela-redefinir-senha { padding: 24px; margin: 30px auto; width: 92%; }
+    #tela-login, #tela-esqueci-senha, #tela-redefinir-senha, #tela-trocar-senha-obrigatoria { padding: 24px; margin: 30px auto; width: 92%; }
     .kpis { grid-template-columns: 1fr 1fr; }
     .modal-actions { flex-direction: column-reverse; }
     .modal-actions .btn, .modal-actions .btn-ghost { width: 100%; }
@@ -447,12 +447,8 @@
 <!-- ===== TELA DE LOGIN (sem sidebar) ===== -->
 <div id="tela-login">
   <h2>Entrar no painel</h2>
-  <p class="sub">Acesse com as credenciais da sua associação</p>
+  <p class="sub">Acesse com o e-mail e a senha da sua conta</p>
 
-  <div class="campo">
-    <label>ID da associação</label>
-    <input type="text" id="login-associacao" placeholder="cole o associacao_id aqui">
-  </div>
   <div class="campo">
     <label>E-mail</label>
     <input type="email" id="login-email" placeholder="voce@exemplo.com">
@@ -471,12 +467,8 @@
 
 <div id="tela-esqueci-senha" style="display:none;">
   <h2>Recuperar senha</h2>
-  <p class="sub">Informe seu e-mail e o ID da associação</p>
+  <p class="sub">Informe seu e-mail</p>
 
-  <div class="campo">
-    <label>ID da associação</label>
-    <input type="text" id="recuperar-associacao" placeholder="cole o associacao_id aqui">
-  </div>
   <div class="campo">
     <label>E-mail</label>
     <input type="email" id="recuperar-email" placeholder="voce@exemplo.com">
@@ -506,11 +498,32 @@
 
   <div class="campo">
     <label>Nova senha</label>
-    <input type="password" id="redefinir-senha-nova" placeholder="mínimo 6 caracteres">
+    <input type="password" id="redefinir-senha-nova" placeholder="mínimo 8 caracteres, com maiúscula, minúscula e número">
   </div>
 
   <button class="btn" style="width:100%;" id="btn-confirmar-redefinicao">Salvar nova senha</button>
   <p id="erro-redefinir"></p>
+</div>
+
+<div id="tela-trocar-senha-obrigatoria" style="display:none;">
+  <h2>Defina sua senha</h2>
+  <p class="sub">Por segurança, troque a senha provisória antes de continuar</p>
+
+  <div class="campo">
+    <label>Senha provisória (atual)</label>
+    <input type="password" id="troca-senha-atual" placeholder="a senha que você acabou de usar para entrar">
+  </div>
+  <div class="campo">
+    <label>Nova senha</label>
+    <input type="password" id="troca-senha-nova" placeholder="mínimo 8 caracteres, com maiúscula, minúscula e número">
+  </div>
+  <div class="campo">
+    <label>Confirmar nova senha</label>
+    <input type="password" id="troca-senha-confirmar" placeholder="repita a nova senha">
+  </div>
+
+  <button class="btn" style="width:100%;" id="btn-confirmar-troca-obrigatoria">Salvar e continuar</button>
+  <p id="erro-troca-obrigatoria"></p>
 </div>
 
 
@@ -709,6 +722,10 @@
       <label>Nome completo</label>
       <input type="text" id="novo-nome">
     </div>
+    <div class="campo" id="campo-novo-email">
+      <label>E-mail (login do associado)</label>
+      <input type="email" id="novo-email" placeholder="associado@exemplo.com">
+    </div>
     <div class="campo">
       <label>CPF</label>
       <input type="text" id="novo-cpf" placeholder="000.000.000-00">
@@ -737,6 +754,20 @@
     <div class="modal-actions">
       <button class="btn btn-ghost" id="btn-cancelar-modal">Cancelar</button>
       <button class="btn" id="btn-salvar-associado">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL CREDENCIAIS DO ASSOCIADO ===== -->
+<div class="overlay" id="overlay-modal-credenciais-associado">
+  <div class="modal">
+    <h3>Associado cadastrado!</h3>
+    <p style="font-size:13px; color:var(--text-muted); margin-bottom:16px;">Essa senha só aparece agora — copie e envie para o associado. No primeiro login, ele vai definir uma senha nova.</p>
+    <div class="campo"><label>E-mail de login</label><input type="text" id="cred-associado-email" readonly></div>
+    <div class="campo"><label>Senha provisória</label><input type="text" id="cred-associado-senha" readonly></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="btn-copiar-senha-associado">Copiar senha</button>
+      <button class="btn" id="btn-fechar-credenciais-associado">Fechar</button>
     </div>
   </div>
 </div>
@@ -808,10 +839,6 @@
         <label>E-mail</label>
         <input type="email" id="usuario-email">
       </div>
-      <div class="campo" id="campo-usuario-senha">
-        <label>Senha provisória</label>
-        <input type="password" id="usuario-senha" placeholder="mínimo 6 caracteres">
-      </div>
       <div class="campo">
         <label>Papel</label>
         <select id="usuario-papel">
@@ -830,18 +857,14 @@
     </div>
 
     <div id="resultado-usuario" style="display:none;">
-      <p style="font-size:13px; color:var(--text-muted); margin-bottom:10px;">
-        Usuário criado! Envie esse link para a pessoa entrar — o ID da associação já vem preenchido:
+      <p style="font-size:13px; color:var(--text-muted); margin-bottom:16px;">
+        Usuário criado! Essa senha só aparece agora — copie e envie para a pessoa. No primeiro login, ela vai definir uma senha nova.
       </p>
-      <div class="campo">
-        <input type="text" id="link-convite" readonly style="font-size:12px;">
-      </div>
-      <p style="font-size:12px; color:var(--text-muted); margin-bottom:16px;">
-        Informe também a senha provisória combinada por fora (esse link não a inclui, por segurança).
-      </p>
+      <div class="campo"><label>E-mail de login</label><input type="text" id="resultado-usuario-email" readonly></div>
+      <div class="campo"><label>Senha provisória</label><input type="text" id="resultado-usuario-senha" readonly></div>
       <div class="modal-actions">
         <button class="btn btn-ghost" id="btn-fechar-resultado-usuario">Fechar</button>
-        <button class="btn" id="btn-copiar-link-convite">Copiar link</button>
+        <button class="btn" id="btn-copiar-senha-usuario">Copiar senha</button>
       </div>
     </div>
   </div>
@@ -893,18 +916,7 @@
 
 <script>
   var API_URL = 'https://minha-associacao-backend.onrender.com';
-  var estado = { token: null, associacaoId: null, papel: null };
-
-  // Se o link tiver ?assoc=<id>, preenche e trava o campo de ID da associação
-  (function preencherAssociacaoDaURL() {
-    var params = new URLSearchParams(window.location.search);
-    var assoc = params.get('assoc');
-    if (assoc) {
-      var campo = document.getElementById('login-associacao');
-      campo.value = assoc;
-      campo.readOnly = true;
-    }
-  })();
+  var estado = { token: null, papel: null };
 
   var tokenRedefinicao = null;
 
@@ -1015,7 +1027,6 @@
   // ---------- Navegação entre telas de autenticação ----------
   document.getElementById('link-esqueci-senha').onclick = function(e) {
     e.preventDefault();
-    document.getElementById('recuperar-associacao').value = document.getElementById('login-associacao').value;
     document.getElementById('recuperar-email').value = document.getElementById('login-email').value;
     document.getElementById('resultado-recuperacao').style.display = 'none';
     document.getElementById('tela-login').style.display = 'none';
@@ -1029,13 +1040,12 @@
 
   // ---------- Solicitar redefinição ----------
   document.getElementById('btn-gerar-recuperacao').onclick = function() {
-    var associacaoId = document.getElementById('recuperar-associacao').value.trim();
     var email = document.getElementById('recuperar-email').value.trim();
     var erroEl = document.getElementById('erro-recuperar');
     erroEl.style.display = 'none';
 
-    if (!associacaoId || !email) {
-      erroEl.textContent = 'Preencha o ID da associação e o e-mail.';
+    if (!email) {
+      erroEl.textContent = 'Preencha o e-mail.';
       erroEl.style.display = 'block';
       return;
     }
@@ -1043,7 +1053,7 @@
     fetch(API_URL + '/auth/esqueci-senha', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: email, associacao_id: associacaoId })
+      body: JSON.stringify({ email: email })
     })
     .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
     .then(function(res) {
@@ -1076,14 +1086,20 @@
     });
   };
 
+  // Espelha a política de senha forte do backend, só para dar feedback rápido
+  // (o backend valida de novo e é quem manda de verdade).
+  function senhaForteClient(senha) {
+    return !!senha && senha.length >= 8 && /[a-z]/.test(senha) && /[A-Z]/.test(senha) && /[0-9]/.test(senha);
+  }
+
   // ---------- Confirmar nova senha ----------
   document.getElementById('btn-confirmar-redefinicao').onclick = function() {
     var novaSenha = document.getElementById('redefinir-senha-nova').value;
     var erroEl = document.getElementById('erro-redefinir');
     erroEl.style.display = 'none';
 
-    if (!novaSenha || novaSenha.length < 6) {
-      erroEl.textContent = 'A nova senha deve ter ao menos 6 caracteres.';
+    if (!senhaForteClient(novaSenha)) {
+      erroEl.textContent = 'A nova senha deve ter ao menos 8 caracteres, com letra maiúscula, minúscula e número.';
       erroEl.style.display = 'block';
       return;
     }
@@ -1115,6 +1131,7 @@
   function entrarNoDashboard() {
     document.getElementById('tela-login').style.display = 'none';
     document.getElementById('tela-esqueci-senha').style.display = 'none';
+    document.getElementById('tela-trocar-senha-obrigatoria').style.display = 'none';
     document.getElementById('tela-dashboard').style.display = 'flex';
 
     if (estado.papel === 'associado') {
@@ -1141,7 +1158,6 @@
   function salvarSessao() {
     localStorage.setItem('sessao_painel', JSON.stringify({
       token: estado.token,
-      associacaoId: estado.associacaoId,
       papel: estado.papel
     }));
   }
@@ -1158,10 +1174,9 @@
 
     try {
       var dados = JSON.parse(salva);
-      if (!dados.token || !dados.associacaoId || !dados.papel) return;
+      if (!dados.token || !dados.papel) return;
 
       estado.token = dados.token;
-      estado.associacaoId = dados.associacaoId;
       estado.papel = dados.papel;
 
       // Valida o token com uma chamada leve antes de assumir a sessão como válida
@@ -1186,13 +1201,12 @@
   })();
 
   document.getElementById('btn-login').onclick = function() {
-    var associacaoId = document.getElementById('login-associacao').value.trim();
     var email = document.getElementById('login-email').value.trim();
     var senha = document.getElementById('login-senha').value;
     var erroEl = document.getElementById('erro-login');
     erroEl.style.display = 'none';
 
-    if (!associacaoId || !email || !senha) {
+    if (!email || !senha) {
       erroEl.textContent = 'Preencha todos os campos.';
       erroEl.style.display = 'block';
       return;
@@ -1201,7 +1215,7 @@
     fetch(API_URL + '/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: email, senha: senha, associacao_id: associacaoId })
+      body: JSON.stringify({ email: email, senha: senha })
     })
     .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
     .then(function(res) {
@@ -1211,8 +1225,15 @@
         return;
       }
       estado.token = res.data.token;
-      estado.associacaoId = associacaoId;
       estado.papel = res.data.usuario.papel;
+
+      if (res.data.deve_trocar_senha) {
+        document.getElementById('login-senha').value = '';
+        document.getElementById('tela-login').style.display = 'none';
+        document.getElementById('tela-trocar-senha-obrigatoria').style.display = 'block';
+        return;
+      }
+
       salvarSessao();
       entrarNoDashboard();
     })
@@ -1222,9 +1243,65 @@
     });
   };
 
+  // ---------- Troca de senha obrigatória (primeiro acesso) ----------
+  document.getElementById('btn-confirmar-troca-obrigatoria').onclick = function() {
+    var senhaAtual = document.getElementById('troca-senha-atual').value;
+    var senhaNova = document.getElementById('troca-senha-nova').value;
+    var senhaConfirmar = document.getElementById('troca-senha-confirmar').value;
+    var erroEl = document.getElementById('erro-troca-obrigatoria');
+    erroEl.style.display = 'none';
+
+    if (!senhaAtual) {
+      erroEl.textContent = 'Informe a senha provisória.';
+      erroEl.style.display = 'block';
+      return;
+    }
+    if (!senhaForteClient(senhaNova)) {
+      erroEl.textContent = 'A nova senha deve ter ao menos 8 caracteres, com letra maiúscula, minúscula e número.';
+      erroEl.style.display = 'block';
+      return;
+    }
+    if (senhaNova !== senhaConfirmar) {
+      erroEl.textContent = 'As senhas não coincidem.';
+      erroEl.style.display = 'block';
+      return;
+    }
+
+    fetch(API_URL + '/auth/senha', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + estado.token },
+      body: JSON.stringify({ senha_atual: senhaAtual, senha_nova: senhaNova })
+    })
+    .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
+    .then(function(res) {
+      if (!res.ok) {
+        erroEl.textContent = res.data.erro || 'Erro ao trocar senha';
+        erroEl.style.display = 'block';
+        return;
+      }
+      estado.token = res.data.token;
+      document.getElementById('troca-senha-atual').value = '';
+      document.getElementById('troca-senha-nova').value = '';
+      document.getElementById('troca-senha-confirmar').value = '';
+      document.getElementById('tela-trocar-senha-obrigatoria').style.display = 'none';
+      salvarSessao();
+      entrarNoDashboard();
+      mostrarToast('Senha definida com sucesso!');
+    })
+    .catch(function() {
+      erroEl.textContent = 'Não foi possível conectar ao servidor.';
+      erroEl.style.display = 'block';
+    });
+  };
+
   document.getElementById('btn-sair').onclick = function() {
+    if (estado.token) {
+      fetch(API_URL + '/auth/logout', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + estado.token }
+      }).catch(function() { /* logout é best-effort, não bloqueia a saída */ });
+    }
     estado.token = null;
-    estado.associacaoId = null;
     estado.papel = null;
     limparSessao();
     document.getElementById('tela-dashboard').style.display = 'none';
@@ -1325,6 +1402,7 @@
     document.getElementById('novo-observacao').value = associado.observacao || '';
     document.getElementById('novo-status').value = associado.status;
     document.getElementById('campo-status-associado').style.display = 'block';
+    document.getElementById('campo-novo-email').style.display = 'none';
     document.getElementById('overlay-modal').style.display = 'flex';
   }
 
@@ -1364,11 +1442,13 @@
     document.getElementById('titulo-modal-associado').textContent = 'Novo associado';
     document.getElementById('editar-associado-id').value = '';
     document.getElementById('novo-nome').value = '';
+    document.getElementById('novo-email').value = '';
     document.getElementById('novo-cpf').value = '';
     document.getElementById('novo-telefone').value = '';
     document.getElementById('novo-categoria').value = '';
     document.getElementById('novo-observacao').value = '';
     document.getElementById('campo-status-associado').style.display = 'none';
+    document.getElementById('campo-novo-email').style.display = 'block';
     document.getElementById('overlay-modal').style.display = 'flex';
   };
   document.getElementById('btn-cancelar-modal').onclick = function() {
@@ -1378,6 +1458,7 @@
   document.getElementById('btn-salvar-associado').onclick = function() {
     var idEdicao = document.getElementById('editar-associado-id').value;
     var nome = document.getElementById('novo-nome').value.trim();
+    var email = document.getElementById('novo-email').value.trim();
     var cpf = document.getElementById('novo-cpf').value.trim();
     var telefone = document.getElementById('novo-telefone').value.trim();
     var categoria = document.getElementById('novo-categoria').value.trim();
@@ -1388,12 +1469,16 @@
       mostrarToast('Informe o nome completo', true);
       return;
     }
+    if (!idEdicao && !email) {
+      mostrarToast('Informe o e-mail do associado (será o login dele)', true);
+      return;
+    }
 
     var url = API_URL + '/associados' + (idEdicao ? '/' + idEdicao : '');
     var metodo = idEdicao ? 'PUT' : 'POST';
     var corpo = idEdicao
       ? { nome_completo: nome, cpf: cpf, telefone: telefone, categoria: categoria, status: status, observacao: observacao }
-      : { nome_completo: nome, cpf: cpf, telefone: telefone, categoria: categoria, observacao: observacao };
+      : { nome_completo: nome, email: email, cpf: cpf, telefone: telefone, categoria: categoria, observacao: observacao };
 
     fetch(url, {
       method: metodo,
@@ -1410,10 +1495,30 @@
         return;
       }
       document.getElementById('overlay-modal').style.display = 'none';
-      mostrarToast(idEdicao ? 'Associado atualizado!' : 'Associado cadastrado com sucesso!');
       carregarAssociados();
+
+      if (idEdicao) {
+        mostrarToast('Associado atualizado!');
+        return;
+      }
+      document.getElementById('cred-associado-email').value = res.data.email;
+      document.getElementById('cred-associado-senha').value = res.data.senha_provisoria;
+      document.getElementById('overlay-modal-credenciais-associado').style.display = 'flex';
     })
     .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
+  };
+
+  document.getElementById('btn-fechar-credenciais-associado').onclick = function() {
+    document.getElementById('overlay-modal-credenciais-associado').style.display = 'none';
+  };
+  document.getElementById('btn-copiar-senha-associado').onclick = function() {
+    var campo = document.getElementById('cred-associado-senha');
+    campo.select();
+    navigator.clipboard.writeText(campo.value).then(function() {
+      mostrarToast('Senha copiada!');
+    }).catch(function() {
+      mostrarToast('Não foi possível copiar automaticamente — selecione e copie manualmente.', true);
+    });
   };
 
   // ---------- Navegação (sidebar) ----------
@@ -1969,7 +2074,6 @@
     document.getElementById('usuario-nome').value = u.nome;
     document.getElementById('usuario-papel').value = u.papel;
     document.getElementById('campo-usuario-email').style.display = 'none';
-    document.getElementById('campo-usuario-senha').style.display = 'none';
     document.getElementById('campo-usuario-associado').style.display = 'none';
     document.getElementById('form-usuario').style.display = 'block';
     document.getElementById('resultado-usuario').style.display = 'none';
@@ -2029,10 +2133,8 @@
     document.getElementById('editar-usuario-id').value = '';
     document.getElementById('usuario-nome').value = '';
     document.getElementById('usuario-email').value = '';
-    document.getElementById('usuario-senha').value = '';
     document.getElementById('usuario-papel').value = 'diretoria';
     document.getElementById('campo-usuario-email').style.display = 'block';
-    document.getElementById('campo-usuario-senha').style.display = 'block';
     document.getElementById('campo-usuario-associado').style.display = 'none';
     document.getElementById('btn-salvar-usuario').textContent = 'Convidar';
     document.getElementById('form-usuario').style.display = 'block';
@@ -2046,11 +2148,11 @@
   document.getElementById('btn-fechar-resultado-usuario').onclick = function() {
     document.getElementById('overlay-modal-usuario').style.display = 'none';
   };
-  document.getElementById('btn-copiar-link-convite').onclick = function() {
-    var campo = document.getElementById('link-convite');
+  document.getElementById('btn-copiar-senha-usuario').onclick = function() {
+    var campo = document.getElementById('resultado-usuario-senha');
     campo.select();
     navigator.clipboard.writeText(campo.value).then(function() {
-      mostrarToast('Link copiado!');
+      mostrarToast('Senha copiada!');
     }).catch(function() {
       mostrarToast('Não foi possível copiar automaticamente — selecione e copie manualmente.', true);
     });
@@ -2089,11 +2191,10 @@
     }
 
     var email = document.getElementById('usuario-email').value.trim();
-    var senha = document.getElementById('usuario-senha').value;
     var associadoVinculo = document.getElementById('usuario-associado-vinculo').value;
 
-    if (!nome || !email || senha.length < 6) {
-      mostrarToast('Preencha nome, e-mail e uma senha com 6+ caracteres', true);
+    if (!nome || !email) {
+      mostrarToast('Preencha nome e e-mail', true);
       return;
     }
     if (papel === 'associado' && !associadoVinculo) {
@@ -2107,7 +2208,7 @@
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ' + estado.token
       },
-      body: JSON.stringify({ nome: nome, email: email, senha: senha, papel: papel, associado_id: papel === 'associado' ? associadoVinculo : undefined })
+      body: JSON.stringify({ nome: nome, email: email, papel: papel, associado_id: papel === 'associado' ? associadoVinculo : undefined })
     })
     .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
     .then(function(res) {
@@ -2117,13 +2218,12 @@
       }
       document.getElementById('usuario-nome').value = '';
       document.getElementById('usuario-email').value = '';
-      document.getElementById('usuario-senha').value = '';
 
-      var link = window.location.origin + window.location.pathname + '?assoc=' + estado.associacaoId;
-      document.getElementById('link-convite').value = link;
+      document.getElementById('resultado-usuario-email').value = res.data.email;
+      document.getElementById('resultado-usuario-senha').value = res.data.senha_provisoria;
       document.getElementById('form-usuario').style.display = 'none';
       document.getElementById('resultado-usuario').style.display = 'block';
-      document.getElementById('titulo-modal-usuario').textContent = 'Convite pronto';
+      document.getElementById('titulo-modal-usuario').textContent = 'Usuário criado';
 
       carregarUsuarios();
     })

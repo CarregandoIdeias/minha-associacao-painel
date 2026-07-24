@@ -217,8 +217,7 @@
           <div class="info-linha"><span>Status</span><span id="usuario-detalhe-status">—</span></div>
           <div class="info-linha"><span>Criado em</span><span id="usuario-detalhe-criado">—</span></div>
           <div style="margin-top:20px;">
-            <div class="campo"><label>Definir nova senha para o admin</label><input type="password" id="nova-senha-admin" placeholder="mínimo 6 caracteres"></div>
-            <button class="btn" id="btn-resetar-senha-admin">Enviar nova senha</button>
+            <button class="btn" id="btn-resetar-senha-admin">Gerar nova senha provisória</button>
           </div>
         </div>
       </div>
@@ -267,7 +266,7 @@
         <option value="outra" selected>Outra</option>
       </select>
     </div>
-    <div class="campo"><label>E-mail</label><input type="email" id="assoc-email"></div>
+    <div class="campo"><label>E-mail (também é o login do admin inicial)</label><input type="email" id="assoc-email"></div>
     <div class="campo"><label>Telefone</label><input type="text" id="assoc-telefone"></div>
     <div class="campo"><label>Endereço</label><input type="text" id="assoc-endereco"></div>
     <div style="display:flex; gap:10px;">
@@ -279,9 +278,8 @@
     <div id="bloco-admin-inicial">
       <hr style="border-color:var(--border); margin:18px 0;">
       <p style="font-size:13px; font-weight:600; margin-bottom:12px;">Admin inicial dessa associação</p>
+      <p style="font-size:12.5px; color:var(--text-muted); margin-bottom:12px;">Loga com o e-mail acima. A senha provisória é gerada automaticamente e aparece só uma vez, depois de criar.</p>
       <div class="campo"><label>Nome do admin</label><input type="text" id="assoc-nome-admin"></div>
-      <div class="campo"><label>E-mail do admin (login)</label><input type="email" id="assoc-email-admin"></div>
-      <div class="campo"><label>Senha provisória</label><input type="password" id="assoc-senha-admin" placeholder="mínimo 6 caracteres"></div>
     </div>
 
     <div class="campo" id="campo-ativo-associacao" style="display:none; align-items:center; gap:10px; display:flex;">
@@ -300,10 +298,11 @@
 <div class="overlay" id="overlay-modal-credenciais">
   <div class="modal">
     <h3>Associação criada!</h3>
-    <p style="font-size:13px; color:var(--text-muted); margin-bottom:16px;">Envie esses dados para o responsável pela associação. O ID da associação é necessário para o login dele.</p>
-    <div class="campo"><label>ID da associação</label><input type="text" id="cred-associacao-id" readonly></div>
-    <div class="campo"><label>E-mail do admin</label><input type="text" id="cred-email-admin" readonly></div>
+    <p style="font-size:13px; color:var(--text-muted); margin-bottom:16px;">Essa senha só aparece agora — copie e envie para o responsável pela associação. No primeiro login, o sistema vai pedir para ele definir uma senha nova.</p>
+    <div class="campo"><label>E-mail de login</label><input type="text" id="cred-email-admin" readonly></div>
+    <div class="campo"><label>Senha provisória</label><input type="text" id="cred-senha-provisoria" readonly></div>
     <div class="modal-actions">
+      <button class="btn btn-ghost" id="btn-copiar-credenciais">Copiar senha</button>
       <button class="btn" id="btn-fechar-credenciais">Fechar</button>
     </div>
   </div>
@@ -559,7 +558,7 @@
   document.getElementById('btn-nova-associacao').onclick = function() {
     document.getElementById('titulo-modal-associacao').textContent = 'Nova associação';
     document.getElementById('editar-associacao-id').value = '';
-    ['assoc-nome','assoc-email','assoc-telefone','assoc-endereco','assoc-cidade','assoc-estado','assoc-cnpj','assoc-nome-admin','assoc-email-admin','assoc-senha-admin'].forEach(function(id) {
+    ['assoc-nome','assoc-email','assoc-telefone','assoc-endereco','assoc-cidade','assoc-estado','assoc-cnpj','assoc-nome-admin'].forEach(function(id) {
       document.getElementById(id).value = '';
     });
     document.getElementById('assoc-tipo').value = 'outra';
@@ -618,6 +617,7 @@
     var cnpj = document.getElementById('assoc-cnpj').value.trim();
 
     if (!nome) { mostrarToast('Informe o nome da associação', true); return; }
+    if (!idEdicao && !email) { mostrarToast('Informe o e-mail da associação (será o login do admin)', true); return; }
 
     if (idEdicao) {
       var ativo = document.getElementById('assoc-ativo').checked;
@@ -638,11 +638,9 @@
     }
 
     var nomeAdmin = document.getElementById('assoc-nome-admin').value.trim();
-    var emailAdmin = document.getElementById('assoc-email-admin').value.trim();
-    var senhaAdmin = document.getElementById('assoc-senha-admin').value;
 
-    if (!nomeAdmin || !emailAdmin || senhaAdmin.length < 6) {
-      mostrarToast('Preencha nome, e-mail e senha (6+ caracteres) do admin inicial', true);
+    if (!nomeAdmin) {
+      mostrarToast('Preencha o nome do admin inicial', true);
       return;
     }
 
@@ -651,20 +649,30 @@
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + estado.token },
       body: JSON.stringify({
         nome_associacao: nome, tipo: tipo, email: email, telefone: telefone, endereco: endereco, cidade: cidade, estado: uf, cnpj: cnpj,
-        nome_admin: nomeAdmin, email_admin: emailAdmin, senha_admin: senhaAdmin
+        nome_admin: nomeAdmin
       })
     })
     .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
     .then(function(res) {
       if (!res.ok) { mostrarToast(res.data.erro || 'Erro ao criar associação', true); return; }
       document.getElementById('overlay-modal-associacao').style.display = 'none';
-      document.getElementById('cred-associacao-id').value = res.data.associacao_id;
       document.getElementById('cred-email-admin').value = res.data.admin.email;
+      document.getElementById('cred-senha-provisoria').value = res.data.senha_provisoria;
       document.getElementById('overlay-modal-credenciais').style.display = 'flex';
       carregarAssociacoes();
       carregarDashboard();
     })
     .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
+  };
+
+  document.getElementById('btn-copiar-credenciais').onclick = function() {
+    var campo = document.getElementById('cred-senha-provisoria');
+    campo.select();
+    navigator.clipboard.writeText(campo.value).then(function() {
+      mostrarToast('Senha copiada!');
+    }).catch(function() {
+      mostrarToast('Não foi possível copiar automaticamente — selecione e copie manualmente.', true);
+    });
   };
 
   document.getElementById('btn-fechar-credenciais').onclick = function() {
@@ -771,21 +779,18 @@
   }
 
   document.getElementById('btn-resetar-senha-admin').onclick = function() {
-    var novaSenha = document.getElementById('nova-senha-admin').value;
-    if (!novaSenha || novaSenha.length < 6) {
-      mostrarToast('Informe uma senha com 6+ caracteres', true);
-      return;
-    }
+    if (!confirm('Gerar uma nova senha provisória para esse admin? A senha atual dele deixa de funcionar.')) return;
+
     fetch(API_URL + '/superadmin/associacoes/' + associacaoDetalheAtual + '/resetar-senha-admin', {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + estado.token },
-      body: JSON.stringify({ nova_senha: novaSenha })
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + estado.token }
     })
     .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
     .then(function(res) {
       if (!res.ok) { mostrarToast(res.data.erro || 'Erro ao redefinir senha', true); return; }
-      mostrarToast('Senha redefinida! Informe a nova senha para o admin (' + res.data.email + ').');
-      document.getElementById('nova-senha-admin').value = '';
+      document.getElementById('cred-email-admin').value = res.data.email;
+      document.getElementById('cred-senha-provisoria').value = res.data.senha_provisoria;
+      document.getElementById('overlay-modal-credenciais').style.display = 'flex';
     })
     .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
   };
