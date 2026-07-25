@@ -139,36 +139,107 @@
   .logo-preview { width: 56px; height: 56px; border-radius: 12px; background: var(--accent-soft); display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; }
   .logo-preview img { width: 100%; height: 100%; object-fit: cover; }
 
+  @media (max-width: 1200px) {
+    .content-area { padding: 28px 32px; }
+    .sidebar { width: 220px; padding: 20px 12px; }
+  }
+
   @media (max-width: 900px) {
     .content-area { padding: 24px; }
+    .sidebar { width: 200px; padding: 16px 10px; }
+    .sidebar .logo { font-size: 16px; }
+    .kpi-card { padding: 16px; }
+    .kpi-card .valor { font-size: 22px; }
   }
-  @media (max-width: 720px) {
+
+  @media (max-width: 768px) {
     .app-layout { flex-direction: column; }
-    .sidebar { width: 100%; height: auto; position: static; flex-direction: row; align-items: center; overflow-x: auto; padding: 12px; }
+    .sidebar {
+      width: 100%;
+      height: auto;
+      position: static;
+      flex-direction: row;
+      align-items: center;
+      overflow-x: auto;
+      padding: 12px 16px;
+    }
     .sidebar.recolhida { width: 100%; }
     .sidebar .logo, .btn-recolher-sidebar { display: none; }
-    .nav-item { width: auto; white-space: nowrap; margin-bottom: 0; }
-    .sidebar.recolhida .rotulo-nav { display: inline; }
+    .nav-item { width: auto; white-space: nowrap; margin-bottom: 0; padding: 8px 12px; }
+    .sidebar.recolhida .rotulo-nav { display: inline; font-size: 13px; }
     .sidebar-footer { margin-top: 0; border-top: none; padding-top: 0; margin-left: auto; }
-    .content-area { padding: 16px; }
-    .topo-conteudo { margin-bottom: 18px; }
+    .content-area { padding: 20px; }
+    .topo-conteudo { margin-bottom: 16px; }
+    .saudacao { font-size: 17px; }
     .nome-mini { display: none; }
-    .perfil-chip { padding: 6px; }
-    .dropdown-notificacoes { right: -60px; }
-  }
-  @media (max-width: 480px) {
-    .kpis { grid-template-columns: 1fr 1fr; }
+    .perfil-chip { padding: 6px 8px; font-size: 12px; }
     .kpi-card { padding: 14px; }
+    .kpi-card .rotulo { font-size: 11px; }
     .kpi-card .valor { font-size: 20px; }
+    .painel-header { padding: 12px 16px; font-size: 14px; }
+    .painel-header h3 { font-size: 14px; }
+    th, td { padding: 10px 12px; font-size: 13px; }
+    table { min-width: 100%; }
+    .modal { padding: 20px; width: 95%; max-width: 500px; }
+    .filtros-associacoes { padding: 14px 16px; gap: 8px; }
+    .filtros-associacoes input, .filtros-associacoes select { min-width: 0; font-size: 13px; }
+    .dropdown-notificacoes { right: -60px; width: 320px; }
+  }
+
+  @media (max-width: 640px) {
+    #tela-login { margin: 30px auto; padding: 20px; width: 90%; }
+    .content-area { padding: 16px; }
     .saudacao { font-size: 16px; }
-    th, td { padding: 10px 14px; font-size: 13px; }
-    .painel-header { padding: 14px 16px; }
-    .filtros-associacoes { padding: 14px 16px; }
-    .filtros-associacoes input, .filtros-associacoes select { min-width: 0; }
-    .modal { padding: 20px; }
-    .modal-actions { flex-direction: column-reverse; }
-    .modal-actions .btn, .modal-actions .btn-ghost { width: 100%; }
-    .dropdown-notificacoes { width: 92vw; right: -70px; }
+    .kpis { grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+    .kpi-card { padding: 12px; }
+    .kpi-card .rotulo { font-size: 10px; }
+    .kpi-card .valor { font-size: 18px; }
+    .painel-header { padding: 12px 14px; gap: 8px; }
+    .painel-header h3 { font-size: 13px; }
+    th, td { padding: 8px 10px; font-size: 12px; }
+    .modal { padding: 18px; }
+    .modal h3 { font-size: 16px; }
+    .modal-actions { flex-direction: column-reverse; gap: 8px; }
+    .modal-actions .btn, .modal-actions .btn-ghost { width: 100%; padding: 10px; font-size: 13px; }
+    .filtros-associacoes { padding: 12px 14px; gap: 8px; }
+    .filtros-associacoes input, .filtros-associacoes select { padding: 8px 10px; }
+    .campo input, .campo select, .campo textarea { font-size: 14px; }
+    .dropdown-notificacoes { width: 92vw; right: -70px; max-width: 90vw; }
+  }
+
+  @media (max-width: 480px) {
+    #tela-login { margin: 24px auto; padding: 18px; width: 90%; border-radius: 14px; }
+    #tela-login h2 { font-size: 20px; }
+    #tela-login p.sub { font-size: 12px; }
+    .content-area { padding: 14px; }
+    .saudacao { font-size: 15px; }
+    .badge-notificacao { font-size: 9px; min-width: 14px; height: 14px; }
+    .kpis { grid-template-columns: 1fr; gap: 10px; margin-bottom: 16px; }
+    .kpi-card { padding: 12px; }
+    .kpi-card .rotulo { font-size: 9px; letter-spacing: 0.03em; }
+    .kpi-card .valor { font-size: 16px; }
+    .painel-header { padding: 10px 12px; font-size: 12px; }
+    .painel-header h3 { font-size: 12px; }
+    table { min-width: 100%; }
+    th, td { padding: 8px; font-size: 11px; }
+    .modal { padding: 16px; width: 92%; }
+    .modal h3 { font-size: 15px; }
+    .campo label { font-size: 12px; }
+    .campo input, .campo select, .campo textarea { padding: 9px 11px; font-size: 14px; border-radius: 8px; }
+    .btn { padding: 8px 12px; font-size: 12px; }
+    .filtros-associacoes { padding: 10px 12px; gap: 6px; }
+    .filtros-associacoes input { min-width: 100px; }
+    .filtros-associacoes input, .filtros-associacoes select { padding: 8px 10px; font-size: 12px; }
+    .dropdown-notificacoes { width: 92vw; right: -80px; max-height: 50vh; }
+  }
+
+  @media (max-width: 360px) {
+    #tela-login { width: 95%; padding: 16px; }
+    .content-area { padding: 12px; }
+    .kpi-card .rotulo { font-size: 8px; }
+    .kpi-card .valor { font-size: 14px; }
+    .modal { padding: 14px; }
+    .dropdown-notificacoes { right: -85px; }
   }
 
   .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-bottom: 28px; }
