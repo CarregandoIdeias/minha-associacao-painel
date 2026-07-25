@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ASSOCIA PLUS — Organize. Comunique. Evolua.</title>
+<meta name="description" content="ASSOCIA PLUS reúne associados, mensalidades e comunicados em um só lugar. Teste grátis por 15 dias, sem cartão de crédito.">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F7F5EF;
+    --bg-card: #ffffff;
+    --bg-alt: #F0ECE0;
+    --text: #1A1712;
+    --text-muted: #6B6558;
+    --border: #E4E0D2;
+    --accent: #C9A84C;
+    --accent-hover: #E8CC80;
+    --accent-soft: rgba(201, 168, 76, 0.12);
+    --success: #2ECC71;
+    --success-soft: rgba(46,204,113,0.12);
+    --warning: #D9A441;
+    --danger: #E74C3C;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-lg: 0 10px 30px -12px rgba(26,23,18,0.18);
+    --spotlight-bg: #1A1712;
+    --spotlight-text: #F7F5EF;
+    --spotlight-muted: #C9C4B6;
+    --spotlight-divider: rgba(247,245,239,.14);
+    --sans: 'Poppins', -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --mono: ui-monospace, 'SF Mono', 'Cascadia Mono', Consolas, monospace;
+    color-scheme: light;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0A0A0A;
+      --bg-card: #1A1A1A;
+      --bg-alt: #141414;
+      --text: #F9F8F5;
+      --text-muted: #888888;
+      --border: #232323;
+      --accent: #C9A84C;
+      --accent-hover: #E8CC80;
+      --accent-soft: rgba(201, 168, 76, 0.14);
+      --success: #2ECC71;
+      --success-soft: rgba(46,204,113,0.14);
+      --warning: #D9A441;
+      --danger: #E74C3C;
+      --shadow: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
+      --shadow-lg: 0 10px 34px -12px rgba(0,0,0,0.55);
+      --spotlight-bg: #C9A84C;
+      --spotlight-text: #0A0A0A;
+      --spotlight-muted: rgba(10,10,10,0.65);
+      --spotlight-divider: rgba(10,10,10,.18);
+      color-scheme: dark;
+    }
+  }
+  [data-theme="dark"] {
+    --bg: #0A0A0A;
+    --bg-card: #1A1A1A;
+    --bg-alt: #141414;
+    --text: #F9F8F5;
+    --text-muted: #888888;
+    --border: #232323;
+    --accent: #C9A84C;
+    --accent-hover: #E8CC80;
+    --accent-soft: rgba(201, 168, 76, 0.14);
+    --success: #2ECC71;
+    --success-soft: rgba(46,204,113,0.14);
+    --warning: #D9A441;
+    --danger: #E74C3C;
+    --shadow: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
+    --shadow-lg: 0 10px 34px -12px rgba(0,0,0,0.55);
+    --spotlight-bg: #C9A84C;
+    --spotlight-text: #0A0A0A;
+    --spotlight-muted: rgba(10,10,10,0.65);
+    --spotlight-divider: rgba(10,10,10,.18);
+    color-scheme: dark;
+  }
+  [data-theme="light"] {
+    --bg: #F7F5EF;
+    --bg-card: #ffffff;
+    --bg-alt: #F0ECE0;
+    --text: #1A1712;
+    --text-muted: #6B6558;
+    --border: #E4E0D2;
+    --accent: #C9A84C;
+    --accent-hover: #E8CC80;
+    --accent-soft: rgba(201, 168, 76, 0.12);
+    --success: #2ECC71;
+    --success-soft: rgba(46,204,113,0.12);
+    --warning: #D9A441;
+    --danger: #E74C3C;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-lg: 0 10px 30px -12px rgba(26,23,18,0.18);
+    --spotlight-bg: #1A1712;
+    --spotlight-text: #F7F5EF;
+    --spotlight-muted: #C9C4B6;
+    --spotlight-divider: rgba(247,245,239,.14);
+    color-scheme: light;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3 {
+    font-family: var(--sans);
+    font-weight: 700;
+    text-wrap: balance;
+    color: var(--text);
+    margin: 0;
+  }
+  p { margin: 0; }
+  a { color: inherit; }
+  svg { display: block; }
+  ::selection { background: var(--accent); color: #0A0A0A; }
+
+  .ap-shell { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
+  @media (max-width: 640px) { .ap-shell { padding: 0 20px; } }
+
+  /* ---------- top hairline ---------- */
+  .ap-hairline { height: 3px; background: linear-gradient(90deg, var(--accent), var(--accent-hover), var(--accent)); }
+
+  /* ---------- nav ---------- */
+  .ap-nav {
+    position: sticky; top: 0; z-index: 40;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+  .ap-nav-row { display: flex; align-items: center; justify-content: space-between; padding: 16px 0; }
+  .ap-mark { font-size: 20px; font-weight: 800; letter-spacing: .01em; display: flex; align-items: baseline; gap: 6px; }
+  .ap-mark .ap-plus {
+    font-weight: 700; font-size: 12px; letter-spacing: .12em;
+    color: #0A0A0A; background: var(--accent);
+    padding: 3px 7px 2px; border-radius: 4px; transform: translateY(-6px);
+  }
+  .ap-nav-links { display: flex; align-items: center; gap: 32px; }
+  .ap-nav-links a { text-decoration: none; color: var(--text-muted); font-size: 14.5px; font-weight: 500; transition: color .15s; }
+  .ap-nav-links a:hover { color: var(--text); }
+  body .ap-nav-cta {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--accent); color: #0A0A0A;
+    padding: 10px 18px; border-radius: 10px; font-size: 14px; font-weight: 700;
+    text-decoration: none; white-space: nowrap; transition: background .15s, transform .15s;
+  }
+  .ap-nav-cta:hover { background: var(--accent-hover); transform: translateY(-1px); }
+  @media (max-width: 780px) {
+    .ap-nav-links-inner { display: none; }
+    .ap-nav-links { gap: 12px; }
+  }
+
+  /* ---------- hero ---------- */
+  .ap-hero { position: relative; overflow: hidden; padding: 80px 0 76px; }
+  .ap-hero-canvas { position: absolute; inset: 0; z-index: 0; opacity: .6; pointer-events: none; }
+  .ap-hero-grid {
+    position: relative; z-index: 1;
+    display: grid; grid-template-columns: 1.1fr .9fr; gap: 56px; align-items: center;
+  }
+  @media (max-width: 900px) { .ap-hero-grid { grid-template-columns: 1fr; gap: 44px; } }
+
+  .ap-eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 12.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--text-muted); margin-bottom: 18px;
+  }
+  .ap-eyebrow::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
+  .ap-hero h1 { font-size: clamp(34px, 5vw, 56px); line-height: 1.08; max-width: 15ch; }
+  .ap-hero h1 em { font-style: normal; color: var(--accent); }
+  .ap-hero-sub { margin-top: 22px; max-width: 44ch; font-size: 17.5px; color: var(--text-muted); font-weight: 300; }
+  .ap-hero-actions { display: flex; align-items: center; gap: 20px; margin-top: 34px; flex-wrap: wrap; }
+  body .ap-btn-primary {
+    background: var(--accent); color: #0A0A0A;
+    padding: 15px 28px; border-radius: 10px; text-decoration: none;
+    font-weight: 700; font-size: 15px; box-shadow: var(--shadow);
+    display: inline-flex; align-items: center; gap: 10px; transition: background .15s, transform .15s;
+  }
+  .ap-btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); }
+  .ap-fine { font-size: 13.5px; color: var(--text-muted); }
+  .ap-fine strong { color: var(--success); font-weight: 700; }
+
+  .ap-hero-panel {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 16px; box-shadow: var(--shadow-lg); padding: 4px;
+  }
+  .ap-hero-panel-inner { padding: 20px; }
+  .ap-panel-topbar { display: flex; align-items: center; gap: 6px; padding: 10px 12px; }
+  .ap-panel-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--border); }
+  .ap-panel-title { margin-left: 8px; font-size: 12px; color: var(--text-muted); font-weight: 500; }
+  .ap-kpi-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
+  .ap-kpi { background: var(--bg); border-radius: 10px; padding: 13px 12px 11px; }
+  .ap-kpi span { display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 5px; }
+  .ap-kpi-value { display: flex; align-items: baseline; gap: 6px; }
+  .ap-kpi strong { font-family: var(--mono); font-size: 18px; font-variant-numeric: tabular-nums; }
+  .ap-kpi-delta { font-size: 10.5px; font-weight: 700; font-family: var(--mono); }
+  .ap-kpi-delta.up { color: var(--success); }
+  .ap-kpi-delta.down { color: var(--danger); }
+  .ap-mini-bars { display: flex; align-items: flex-end; gap: 5px; height: 64px; padding: 0 2px; }
+  .ap-mini-bars div { flex: 1; background: var(--accent); border-radius: 3px 3px 0 0; opacity: .85; }
+  .ap-panel-caption { margin-top: 14px; font-size: 12px; color: var(--text-muted); text-align: center; }
+
+  /* ---------- section shells ---------- */
+  .ap-section { padding: 92px 0; }
+  .ap-section.alt { background: var(--bg-alt); }
+  .ap-head { max-width: 640px; margin-bottom: 52px; }
+  .ap-head h2 { font-size: clamp(24px, 3.4vw, 34px); }
+  .ap-head p { margin-top: 14px; font-size: 16px; color: var(--text-muted); max-width: 56ch; font-weight: 300; }
+
+  /* ---------- icon chip ---------- */
+  .ap-icon-chip {
+    width: 42px; height: 42px; border-radius: 10px;
+    background: var(--accent-soft); color: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 18px;
+  }
+
+  /* ---------- problem cards ---------- */
+  .ap-problem-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  @media (max-width: 900px) { .ap-problem-grid { grid-template-columns: 1fr; } }
+  .ap-problem { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 28px 26px; }
+  .ap-problem .before {
+    font-size: 14.5px; color: var(--text-muted); padding-bottom: 18px; margin-bottom: 18px;
+    border-bottom: 1px dashed var(--border); font-weight: 300; font-style: italic;
+  }
+  .ap-problem .after { font-size: 14.5px; display: flex; gap: 10px; }
+  .ap-problem .after .glyph { color: var(--accent); font-weight: 700; flex-shrink: 0; }
+
+  /* ---------- pillars (real sequence) ---------- */
+  .ap-pillars { position: relative; }
+  .ap-pillar-rail { position: absolute; left: 0; right: 0; top: 26px; height: 1px; background: var(--border); z-index: 0; }
+  @media (max-width: 900px) { .ap-pillar-rail { display: none; } }
+  .ap-pillar-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; position: relative; z-index: 1; }
+  @media (max-width: 900px) { .ap-pillar-grid { grid-template-columns: 1fr; } }
+  .ap-pillar-step {
+    width: 52px; height: 52px; border-radius: 50%; background: var(--accent);
+    color: #0A0A0A; display: flex; align-items: center; justify-content: center;
+    font-size: 19px; font-weight: 700; margin-bottom: 24px; box-shadow: var(--shadow);
+  }
+  .ap-pillar h3 { font-size: 20px; margin-bottom: 8px; }
+  .ap-pillar .tag {
+    font-size: 11.5px; font-weight: 700; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--accent); display: block; margin-bottom: 6px;
+  }
+  .ap-pillar > p { color: var(--text-muted); font-size: 14.5px; font-weight: 300; }
+  .ap-pillar ul { list-style: none; padding: 0; margin: 18px 0 0; display: grid; gap: 11px; }
+  .ap-pillar li { font-size: 14.5px; color: var(--text-muted); padding-left: 18px; position: relative; font-weight: 300; }
+  .ap-pillar li::before {
+    content: ""; position: absolute; left: 0; top: 8px; width: 6px; height: 6px;
+    background: var(--accent); border-radius: 50%;
+  }
+
+  /* ---------- trust ---------- */
+  .ap-trust { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; }
+  @media (max-width: 900px) { .ap-trust { grid-template-columns: 1fr; gap: 40px; } }
+  .ap-trust-list { display: grid; gap: 22px; margin-top: 26px; }
+  .ap-trust-item { display: flex; gap: 16px; }
+  .ap-trust-item .n { font-family: var(--mono); color: var(--accent); font-size: 13px; padding-top: 3px; font-weight: 700; }
+  .ap-trust-item h4 { font-size: 15.5px; font-weight: 700; margin: 0 0 4px; }
+  .ap-trust-item p { font-size: 14.5px; color: var(--text-muted); font-weight: 300; }
+  .ap-trust-card {
+    background: var(--spotlight-bg); color: var(--spotlight-text);
+    border-radius: 16px; padding: 34px; box-shadow: var(--shadow-lg);
+  }
+  .ap-trust-card h3 { color: var(--spotlight-text); font-size: 22px; margin-bottom: 12px; }
+  .ap-trust-card h3 span { text-decoration: underline; text-decoration-color: currentColor; text-underline-offset: 4px; }
+  .ap-trust-card p { color: var(--spotlight-muted); font-size: 14.5px; font-weight: 300; }
+  .ap-trust-card .divider { height: 1px; background: var(--spotlight-divider); margin: 24px 0; }
+
+  /* ---------- pricing ---------- */
+  .ap-trial-banner {
+    display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap;
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;
+    padding: 20px 28px; margin-bottom: 44px;
+  }
+  .ap-trial-banner strong { font-size: 16px; }
+  .ap-trial-banner .badge {
+    font-family: var(--mono); font-size: 12.5px; font-weight: 700; color: var(--success);
+    background: var(--success-soft); padding: 5px 10px; border-radius: 999px; margin-left: 10px;
+  }
+  .ap-pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; align-items: stretch; }
+  @media (max-width: 980px) { .ap-pricing-grid { grid-template-columns: 1fr; } }
+  .ap-price-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 30px 26px; display: flex; flex-direction: column; }
+  .ap-price-card.featured { border-color: var(--accent); box-shadow: var(--shadow-lg); transform: translateY(-8px); }
+  @media (max-width: 980px) { .ap-price-card.featured { transform: none; } }
+
+  .ap-price-scale { display: flex; align-items: flex-end; gap: 4px; height: 20px; margin-bottom: 16px; }
+  .ap-price-scale div { flex: 1; border-radius: 2px 2px 0 0; background: var(--border); }
+  .ap-price-scale div.on { background: var(--accent); }
+
+  .ap-price-porte { font-size: 12.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text-muted); }
+  .ap-price-name { font-size: 22px; font-weight: 700; margin: 6px 0 2px; }
+  .ap-price-recommend {
+    font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 6px; display: block;
+  }
+  .ap-price-formula { margin: 20px 0 8px; }
+  .ap-price-formula .base { font-family: var(--mono); font-size: 31px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .ap-price-formula .unit { font-size: 13.5px; color: var(--text-muted); }
+  .ap-price-formula .per { font-family: var(--mono); font-size: 14px; color: var(--text-muted); margin-top: 5px; }
+  .ap-price-example { margin-top: 16px; padding: 13px 15px; background: var(--bg-alt); border-radius: 8px; font-size: 13px; color: var(--text-muted); }
+  .ap-price-example b { color: var(--text); font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  .ap-price-card ul { list-style: none; padding: 0; margin: 22px 0 26px; display: grid; gap: 11px; flex: 1; }
+  .ap-price-card li { font-size: 14px; color: var(--text-muted); padding-left: 20px; position: relative; font-weight: 300; }
+  .ap-price-card li::before { content: "✓"; position: absolute; left: 0; color: var(--accent); font-weight: 700; }
+  .ap-price-cta {
+    text-align: center; text-decoration: none; padding: 13px; border-radius: 10px;
+    font-weight: 700; font-size: 14.5px; border: 1px solid var(--accent); color: var(--text);
+    transition: background .15s, transform .15s;
+  }
+  .ap-price-card.featured .ap-price-cta { background: var(--accent); color: #0A0A0A; border-color: var(--accent); }
+  .ap-price-cta:hover { background: var(--accent-soft); transform: translateY(-1px); }
+  .ap-price-card.featured .ap-price-cta:hover { background: var(--accent-hover); }
+  .ap-price-note { text-align: center; margin-top: 30px; font-size: 13.5px; color: var(--text-muted); font-weight: 300; }
+
+  /* ---------- faq ---------- */
+  .ap-faq { max-width: 760px; }
+  .ap-faq-item { border-bottom: 1px solid var(--border); }
+  .ap-faq-q {
+    width: 100%; text-align: left; background: none; border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    padding: 20px 0; font-family: var(--sans); font-size: 16px; font-weight: 600; color: var(--text);
+  }
+  .ap-faq-q .plus { font-family: var(--mono); font-size: 18px; color: var(--accent); transition: transform .2s; flex-shrink: 0; }
+  .ap-faq-item[data-open="true"] .plus { transform: rotate(45deg); }
+  .ap-faq-a { max-height: 0; overflow: hidden; transition: max-height .25s ease; }
+  .ap-faq-item[data-open="true"] .ap-faq-a { max-height: 240px; }
+  .ap-faq-a p { padding: 0 0 20px; font-size: 14.5px; color: var(--text-muted); max-width: 62ch; font-weight: 300; }
+  .ap-faq-q:focus-visible, .ap-nav-cta:focus-visible, .ap-btn-primary:focus-visible, .ap-price-cta:focus-visible {
+    outline: 2px solid var(--accent); outline-offset: 3px;
+  }
+
+  /* ---------- final cta ---------- */
+  .ap-final { text-align: center; padding: 100px 0; }
+  .ap-final h2 { font-size: clamp(26px, 4vw, 38px); max-width: 20ch; margin: 0 auto; }
+  .ap-final p { margin-top: 16px; color: var(--text-muted); font-size: 16px; font-weight: 300; }
+  .ap-final .ap-hero-actions { justify-content: center; margin-top: 32px; }
+
+  /* ---------- footer ---------- */
+  .ap-footer { border-top: 1px solid var(--border); padding: 36px 0; }
+  .ap-footer-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .ap-footer p { font-size: 13px; color: var(--text-muted); }
+
+  /* ---------- reveal ---------- */
+  .ap-reveal { opacity: 0; transform: translateY(14px); transition: opacity .5s ease, transform .5s ease; }
+  .ap-reveal.in { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce) { .ap-reveal { opacity: 1; transform: none; transition: none; } }
+</style>
+</head>
+<body>
+  <div class="ap-hairline"></div>
+
+  <nav class="ap-nav">
+    <div class="ap-shell ap-nav-row">
+      <div class="ap-mark">ASSOCIA<span class="ap-plus">PLUS</span></div>
+      <div class="ap-nav-links">
+        <div class="ap-nav-links-inner" style="display:flex; align-items:center; gap:32px;">
+          <a href="#recursos">Recursos</a>
+          <a href="#planos">Planos</a>
+          <a href="#faq">Perguntas frequentes</a>
+        </div>
+        <a class="ap-nav-cta" href="#planos">Teste grátis por 15 dias</a>
+      </div>
+    </div>
+  </nav>
+
+  <header class="ap-hero">
+    <canvas class="ap-hero-canvas" id="apNetCanvas"></canvas>
+    <div class="ap-shell ap-hero-grid">
+      <div>
+        <span class="ap-eyebrow">Gestão de associações</span>
+        <h1>A sua associação, <em>finalmente em ordem.</em></h1>
+        <p class="ap-hero-sub">ASSOCIA PLUS reúne associados, mensalidades e comunicados em um só lugar — sem planilha perdida, sem grupo de WhatsApp lotado, sem surpresa no caixa no fim do mês.</p>
+        <div class="ap-hero-actions">
+          <a class="ap-btn-primary" href="#planos">Começar teste grátis →</a>
+          <span class="ap-fine"><strong>15 dias grátis</strong> · sem cartão de crédito</span>
+        </div>
+      </div>
+      <div class="ap-hero-panel" aria-hidden="true">
+        <div class="ap-hero-panel-inner">
+          <div class="ap-panel-topbar">
+            <span class="ap-panel-dot"></span><span class="ap-panel-dot"></span><span class="ap-panel-dot"></span>
+            <span class="ap-panel-title">Dashboard · Associação Jardim das Flores</span>
+          </div>
+          <div class="ap-kpi-row">
+            <div class="ap-kpi">
+              <span>Associados ativos</span>
+              <div class="ap-kpi-value"><strong>238</strong><span class="ap-kpi-delta up">+12</span></div>
+            </div>
+            <div class="ap-kpi">
+              <span>Receita do mês</span>
+              <div class="ap-kpi-value"><strong>R$ 6.140</strong><span class="ap-kpi-delta up">+8%</span></div>
+            </div>
+            <div class="ap-kpi">
+              <span>Inadimplência</span>
+              <div class="ap-kpi-value"><strong>4,2%</strong><span class="ap-kpi-delta down">-1,4pp</span></div>
+            </div>
+          </div>
+          <div class="ap-mini-bars" aria-hidden="true">
+            <div style="height:38%"></div><div style="height:52%"></div><div style="height:44%"></div>
+            <div style="height:68%"></div><div style="height:60%"></div><div style="height:80%"></div>
+            <div style="height:71%"></div><div style="height:90%"></div>
+          </div>
+          <p class="ap-panel-caption">Crescimento e receita acompanhados em tempo real</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section class="ap-section" id="recursos">
+    <div class="ap-shell">
+      <div class="ap-head ap-reveal">
+        <h2>Três problemas que toda diretoria conhece</h2>
+        <p>Não é falta de esforço — é falta de ferramenta. ASSOCIA PLUS resolve o que hoje ainda é feito na base da planilha e do grupo de WhatsApp.</p>
+      </div>
+      <div class="ap-problem-grid">
+        <div class="ap-problem ap-reveal">
+          <div class="ap-icon-chip" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="5" width="18" height="14" rx="2"></rect>
+              <circle cx="8.5" cy="11" r="2"></circle>
+              <path d="M5.5 16c.6-1.8 2-2.6 3-2.6s2.4.8 3 2.6"></path>
+              <line x1="14" y1="9" x2="18" y2="9"></line>
+              <line x1="14" y1="12.5" x2="18" y2="12.5"></line>
+            </svg>
+          </div>
+          <p class="before">"A lista de associados vive desatualizada, espalhada entre planilhas, cadernos e a memória de quem está há mais tempo na diretoria."</p>
+          <p class="after"><span class="glyph">→</span> Cadastro único, com CPF validado, categoria e status sempre atuais — qualquer um da diretoria vê o mesmo dado, na hora.</p>
+        </div>
+        <div class="ap-problem ap-reveal">
+          <div class="ap-icon-chip" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 8V5.5a1 1 0 0 1 1-1h3"></path>
+              <path d="M20 8V5.5a1 1 0 0 0-1-1h-3"></path>
+              <path d="M4 16v2.5a1 1 0 0 0 1 1h3"></path>
+              <path d="M20 16v2.5a1 1 0 0 1-1 1h-3"></path>
+              <rect x="9.5" y="9.5" width="5" height="5" rx="1"></rect>
+            </svg>
+          </div>
+          <p class="before">"Cobrar mensalidade depende de lembrete manual, e mesmo assim a inadimplência só aparece quando o caixa já está apertado."</p>
+          <p class="after"><span class="glyph">→</span> Cobrança por Pix (QR code e copia-e-cola), alerta automático de vencimento e painel de inadimplência sempre visível.</p>
+        </div>
+        <div class="ap-problem ap-reveal">
+          <div class="ap-icon-chip" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 5h14a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-9l-4 3v-3H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"></path>
+              <line x1="8" y1="9.5" x2="16" y2="9.5"></line>
+              <line x1="8" y1="12.5" x2="13" y2="12.5"></line>
+            </svg>
+          </div>
+          <p class="before">"Comunicado se perde no grupo de WhatsApp — ninguém sabe se o associado realmente leu o aviso importante."</p>
+          <p class="after"><span class="glyph">→</span> Mural próprio, com contagem real de quem já leu, e portal individual para cada associado.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="ap-section alt">
+    <div class="ap-shell">
+      <div class="ap-head ap-reveal">
+        <h2>Organize. Comunique. Evolua.</h2>
+        <p>As três etapas de toda associação que sai da desordem para a maturidade de gestão — e o que ASSOCIA PLUS entrega em cada uma delas.</p>
+      </div>
+      <div class="ap-pillars">
+        <div class="ap-pillar-rail"></div>
+        <div class="ap-pillar-grid">
+          <div class="ap-pillar ap-reveal">
+            <div class="ap-pillar-step">1</div>
+            <span class="tag">Organize</span>
+            <h3>Todo cadastro, um só lugar</h3>
+            <p>Associados, mensalidades e histórico financeiro sem depender de planilha nem de memória.</p>
+            <ul>
+              <li>Cadastro com validação de CPF</li>
+              <li>Cobranças com Pix e confirmação de pagamento</li>
+              <li>Histórico completo por associado</li>
+            </ul>
+          </div>
+          <div class="ap-pillar ap-reveal">
+            <div class="ap-pillar-step">2</div>
+            <span class="tag">Comunique</span>
+            <h3>Ninguém fica sem saber</h3>
+            <p>Mural de avisos com confirmação de leitura e portal exclusivo para cada associado.</p>
+            <ul>
+              <li>Comunicados com destaque e agendamento</li>
+              <li>Contagem real de quem já leu</li>
+              <li>Portal do associado, acesso próprio</li>
+            </ul>
+          </div>
+          <div class="ap-pillar ap-reveal">
+            <div class="ap-pillar-step">3</div>
+            <span class="tag">Evolua</span>
+            <h3>Decisão com dado, não achismo</h3>
+            <p>Dashboard com crescimento, receita e inadimplência mês a mês, para a diretoria decidir com números.</p>
+            <ul>
+              <li>Indicadores de crescimento e receita</li>
+              <li>Comparativo mês a mês</li>
+              <li>Alertas de vencimento automáticos</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="ap-section">
+    <div class="ap-shell">
+      <div class="ap-trust ap-reveal">
+        <div>
+          <span class="ap-eyebrow">Segurança</span>
+          <h2 style="font-size: clamp(22px, 3vw, 30px);">O dado da sua associação é só da sua associação</h2>
+          <div class="ap-trust-list">
+            <div class="ap-trust-item">
+              <span class="n">01</span>
+              <div><h4>Isolamento real entre associações</h4><p>Cada entidade tem seus dados separados por desenho no próprio banco — não é só regra no código, é imposto pelo banco de dados.</p></div>
+            </div>
+            <div class="ap-trust-item">
+              <span class="n">02</span>
+              <div><h4>Senhas nunca em texto simples</h4><p>Toda senha é protegida por criptografia forte antes de ser guardada — nem a equipe do ASSOCIA PLUS tem acesso a ela.</p></div>
+            </div>
+            <div class="ap-trust-item">
+              <span class="n">03</span>
+              <div><h4>Conexão sempre criptografada</h4><p>Do navegador ao banco de dados, o tráfego é criptografado ponta a ponta.</p></div>
+            </div>
+          </div>
+        </div>
+        <div class="ap-trust-card">
+          <h3>Feito para crescer <span>sem quebrar</span></h3>
+          <p>A mesma plataforma que atende uma associação de bairro atende uma federação com centenas de associados — sem trocar de sistema no meio do caminho.</p>
+          <div class="divider"></div>
+          <p>Infraestrutura revisada e testada continuamente, com atenção redobrada a cada nova associação-cliente que entra na plataforma.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="ap-section alt" id="planos">
+    <div class="ap-shell">
+      <div class="ap-head ap-reveal">
+        <h2>Um plano para cada porte de associação</h2>
+        <p>Preço-base fixo por mês + um valor por associado ativo. Você só paga mais quando a sua associação cresce.</p>
+      </div>
+
+      <div class="ap-trial-banner ap-reveal">
+        <div><strong>Teste todos os recursos por 15 dias</strong><span class="badge">sem cartão de crédito</span></div>
+        <span style="font-size:14px; color:var(--text-muted);">Cancele quando quiser, sem burocracia.</span>
+      </div>
+
+      <div class="ap-pricing-grid">
+        <div class="ap-price-card ap-reveal">
+          <div class="ap-price-scale" aria-hidden="true"><div class="on" style="height:35%"></div><div style="height:65%"></div><div style="height:100%"></div></div>
+          <span class="ap-price-porte">Pequeno porte · até 50 associados</span>
+          <h3 class="ap-price-name">Básico</h3>
+          <div class="ap-price-formula">
+            <span class="base">R$ 49,90</span><span class="unit">/mês</span>
+            <div class="per">+ R$ 2,00 por associado ativo</div>
+          </div>
+          <div class="ap-price-example">Com 50 associados: <b>R$ 149,90/mês</b></div>
+          <ul>
+            <li>Cadastro de associados</li>
+            <li>Cobrança via Pix</li>
+            <li>Mural de comunicados</li>
+            <li>Dashboard com indicadores</li>
+          </ul>
+          <a class="ap-price-cta" href="#faq">Começar teste grátis</a>
+        </div>
+
+        <div class="ap-price-card featured ap-reveal">
+          <div class="ap-price-scale" aria-hidden="true"><div style="height:35%"></div><div class="on" style="height:65%"></div><div style="height:100%"></div></div>
+          <span class="ap-price-recommend">Mais escolhido</span>
+          <span class="ap-price-porte">Médio porte · 50 a 200 associados</span>
+          <h3 class="ap-price-name">Profissional</h3>
+          <div class="ap-price-formula">
+            <span class="base">R$ 99,90</span><span class="unit">/mês</span>
+            <div class="per">+ R$ 1,50 por associado ativo</div>
+          </div>
+          <div class="ap-price-example">Com 100 associados: <b>R$ 249,90/mês</b></div>
+          <ul>
+            <li>Tudo do plano Básico</li>
+            <li>Alertas automáticos de vencimento</li>
+            <li>Portal exclusivo do associado</li>
+            <li>Suporte prioritário</li>
+          </ul>
+          <a class="ap-price-cta" href="#faq">Começar teste grátis</a>
+        </div>
+
+        <div class="ap-price-card ap-reveal">
+          <div class="ap-price-scale" aria-hidden="true"><div style="height:35%"></div><div style="height:65%"></div><div class="on" style="height:100%"></div></div>
+          <span class="ap-price-porte">Grande porte · 200+ associados</span>
+          <h3 class="ap-price-name">Enterprise</h3>
+          <div class="ap-price-formula">
+            <span class="base">R$ 199,90</span><span class="unit">/mês</span>
+            <div class="per">+ R$ 1,00 por associado ativo</div>
+          </div>
+          <div class="ap-price-example">Com 300 associados: <b>R$ 499,90/mês</b></div>
+          <ul>
+            <li>Tudo do plano Profissional</li>
+            <li>Condições comerciais sob negociação</li>
+            <li>Atendimento dedicado</li>
+          </ul>
+          <a class="ap-price-cta" href="#faq">Falar com a equipe</a>
+        </div>
+      </div>
+      <p class="ap-price-note">Valores calculados sobre associados ativos no mês. Mudou de porte? O plano se ajusta junto, sem troca de sistema.</p>
+    </div>
+  </section>
+
+  <section class="ap-section" id="faq">
+    <div class="ap-shell">
+      <div class="ap-head ap-reveal">
+        <h2>Perguntas frequentes</h2>
+      </div>
+      <div class="ap-faq ap-reveal">
+        <div class="ap-faq-item" data-open="false">
+          <button class="ap-faq-q">Preciso instalar algum programa?<span class="plus">+</span></button>
+          <div class="ap-faq-a"><p>Não. O ASSOCIA PLUS funciona direto no navegador, em computador ou celular — nada para baixar ou instalar.</p></div>
+        </div>
+        <div class="ap-faq-item" data-open="false">
+          <button class="ap-faq-q">Como funciona o teste grátis?<span class="plus">+</span></button>
+          <div class="ap-faq-a"><p>15 dias com acesso completo a todos os recursos, sem pedir dados de cartão. Ao final, você escolhe o plano que faz sentido para o porte da sua associação — ou simplesmente para de usar, sem cobrança.</p></div>
+        </div>
+        <div class="ap-faq-item" data-open="false">
+          <button class="ap-faq-q">Meus dados ficam seguros?<span class="plus">+</span></button>
+          <div class="ap-faq-a"><p>Sim. Cada associação tem seus dados isolados por desenho no banco de dados (não só por regra de código), senhas são protegidas por criptografia forte, e toda conexão é criptografada.</p></div>
+        </div>
+        <div class="ap-faq-item" data-open="false">
+          <button class="ap-faq-q">Como funciona o recebimento das mensalidades?<span class="plus">+</span></button>
+          <div class="ap-faq-a"><p>Pelo Pix da própria associação — QR code e "copia e cola" gerados automaticamente. O associado paga, envia o comprovante, e a diretoria confirma o recebimento pelo painel.</p></div>
+        </div>
+        <div class="ap-faq-item" data-open="false">
+          <button class="ap-faq-q">Posso trocar de plano depois?<span class="plus">+</span></button>
+          <div class="ap-faq-a"><p>Sim, a qualquer momento. O valor se ajusta automaticamente conforme o número de associados ativos da sua associação.</p></div>
+        </div>
+        <div class="ap-faq-item" data-open="false">
+          <button class="ap-faq-q">Existe contrato de fidelidade?<span class="plus">+</span></button>
+          <div class="ap-faq-a"><p>Não. Você pode cancelar quando quiser, sem multa e sem burocracia.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="ap-final">
+    <div class="ap-shell">
+      <h2 class="ap-reveal">Organize hoje. Comunique sempre. Evolua sem limite.</h2>
+      <p class="ap-reveal">15 dias grátis, acesso completo, sem cartão de crédito.</p>
+      <div class="ap-hero-actions ap-reveal">
+        <a class="ap-btn-primary" href="#planos">Começar teste grátis →</a>
+      </div>
+    </div>
+  </section>
+
+  <footer class="ap-footer">
+    <div class="ap-shell ap-footer-row">
+      <div class="ap-mark" style="font-size:17px;">ASSOCIA<span class="ap-plus" style="transform:translateY(-4px);">PLUS</span></div>
+      <p>ASSOCIA PLUS · © 2026</p>
+    </div>
+  </footer>
+
+<script>
+(function () {
+  var faqItems = document.querySelectorAll('.ap-faq-item');
+  for (var i = 0; i < faqItems.length; i++) {
+    (function (item) {
+      var btn = item.querySelector('.ap-faq-q');
+      btn.addEventListener('click', function () {
+        var isOpen = item.getAttribute('data-open') === 'true';
+        for (var j = 0; j < faqItems.length; j++) {
+          faqItems[j].setAttribute('data-open', 'false');
+        }
+        item.setAttribute('data-open', isOpen ? 'false' : 'true');
+      });
+    })(faqItems[i]);
+  }
+
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if ('IntersectionObserver' in window && !reduceMotion) {
+    var revealEls = document.querySelectorAll('.ap-reveal');
+    var obs = new IntersectionObserver(function (entries) {
+      for (var i = 0; i < entries.length; i++) {
+        if (entries[i].isIntersecting) {
+          entries[i].target.classList.add('in');
+          obs.unobserve(entries[i].target);
+        }
+      }
+    }, { threshold: 0.15 });
+    for (var i = 0; i < revealEls.length; i++) obs.observe(revealEls[i]);
+  } else {
+    var revealElsFallback = document.querySelectorAll('.ap-reveal');
+    for (var i = 0; i < revealElsFallback.length; i++) revealElsFallback[i].classList.add('in');
+  }
+
+  // Rede sutil de pontos no fundo do hero -- representa associados conectados.
+  // Cor da linha/ponto acompanha o tema (claro/escuro) ativo no momento.
+  var canvas = document.getElementById('apNetCanvas');
+  if (canvas) {
+    var ctx = canvas.getContext('2d');
+    var w, h, points, dpr;
+
+    function isDark() {
+      var attr = document.documentElement.getAttribute('data-theme');
+      if (attr === 'dark') return true;
+      if (attr === 'light') return false;
+      return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+
+    function resize() {
+      var hero = canvas.parentElement;
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      w = hero.offsetWidth;
+      h = hero.offsetHeight;
+      canvas.width = w * dpr;
+      canvas.height = h * dpr;
+      canvas.style.width = w + 'px';
+      canvas.style.height = h + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      var count = Math.max(18, Math.round((w * h) / 42000));
+      points = [];
+      for (var i = 0; i < count; i++) {
+        points.push({
+          x: Math.random() * w,
+          y: Math.random() * h,
+          vx: (Math.random() - 0.5) * 0.12,
+          vy: (Math.random() - 0.5) * 0.12
+        });
+      }
+    }
+
+    function tick() {
+      ctx.clearRect(0, 0, w, h);
+      var lineColor = isDark() ? 'rgba(249,248,245,' : 'rgba(26,23,18,';
+      var dotColor = 'rgba(201,168,76,0.6)';
+
+      for (var i = 0; i < points.length; i++) {
+        var p = points[i];
+        if (!reduceMotion) {
+          p.x += p.vx; p.y += p.vy;
+          if (p.x < 0 || p.x > w) p.vx *= -1;
+          if (p.y < 0 || p.y > h) p.vy *= -1;
+        }
+      }
+      for (var i = 0; i < points.length; i++) {
+        for (var j = i + 1; j < points.length; j++) {
+          var a = points[i], b = points[j];
+          var dx = a.x - b.x, dy = a.y - b.y;
+          var dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 140) {
+            ctx.strokeStyle = lineColor + (1 - dist / 140) * 0.14 + ')';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
+            ctx.stroke();
+          }
+        }
+      }
+      for (var i = 0; i < points.length; i++) {
+        ctx.fillStyle = dotColor;
+        ctx.beginPath();
+        ctx.arc(points[i].x, points[i].y, 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      if (!reduceMotion) requestAnimationFrame(tick);
+    }
+
+    resize();
+    tick();
+    window.addEventListener('resize', resize);
+  }
+})();
+</script>
+</body>
+</html>
