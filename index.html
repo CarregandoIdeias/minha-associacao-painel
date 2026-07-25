@@ -6,6 +6,7 @@
 <title>Minha Associação — Painel</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
   :root {
     --bg: #F7F5EF;
@@ -122,8 +123,8 @@
 
   .content-area {
     flex: 1;
+    min-width: 0;
     padding: 32px 40px;
-    max-width: 1100px;
   }
 
   .page-header {
@@ -217,6 +218,10 @@
   .kpi-card .rotulo { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); }
   .kpi-card.ativo .valor { color: var(--success); }
   .kpi-card.inadimplente .valor { color: var(--warning); }
+
+  .graficos { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-bottom: 28px; }
+  .grafico-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 20px; box-shadow: var(--shadow); }
+  .grafico-card h4 { font-size: 14px; font-weight: 600; margin-bottom: 14px; }
 
   .painel {
     background: var(--bg-card);
@@ -646,6 +651,16 @@
           <div class="rotulo">Inadimplentes</div>
           <div class="valor" id="kpi-inadimplentes">0</div>
         </div>
+        <div class="kpi-card">
+          <div class="rotulo">Novos (7 dias)</div>
+          <div class="valor" id="kpi-novos-semana">0</div>
+        </div>
+      </div>
+      <div class="graficos">
+        <div class="grafico-card">
+          <h4>Novos associados (últimos 7 dias)</h4>
+          <div style="height:220px;"><canvas id="grafico-novos-associados"></canvas></div>
+        </div>
       </div>
       <div class="painel">
         <div class="painel-header">
@@ -1008,6 +1023,7 @@
     }
   })();
   var associadosCache = [];
+  var graficoNovosAssociados = null;
 
   // Converte texto tipo "150,00" ou "150.00" em número
   function parseMoney(texto) {
@@ -1091,6 +1107,7 @@
   document.getElementById('btn-tema').onclick = function() {
     var atual = document.documentElement.getAttribute('data-theme');
     aplicarTema(atual === 'dark' ? 'light' : 'dark');
+    if (associadosCache.length || graficoNovosAssociados) atualizarGraficoNovosAssociados(associadosCache);
   };
 
   // ---------- Toast ----------
@@ -1402,7 +1419,65 @@
     document.getElementById('kpi-total').textContent = lista.length;
     document.getElementById('kpi-ativos').textContent = lista.filter(function(a) { return a.status === 'ativo'; }).length;
     document.getElementById('kpi-inadimplentes').textContent = lista.filter(function(a) { return a.status === 'inadimplente'; }).length;
+    atualizarGraficoNovosAssociados(lista);
     aplicarFiltroAssociados();
+  }
+
+  function coresGrafico() {
+    var estiloEscuro = document.documentElement.getAttribute('data-theme') === 'dark';
+    return {
+      grade: estiloEscuro ? '#2a2a2a' : '#E4E0D2',
+      texto: estiloEscuro ? '#888888' : '#6B6558',
+      linha: '#C9A84C'
+    };
+  }
+
+  var DIAS_SEMANA_PT = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+
+  function chaveDataLocal(d) {
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+
+  function atualizarGraficoNovosAssociados(lista) {
+    var hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+
+    // Últimos 7 dias (hoje incluso), um balde por dia
+    var dias = [];
+    for (var i = 6; i >= 0; i--) {
+      var d = new Date(hoje);
+      d.setDate(d.getDate() - i);
+      dias.push(d);
+    }
+
+    var contagens = dias.map(function(d) {
+      var chaveDia = chaveDataLocal(d);
+      return lista.filter(function(a) {
+        return a.data_ingresso && a.data_ingresso.substring(0, 10) === chaveDia;
+      }).length;
+    });
+
+    document.getElementById('kpi-novos-semana').textContent = contagens.reduce(function(a, b) { return a + b; }, 0);
+
+    var labels = dias.map(function(d) { return DIAS_SEMANA_PT[d.getDay()] + ' ' + String(d.getDate()).padStart(2, '0'); });
+    var cores = coresGrafico();
+
+    if (graficoNovosAssociados) graficoNovosAssociados.destroy();
+    graficoNovosAssociados = new Chart(document.getElementById('grafico-novos-associados'), {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{ data: contagens, backgroundColor: cores.linha, borderRadius: 6 }]
+      },
+      options: {
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { color: cores.texto }, grid: { display: false } },
+          y: { ticks: { color: cores.texto, precision: 0 }, grid: { color: cores.grade }, beginAtZero: true }
+        }
+      }
+    });
   }
 
   function aplicarFiltroAssociados() {
