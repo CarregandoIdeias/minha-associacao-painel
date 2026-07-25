@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Minha Associação — Painel</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <style>
   :root {
@@ -40,7 +40,7 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Poppins', sans-serif;
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
@@ -64,8 +64,7 @@
   }
 
   .sidebar .logo {
-    font-family: 'Playfair Display', serif;
-    font-weight: 900;
+    font-weight: 800;
     font-size: 19px;
     padding: 0 10px 28px 10px;
     display: flex;
@@ -133,7 +132,7 @@
     align-items: center;
     margin-bottom: 24px;
   }
-  .page-header h1 { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 700; }
+  .page-header h1 { font-size: 24px; font-weight: 700; }
 
   .btn {
     background: var(--accent);
@@ -155,6 +154,8 @@
     border: 1px solid var(--border);
   }
   .btn-ghost:hover { background: var(--accent-soft); color: var(--accent); }
+  .btn-perigo { background: var(--danger); color: #fff; }
+  .btn-perigo:hover { background: #c0392b; }
 
   /* ---------- Tela de login ---------- */
   #tela-login, #tela-esqueci-senha, #tela-redefinir-senha, #tela-trocar-senha-obrigatoria {
@@ -166,7 +167,7 @@
     padding: 36px;
     box-shadow: var(--shadow);
   }
-  #tela-login h2 { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+  #tela-login h2 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
   #tela-login p.sub { color: var(--text-muted); font-size: 13px; margin-bottom: 24px; }
 
   .campo { margin-bottom: 16px; }
@@ -212,7 +213,7 @@
     padding: 20px;
     box-shadow: var(--shadow);
   }
-  .kpi-card .valor { font-family: 'JetBrains Mono', monospace; font-size: 26px; font-weight: 600; margin-top: 4px; color: var(--accent); }
+  .kpi-card .valor { font-size: 26px; font-weight: 700; margin-top: 4px; color: var(--accent); }
   .kpi-card .rotulo { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); }
   .kpi-card.ativo .valor { color: var(--success); }
   .kpi-card.inadimplente .valor { color: var(--warning); }
@@ -912,6 +913,18 @@
   </div>
 </div>
 
+<!-- ===== MODAL DE CONFIRMAÇÃO (genérico, usado por qualquer ação) ===== -->
+<div class="overlay" id="overlay-modal-confirmacao">
+  <div class="modal">
+    <h3 id="titulo-modal-confirmacao">Confirmar ação</h3>
+    <p id="texto-modal-confirmacao" style="font-size:13.5px; color:var(--text-muted); line-height:1.5;"></p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="btn-cancelar-confirmacao">Cancelar</button>
+      <button class="btn" id="btn-confirmar-confirmacao">Confirmar</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -1407,22 +1420,28 @@
   }
 
   function excluirAssociado(id) {
-    if (!confirm('Tem certeza que deseja excluir esse associado? Isso também remove as cobranças relacionadas.')) return;
-
-    fetch(API_URL + '/associados/' + id, {
-      method: 'DELETE',
-      headers: { 'Authorization': 'Bearer ' + estado.token }
-    })
-    .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
-    .then(function(res) {
-      if (!res.ok) {
-        mostrarToast(res.data.erro || 'Erro ao excluir associado', true);
-        return;
+    confirmarAcao({
+      titulo: 'Excluir associado',
+      mensagem: 'Tem certeza que deseja excluir esse associado? Isso também remove as cobranças relacionadas.',
+      textoConfirmar: 'Excluir',
+      perigo: true,
+      aoConfirmar: function() {
+        fetch(API_URL + '/associados/' + id, {
+          method: 'DELETE',
+          headers: { 'Authorization': 'Bearer ' + estado.token }
+        })
+        .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
+        .then(function(res) {
+          if (!res.ok) {
+            mostrarToast(res.data.erro || 'Erro ao excluir associado', true);
+            return;
+          }
+          mostrarToast('Associado excluído.');
+          carregarAssociados();
+        })
+        .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
       }
-      mostrarToast('Associado excluído.');
-      carregarAssociados();
-    })
-    .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
+    });
   }
 
   function escapeHtml(texto) {
@@ -1430,6 +1449,23 @@
     div.textContent = texto;
     return div.innerHTML;
   }
+
+  // Modal de confirmação genérico — substitui o confirm() nativo do navegador
+  function confirmarAcao(opcoes) {
+    document.getElementById('titulo-modal-confirmacao').textContent = opcoes.titulo || 'Confirmar ação';
+    document.getElementById('texto-modal-confirmacao').textContent = opcoes.mensagem;
+    var btnConfirmar = document.getElementById('btn-confirmar-confirmacao');
+    btnConfirmar.textContent = opcoes.textoConfirmar || 'Confirmar';
+    btnConfirmar.className = 'btn' + (opcoes.perigo ? ' btn-perigo' : '');
+    btnConfirmar.onclick = function() {
+      document.getElementById('overlay-modal-confirmacao').style.display = 'none';
+      opcoes.aoConfirmar();
+    };
+    document.getElementById('overlay-modal-confirmacao').style.display = 'flex';
+  }
+  document.getElementById('btn-cancelar-confirmacao').onclick = function() {
+    document.getElementById('overlay-modal-confirmacao').style.display = 'none';
+  };
 
   function formatarData(iso) {
     if (!iso) return '—';
@@ -1717,41 +1753,53 @@
   }
 
   function excluirCobranca(id) {
-    if (!confirm('Tem certeza que deseja excluir essa cobrança?')) return;
-
-    fetch(API_URL + '/cobrancas/' + id, {
-      method: 'DELETE',
-      headers: { 'Authorization': 'Bearer ' + estado.token }
-    })
-    .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
-    .then(function(res) {
-      if (!res.ok) {
-        mostrarToast(res.data.erro || 'Erro ao excluir cobrança', true);
-        return;
+    confirmarAcao({
+      titulo: 'Excluir cobrança',
+      mensagem: 'Tem certeza que deseja excluir essa cobrança?',
+      textoConfirmar: 'Excluir',
+      perigo: true,
+      aoConfirmar: function() {
+        fetch(API_URL + '/cobrancas/' + id, {
+          method: 'DELETE',
+          headers: { 'Authorization': 'Bearer ' + estado.token }
+        })
+        .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
+        .then(function(res) {
+          if (!res.ok) {
+            mostrarToast(res.data.erro || 'Erro ao excluir cobrança', true);
+            return;
+          }
+          mostrarToast('Cobrança excluída.');
+          carregarCobrancas();
+        })
+        .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
       }
-      mostrarToast('Cobrança excluída.');
-      carregarCobrancas();
-    })
-    .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
+    });
   }
 
   function estornarPagamento(id) {
-    if (!confirm('Estornar esse pagamento? A cobrança volta para "pendente" e o associado poderá pagar novamente.')) return;
-
-    fetch(API_URL + '/cobrancas/' + id + '/estornar', {
-      method: 'PATCH',
-      headers: { 'Authorization': 'Bearer ' + estado.token }
-    })
-    .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
-    .then(function(res) {
-      if (!res.ok) {
-        mostrarToast(res.data.erro || 'Erro ao estornar pagamento', true);
-        return;
+    confirmarAcao({
+      titulo: 'Estornar pagamento',
+      mensagem: 'Estornar esse pagamento? A cobrança volta para "pendente" e o associado poderá pagar novamente.',
+      textoConfirmar: 'Estornar',
+      perigo: true,
+      aoConfirmar: function() {
+        fetch(API_URL + '/cobrancas/' + id + '/estornar', {
+          method: 'PATCH',
+          headers: { 'Authorization': 'Bearer ' + estado.token }
+        })
+        .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
+        .then(function(res) {
+          if (!res.ok) {
+            mostrarToast(res.data.erro || 'Erro ao estornar pagamento', true);
+            return;
+          }
+          mostrarToast('Pagamento estornado. A cobrança voltou para pendente.');
+          carregarCobrancas();
+        })
+        .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
       }
-      mostrarToast('Pagamento estornado. A cobrança voltou para pendente.');
-      carregarCobrancas();
-    })
-    .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
+    });
   }
 
   // ---------- Modal Ver comprovante (admin/diretoria) ----------
@@ -1924,22 +1972,28 @@
   }
 
   function excluirComunicado(id) {
-    if (!confirm('Tem certeza que deseja excluir esse comunicado?')) return;
-
-    fetch(API_URL + '/comunicados/' + id, {
-      method: 'DELETE',
-      headers: { 'Authorization': 'Bearer ' + estado.token }
-    })
-    .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
-    .then(function(res) {
-      if (!res.ok) {
-        mostrarToast(res.data.erro || 'Erro ao excluir comunicado', true);
-        return;
+    confirmarAcao({
+      titulo: 'Excluir comunicado',
+      mensagem: 'Tem certeza que deseja excluir esse comunicado?',
+      textoConfirmar: 'Excluir',
+      perigo: true,
+      aoConfirmar: function() {
+        fetch(API_URL + '/comunicados/' + id, {
+          method: 'DELETE',
+          headers: { 'Authorization': 'Bearer ' + estado.token }
+        })
+        .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
+        .then(function(res) {
+          if (!res.ok) {
+            mostrarToast(res.data.erro || 'Erro ao excluir comunicado', true);
+            return;
+          }
+          mostrarToast('Comunicado excluído.');
+          carregarComunicados();
+        })
+        .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
       }
-      mostrarToast('Comunicado excluído.');
-      carregarComunicados();
-    })
-    .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
+    });
   }
 
   function formatarDataHora(iso) {
@@ -2082,22 +2136,28 @@
   }
 
   function excluirUsuario(id) {
-    if (!confirm('Tem certeza que deseja excluir esse usuário permanentemente?')) return;
-
-    fetch(API_URL + '/usuarios/' + id, {
-      method: 'DELETE',
-      headers: { 'Authorization': 'Bearer ' + estado.token }
-    })
-    .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
-    .then(function(res) {
-      if (!res.ok) {
-        mostrarToast(res.data.erro || 'Erro ao excluir usuário', true);
-        return;
+    confirmarAcao({
+      titulo: 'Excluir usuário',
+      mensagem: 'Tem certeza que deseja excluir esse usuário permanentemente?',
+      textoConfirmar: 'Excluir',
+      perigo: true,
+      aoConfirmar: function() {
+        fetch(API_URL + '/usuarios/' + id, {
+          method: 'DELETE',
+          headers: { 'Authorization': 'Bearer ' + estado.token }
+        })
+        .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
+        .then(function(res) {
+          if (!res.ok) {
+            mostrarToast(res.data.erro || 'Erro ao excluir usuário', true);
+            return;
+          }
+          mostrarToast('Usuário excluído.');
+          carregarUsuarios();
+        })
+        .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
       }
-      mostrarToast('Usuário excluído.');
-      carregarUsuarios();
-    })
-    .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
+    });
   }
 
   function atualizarCampoVinculoAssociado() {
