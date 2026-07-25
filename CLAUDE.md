@@ -31,6 +31,18 @@ esquecer e dar push com a produção apontando para localhost.
 - Sessão fica em `localStorage` (`sessao_painel`: `{ token, papel }`) e é
   revalidada contra o backend a cada carregamento de página.
 
+## Super Admin — mudanças recentes (24/07/2026)
+
+Reformulação completa do painel Super Admin com sidebar navegável (Dashboard
++ Associações). Backend ganha `utils/precos.js` com tabela de planos
+(trial/basico/profissional/enterprise) e cálculo de MRR por associação.
+Migration aditiva no banco: `cep, site, valor_mensalidade_manual,
+vencimento_assinatura, forma_cobranca` em `associacoes`; `cpf` em `usuarios`.
+Dashboard novo com 7 KPIs + 4 gráficos + alertas em tempo real. Formulário
+de associação estendido. Todos os `confirm()` nativos trocados por modal
+próprio via `confirmarAcao()` — função genérica reutilizável para qualquer
+ação futura que precise confirmação.
+
 ## Convenções
 
 - Sem framework/bundler — tudo inline (CSS e JS dentro do próprio HTML).
@@ -39,3 +51,6 @@ esquecer e dar push com a produção apontando para localhost.
 - Padrão de modal "credenciais geradas" (senha provisória mostrada uma
   única vez, com botão de copiar) se repete em vários fluxos — reaproveitar
   o mesmo padrão visual/JS ao criar um novo, não inventar outro.
+- Super Admin: `confirmarAcao({ titulo, mensagem, textoConfirmar, perigo, aoConfirmar })`
+  centraliza confirmações — qualquer nova ação destrutiva deve usar isso,
+  não `confirm()` nativo.
