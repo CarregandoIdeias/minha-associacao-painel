@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Super Admin — Carregando Ideias</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
   :root {
@@ -20,10 +20,10 @@
     --shadow: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; transition: background .2s, color .2s; }
+  body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; transition: background .2s, color .2s; }
 
   #tela-login { max-width: 420px; margin: 80px auto; background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 36px; box-shadow: var(--shadow); }
-  #tela-login h2 { font-family: 'Playfair Display', serif; font-size: 22px; margin-bottom: 6px; }
+  #tela-login h2 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
   #tela-login p.sub { color: var(--text-muted); font-size: 13px; margin-bottom: 24px; }
   #erro-login { color: var(--danger); font-size: 13px; margin-top: 10px; display: none; }
 
@@ -40,9 +40,9 @@
   .btn-pequeno:hover { background: var(--accent); color: #0A0A0A; }
 
   header { display: flex; justify-content: space-between; align-items: center; padding: 18px 32px; background: var(--bg-card); border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 10px; }
-  .saudacao { font-family: 'Playfair Display', serif; font-size: 19px; font-weight: 700; }
-  .saudacao .data { font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 400; color: var(--text-muted); margin-top: 2px; }
-  .logo { font-family: 'Playfair Display', serif; font-weight: 900; font-size: 14px; color: var(--accent); }
+  .saudacao { font-size: 19px; font-weight: 700; }
+  .saudacao .data { font-size: 13px; font-weight: 400; color: var(--text-muted); margin-top: 2px; }
+  .logo { font-weight: 800; font-size: 14px; color: var(--accent); }
   .logo span { color: var(--text); }
   .theme-toggle { background: var(--accent-soft); border: none; border-radius: 10px; width: 38px; height: 38px; font-size: 16px; cursor: pointer; color: var(--accent); }
 
@@ -71,7 +71,7 @@
   .btn-recolher-sidebar svg { width: 16px; height: 16px; transition: transform .2s; display: block; }
   .sidebar.recolhida { width: 76px; }
   .sidebar.recolhida .btn-recolher-sidebar svg { transform: rotate(180deg); }
-  .sidebar.recolhida .logo .logo-texto,
+  .sidebar.recolhida .logo,
   .sidebar.recolhida .rotulo-nav { display: none; }
   .sidebar.recolhida .nav-item { justify-content: center; padding: 11px; }
   .sidebar.recolhida .sidebar-footer { flex-direction: column; }
@@ -89,13 +89,14 @@
 
   .sidebar-footer { margin-top: auto; display: flex; align-items: center; gap: 8px; padding-top: 16px; border-top: 1px solid var(--border); }
 
-  .content-area { flex: 1; min-width: 0; padding: 32px 40px; max-width: 1300px; }
+  .content-area { flex: 1; min-width: 0; padding: 32px 40px; }
   .secao-conteudo { display: none; }
   .secao-conteudo.ativa { display: block; }
 
   .topo-conteudo { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 14px; }
   .topo-acoes { display: flex; align-items: center; gap: 12px; }
 
+  .notificacao-wrapper { position: relative; }
   .btn-notificacao {
     position: relative; background: var(--accent-soft); border: none; border-radius: 10px;
     width: 38px; height: 38px; display: flex; align-items: center; justify-content: center;
@@ -107,6 +108,15 @@
     font-weight: 700; border-radius: 10px; min-width: 16px; height: 16px; display: flex; align-items: center;
     justify-content: center; padding: 0 3px; line-height: 1;
   }
+  .dropdown-notificacoes {
+    display: none; position: absolute; top: calc(100% + 10px); right: 0; width: 340px; max-width: 85vw;
+    max-height: 420px; overflow-y: auto; background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 14px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); z-index: 60;
+  }
+  .dropdown-notificacoes.aberto { display: block; }
+  .dropdown-notificacoes-header { font-size: 13px; font-weight: 700; padding: 14px 18px; border-bottom: 1px solid var(--border); }
+  .dropdown-notificacoes .alerta-item { padding: 12px 18px; }
+  .dropdown-notificacoes .vazio { padding: 24px; font-size: 13px; }
 
   .perfil-chip { display: flex; align-items: center; gap: 8px; padding: 6px 12px 6px 6px; border-radius: 20px; background: var(--accent-soft); }
   .avatar-mini { width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: #0A0A0A; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; flex-shrink: 0; }
@@ -139,12 +149,30 @@
     .sidebar.recolhida .rotulo-nav { display: inline; }
     .sidebar-footer { margin-top: 0; border-top: none; padding-top: 0; margin-left: auto; }
     .content-area { padding: 16px; }
+    .topo-conteudo { margin-bottom: 18px; }
+    .nome-mini { display: none; }
+    .perfil-chip { padding: 6px; }
+    .dropdown-notificacoes { right: -60px; }
+  }
+  @media (max-width: 480px) {
+    .kpis { grid-template-columns: 1fr 1fr; }
+    .kpi-card { padding: 14px; }
+    .kpi-card .valor { font-size: 20px; }
+    .saudacao { font-size: 16px; }
+    th, td { padding: 10px 14px; font-size: 13px; }
+    .painel-header { padding: 14px 16px; }
+    .filtros-associacoes { padding: 14px 16px; }
+    .filtros-associacoes input, .filtros-associacoes select { min-width: 0; }
+    .modal { padding: 20px; }
+    .modal-actions { flex-direction: column-reverse; }
+    .modal-actions .btn, .modal-actions .btn-ghost { width: 100%; }
+    .dropdown-notificacoes { width: 92vw; right: -70px; }
   }
 
   .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-bottom: 28px; }
   .kpi-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 18px; box-shadow: var(--shadow); }
   .kpi-card .rotulo { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); }
-  .kpi-card .valor { font-family: 'JetBrains Mono', monospace; font-size: 24px; font-weight: 600; margin-top: 4px; color: var(--accent); }
+  .kpi-card .valor { font-size: 24px; font-weight: 700; margin-top: 4px; color: var(--accent); }
   .kpi-card.alerta .valor { color: var(--warning); }
   .kpi-card.perigo .valor { color: var(--danger); }
 
@@ -153,8 +181,8 @@
   .painel-header h3 { font-size: 15px; font-weight: 600; }
 
   #tabela-associacoes-container { overflow-x: auto; }
-  table { width: 100%; border-collapse: collapse; min-width: 1100px; }
-  th, td { text-align: left; padding: 14px 22px; font-size: 14px; border-bottom: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; min-width: 980px; }
+  th, td { text-align: left; padding: 14px 16px; font-size: 14px; border-bottom: 1px solid var(--border); }
   th { color: var(--text-muted); font-weight: 500; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
   tr:last-child td { border-bottom: none; }
 
@@ -166,7 +194,7 @@
 
   .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); align-items: center; justify-content: center; z-index: 50; }
   .modal { background: var(--bg-card); border-radius: 16px; padding: 28px; width: 92%; max-width: 480px; box-shadow: var(--shadow); max-height: 90vh; overflow-y: auto; }
-  .modal h3 { font-family: 'Playfair Display', serif; margin-bottom: 18px; font-size: 18px; }
+  .modal h3 { font-weight: 700; margin-bottom: 18px; font-size: 18px; }
   .modal-actions { display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end; }
 
   .toast { position: fixed; bottom: 24px; right: 24px; left: 24px; max-width: 380px; margin-left: auto; background: var(--accent); color: #0A0A0A; padding: 12px 20px; border-radius: 10px; font-size: 14px; font-weight: 600; box-shadow: var(--shadow); opacity: 0; transform: translateY(10px); transition: all .25s; z-index: 100; }
@@ -188,7 +216,7 @@
 
   #tela-detalhe-associacao { display: none; }
   .detalhe-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
-  .detalhe-header h1 { font-family: 'Playfair Display', serif; font-size: 22px; }
+  .detalhe-header h1 { font-weight: 700; font-size: 22px; }
 
   .abas-detalhe { display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 1px solid var(--border); overflow-x: auto; }
   .aba-detalhe {
@@ -219,7 +247,7 @@
     <button class="btn-recolher-sidebar" id="btn-recolher-sidebar" title="Recolher menu">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
     </button>
-    <div class="logo">Carregando<span class="logo-texto">Ideias</span></div>
+    <div class="logo">Super Admin</div>
 
     <button class="nav-item ativa" id="aba-dashboard">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
@@ -244,10 +272,16 @@
         <div class="data" id="texto-data"></div>
       </div>
       <div class="topo-acoes">
-        <button class="btn-notificacao" id="btn-notificacoes" title="Alertas">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-          <span class="badge-notificacao" id="badge-notificacoes" style="display:none;">0</span>
-        </button>
+        <div class="notificacao-wrapper">
+          <button class="btn-notificacao" id="btn-notificacoes" title="Alertas">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <span class="badge-notificacao" id="badge-notificacoes" style="display:none;">0</span>
+          </button>
+          <div class="dropdown-notificacoes" id="dropdown-notificacoes">
+            <div class="dropdown-notificacoes-header">Alertas</div>
+            <div id="lista-alertas-dropdown"><div class="vazio">Nenhum alerta no momento.</div></div>
+          </div>
+        </div>
         <div class="perfil-chip">
           <div class="avatar-mini" id="avatar-superadmin">A</div>
           <span class="nome-mini" id="nome-superadmin">Administrador</span>
@@ -571,10 +605,16 @@
     document.getElementById('sidebar-superadmin').classList.add('recolhida');
   }
 
-  document.getElementById('btn-notificacoes').onclick = function() {
-    ativarSecaoSuperAdmin('dashboard');
-    document.getElementById('painel-alertas').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.getElementById('btn-notificacoes').onclick = function(e) {
+    e.stopPropagation();
+    document.getElementById('dropdown-notificacoes').classList.toggle('aberto');
   };
+  document.addEventListener('click', function(e) {
+    var dropdown = document.getElementById('dropdown-notificacoes');
+    if (dropdown.classList.contains('aberto') && !dropdown.contains(e.target) && e.target.id !== 'btn-notificacoes') {
+      dropdown.classList.remove('aberto');
+    }
+  });
 
   function entrarNoDashboard() {
     document.getElementById('tela-login').style.display = 'none';
@@ -710,14 +750,14 @@
       badge.style.display = 'none';
     }
 
-    var container = document.getElementById('lista-alertas');
-    if (alertas.length === 0) {
-      container.innerHTML = '<div class="vazio">Nenhum alerta no momento.</div>';
-      return;
-    }
-    container.innerHTML = alertas.map(function(a) {
-      return '<div class="alerta-item"><span class="alerta-ponto ' + a.nivel + '"></span><span>' + escapeHtml(a.texto) + '</span></div>';
-    }).join('');
+    var html = alertas.length === 0
+      ? '<div class="vazio">Nenhum alerta no momento.</div>'
+      : alertas.map(function(a) {
+          return '<div class="alerta-item"><span class="alerta-ponto ' + a.nivel + '"></span><span>' + escapeHtml(a.texto) + '</span></div>';
+        }).join('');
+
+    document.getElementById('lista-alertas').innerHTML = html;
+    document.getElementById('lista-alertas-dropdown').innerHTML = html;
   }
 
   function desenharGraficos(crescimento, novosAssociados, receitaHistorico, distribuicaoPlanos) {
