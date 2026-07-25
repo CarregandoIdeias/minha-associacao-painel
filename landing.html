@@ -143,6 +143,7 @@
     padding: 3px 7px 2px; border-radius: 4px; transform: translateY(-6px);
   }
   .ap-nav-links { display: flex; align-items: center; gap: 32px; }
+  .ap-nav-links-inner { display: flex; align-items: center; gap: 32px; }
   .ap-nav-links a { text-decoration: none; color: var(--text-muted); font-size: 14.5px; font-weight: 500; transition: color .15s; }
   .ap-nav-links a:hover { color: var(--text); }
   body .ap-nav-cta {
@@ -155,6 +156,10 @@
   @media (max-width: 780px) {
     .ap-nav-links-inner { display: none; }
     .ap-nav-links { gap: 12px; }
+  }
+  @media (max-width: 400px) {
+    .ap-mark { font-size: 17px; }
+    body .ap-nav-cta { padding: 9px 12px; font-size: 12.5px; }
   }
 
   /* ---------- hero ---------- */
@@ -360,7 +365,7 @@
     <div class="ap-shell ap-nav-row">
       <div class="ap-mark">ASSOCIA<span class="ap-plus">PLUS</span></div>
       <div class="ap-nav-links">
-        <div class="ap-nav-links-inner" style="display:flex; align-items:center; gap:32px;">
+        <div class="ap-nav-links-inner">
           <a href="#recursos">Recursos</a>
           <a href="#planos">Planos</a>
           <a href="#faq">Perguntas frequentes</a>
