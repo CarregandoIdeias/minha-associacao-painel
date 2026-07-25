@@ -10,18 +10,28 @@ de dados, segurança). Este README cobre só o front-end.
 
 ## Arquivos
 
-- `index.html` — painel da associação (admin/diretoria/associado). Login,
-  dashboard, associados, financeiro, comunicados, usuários, configurações,
-  meu perfil, portal do associado — tudo num arquivo só, com abas
-  mostradas/escondidas por papel. Header fixo no topo (saudação, e-mail,
-  avatar, menu de perfil) acima do conteúdo de cada seção — ver "Header e
-  Meu Perfil" abaixo. Menu lateral, sem submenus: Dashboard (tela inicial,
-  ver seção própria abaixo) → Associados → Financeiro → Comunicados →
-  Usuários → Configurações. Em tablet/celular a sidebar vira um menu
-  off-canvas com botão hambúrguer (☰), ver seção "Layout e
-  responsividade".
+- `index.html` — painel da associação (admin/diretoria). Login, dashboard,
+  associados, financeiro, comunicados, usuários, configurações, meu
+  perfil. Header fixo no topo (saudação, e-mail, avatar, menu de perfil)
+  acima do conteúdo de cada seção — ver "Header e Meu Perfil" abaixo. Menu
+  lateral, sem submenus: Dashboard (tela inicial, ver seção própria
+  abaixo) → Associados → Financeiro → Comunicados → Usuários →
+  Configurações. Em tablet/celular a sidebar vira um menu off-canvas com
+  botão hambúrguer (☰), ver seção "Layout e responsividade". Login
+  rejeita contas com papel `associado` (mensagem aponta para
+  `portal.html`) — ver seção "Separação do Portal do Associado" abaixo.
+- `portal.html` — Portal do Associado, arquivo próprio desde 25/07/2026
+  (ver seção "Separação do Portal do Associado" abaixo). Login separado
+  (rejeita papéis que não sejam `associado`), sessão própria
+  (`sessao_portal` no `localStorage`, isolada de `sessao_painel`). Sidebar
+  enxuta: Meus Dados (tela inicial — cadastro, foto, cobranças, pagamento
+  via Pix com upload de comprovante) e Comunicados (mural só leitura, sem
+  botão de publicar). Mesmo sistema visual do `index.html` (cores,
+  tipografia, sidebar off-canvas no mobile), CSS trimado do que é
+  específico do painel administrativo (KPIs, gráficos, tabela de
+  associados etc.) — não tem Chart.js, só o gerador de QR Pix.
 - `superadmin.html` — painel do Super Admin (dono da plataforma). Login
-  separado do painel da associação. Layout com sidebar navegável
+  separado dos outros dois arquivos. Layout com sidebar navegável
   (Dashboard + Associações). Dashboard agregado com 7 KPIs, 4 gráficos
   (crescimento, novos associados, receita, distribuição por plano),
   últimas associações e alertas em tempo real (vencimentos, mensalidades
@@ -29,17 +39,49 @@ de dados, segurança). Este README cobre só o front-end.
   cidade, UF, plano, status) e formulário estendido (plano contratado,
   vencimento, forma de cobrança, logo/CEP/site, CPF responsável).
 
+## Separação do Portal do Associado (25/07/2026)
+
+Antes dessa mudança, o associado fazia login pelo mesmo `index.html` do
+admin/diretoria — o JS escondia/mostrava abas em runtime conforme
+`estado.papel === 'associado'` (`entrarNoDashboard()`). Isso significava
+que todo associado baixava e executava o código inteiro de administração
+(associados, financeiro, usuários, configurações) mesmo sem acesso a
+nada disso, e qualquer mudança no painel admin arriscava quebrar por
+engano a tela do associado por estarem no mesmo arquivo.
+
+Passou a seguir o mesmo padrão que `superadmin.html` já usava: arquivo
+próprio (`portal.html`), com login e sessão isolados. `index.html` agora
+recusa login de contas com papel `associado` (mensagem de erro aponta
+para o portal); `portal.html` recusa login de qualquer papel que não
+seja `associado`. Sessões salvas antes da mudança (`sessao_painel` com
+`papel: 'associado'`) são detectadas e limpas na restauração de sessão
+do `index.html`, forçando novo login (que agora vai barrar e orientar a
+pessoa a usar `portal.html`).
+
+O backend não mudou nada — `routes/portal.js` já era um módulo à parte,
+só consumido pelo papel `associado` (`autorizar('associado')`), então
+essa separação foi só de front-end.
+
+`abrirModalPix()` em `index.html` foi simplificada: antes tinha um modo
+duplo (`modoAdmin`) que também servia o fluxo de autoatendimento do
+associado (upload de comprovante); agora serve só a visualização do QR
+pela diretoria (sem upload — isso já era escondido em modo admin, só que
+agora o bloco de upload nem existe mais no HTML). O fluxo de pagamento
+completo (QR + copia-e-cola + upload de comprovante) vive só em
+`portal.html`.
+
 ## Hospedagem
 
-Vercel, mesmo domínio para os dois arquivos:
+Vercel, mesmo domínio para os três arquivos:
 - `https://minha-associacao-painel.vercel.app/` → `index.html`
+- `https://minha-associacao-painel.vercel.app/portal.html`
 - `https://minha-associacao-painel.vercel.app/superadmin.html`
 
 Deploy automático a cada push no GitHub (branch `main`).
 
 ## Configuração
 
-Cada arquivo tem, no topo do `<script>`, uma constante:
+Cada um dos três arquivos tem, no topo do `<script>`, uma constante:
 
 ```js
 var API_URL = 'https://minha-associacao-backend.onrender.com';
@@ -183,9 +225,19 @@ na associação permite sobrescrever — útil para negociações customizadas.
 - Estilo consistente em todo o arquivo: `var` e `function() {}` em vez de
   `const`/`let`/arrow functions — manter esse padrão ao editar.
 - Toda chamada à API inclui `Authorization: Bearer <token>` a partir de
-  `estado.token`; sessão persiste em `localStorage` (`sessao_painel`).
+  `estado.token`; sessão persiste em `localStorage` — cada arquivo com sua
+  própria chave (`sessao_painel` em `index.html`, `sessao_portal` em
+  `portal.html`, `sessao_superadmin` em `superadmin.html`), sem
+  compartilhar sessão entre si.
 - Modais de confirmação para ações destrutivas usam `confirmarAcao()`
-  reutilizável — implementada nos dois arquivos (`index.html` e
-  `superadmin.html`), não `confirm()` nativo. Assinatura:
+  reutilizável — implementada em `index.html` e `superadmin.html` (não em
+  `portal.html`, que não tem ações destrutivas), não `confirm()` nativo.
+  Assinatura:
   `confirmarAcao({ titulo, mensagem, textoConfirmar, perigo, aoConfirmar })`;
   `perigo: true` deixa o botão de confirmação vermelho (`.btn-perigo`).
+- Cada um dos três arquivos é autocontido (login, sessão, layout
+  próprios) por papel de usuário — não por associação; o isolamento entre
+  associações continua sendo feito pelo backend (RLS), não pelo
+  front-end. Ao criar um padrão visual/JS novo num desses arquivos que
+  fizer sentido nos outros, reaproveitar copiando o trecho (sem
+  bundler/import, cada arquivo é independente).

@@ -497,20 +497,6 @@
     gap: 20px;
     margin-bottom: 18px;
   }
-  .avatar-associado {
-    width: 84px;
-    height: 84px;
-    border-radius: 50%;
-    background: var(--accent-soft);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    flex-shrink: 0;
-    border: 2px solid var(--border);
-  }
-  .avatar-associado img { width: 100%; height: 100%; object-fit: cover; }
-  .avatar-associado svg { width: 36px; height: 36px; color: var(--accent); }
 
   /* ---------- Modal ---------- */
   .overlay {
@@ -557,11 +543,11 @@
 
   /* ---------- Responsividade: tabelas com rolagem horizontal ---------- */
   #tabela-container, #tabela-cobrancas-container, #tabela-usuarios-container,
-  #tabela-minhas-cobrancas-container, #lista-comunicados-container {
+  #lista-comunicados-container {
     overflow-x: auto;
   }
   #tabela-container table, #tabela-cobrancas-container table,
-  #tabela-usuarios-container table, #tabela-minhas-cobrancas-container table {
+  #tabela-usuarios-container table {
     min-width: 640px;
   }
 
@@ -801,10 +787,6 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/><circle cx="19" cy="8" r="2"/><circle cx="5" cy="8" r="2"/></svg>
       Usuários
     </button>
-    <button class="nav-item" id="aba-meus-dados" style="display:none;">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      Meus Dados
-    </button>
     <button class="nav-item" id="aba-configuracoes" style="display:none;">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       Configurações
@@ -1017,34 +999,6 @@
           <button class="btn" id="btn-novo-usuario">+ Convidar usuário</button>
         </div>
         <div id="tabela-usuarios-container">
-          <div class="vazio">Carregando...</div>
-        </div>
-      </div>
-    </div>
-
-    <div id="secao-meus-dados" style="display:none;">
-      <div class="page-header"><h1>Meus Dados</h1></div>
-      <div class="painel" style="margin-bottom:24px;">
-        <div class="painel-header"><h3>Meu cadastro</h3></div>
-        <div style="padding:22px;">
-          <div class="perfil-topo">
-            <div class="avatar-associado" id="avatar-associado">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            </div>
-            <div>
-              <input type="file" id="input-foto-associado" accept="image/*" style="display:none;">
-              <button class="btn btn-ghost" id="btn-trocar-foto">Trocar foto</button>
-              <p style="font-size:12px; color:var(--text-muted); margin-top:6px;">JPG ou PNG, a imagem será redimensionada automaticamente.</p>
-            </div>
-          </div>
-          <div id="perfil-associado-container">
-            <div class="vazio">Carregando...</div>
-          </div>
-        </div>
-      </div>
-      <div class="painel">
-        <div class="painel-header"><h3>Minhas cobranças</h3></div>
-        <div id="tabela-minhas-cobrancas-container">
           <div class="vazio">Carregando...</div>
         </div>
       </div>
@@ -1317,16 +1271,8 @@
     </div>
     <button class="btn btn-ghost" style="width:100%; margin-bottom:18px;" id="btn-copiar-pix">Copiar código</button>
 
-    <div id="bloco-envio-comprovante-pix">
-      <p style="font-size:13px; font-weight:600; margin-bottom:8px;">Já pagou? Envie o comprovante:</p>
-      <input type="file" id="input-comprovante" accept="image/*,application/pdf" style="display:none;">
-      <button class="btn btn-ghost" style="width:100%;" id="btn-selecionar-comprovante">Escolher arquivo</button>
-      <p id="nome-arquivo-comprovante" style="font-size:12px; color:var(--text-muted); margin-top:6px;"></p>
-    </div>
-
     <div class="modal-actions">
-      <button class="btn btn-ghost" id="btn-fechar-modal-pix">Fechar</button>
-      <button class="btn" id="btn-enviar-comprovante">Enviar comprovante</button>
+      <button class="btn" id="btn-fechar-modal-pix">Fechar</button>
     </div>
   </div>
 </div>
@@ -1702,27 +1648,15 @@
     document.getElementById('tela-dashboard').style.display = 'flex';
     renderizarHeader();
 
-    if (estado.papel === 'associado') {
-      // Associado só vê seus próprios dados — esconde as abas administrativas
-      ['aba-dashboard', 'aba-associados', 'aba-financeiro', 'aba-usuarios', 'aba-configuracoes'].forEach(function(id) {
-        document.getElementById(id).style.display = 'none';
-      });
-      document.getElementById('aba-meus-dados').style.display = 'flex';
-      document.getElementById('btn-novo-comunicado').style.display = 'none';
-      ativarAba('meus-dados');
-      carregarMeusDados();
-      carregarComunicados();
-    } else {
-      if (estado.papel === 'admin') {
-        document.getElementById('aba-usuarios').style.display = 'flex';
-        document.getElementById('aba-configuracoes').style.display = 'flex';
-      }
-      ativarAba('dashboard');
-      carregarAssociados();
-      carregarCobrancas();
-      carregarComunicados();
-      carregarAtividades();
+    if (estado.papel === 'admin') {
+      document.getElementById('aba-usuarios').style.display = 'flex';
+      document.getElementById('aba-configuracoes').style.display = 'flex';
     }
+    ativarAba('dashboard');
+    carregarAssociados();
+    carregarCobrancas();
+    carregarComunicados();
+    carregarAtividades();
   }
 
   function salvarSessao() {
@@ -1746,6 +1680,12 @@
     try {
       var dados = JSON.parse(salva);
       if (!dados.token || !dados.papel) return;
+      if (dados.papel === 'associado') {
+        // Sessão de associado salva antes da separação do Portal do Associado
+        // (portal.html) — não é mais válida nesse arquivo.
+        limparSessao();
+        return;
+      }
 
       estado.token = dados.token;
       estado.papel = dados.papel;
@@ -1797,6 +1737,12 @@
         erroEl.style.display = 'block';
         return;
       }
+      if (res.data.usuario.papel === 'associado') {
+        erroEl.textContent = 'Esta é a área da diretoria. Associados devem acessar pelo Portal do Associado (portal.html).';
+        erroEl.style.display = 'block';
+        return;
+      }
+
       estado.token = res.data.token;
       estado.papel = res.data.usuario.papel;
       estado.nome = res.data.usuario.nome || '';
@@ -2256,7 +2202,7 @@
 
   // ---------- Navegação (sidebar) ----------
   function ativarAba(idAtiva) {
-    ['dashboard', 'associados', 'financeiro', 'comunicados', 'usuarios', 'meus-dados', 'configuracoes', 'meu-perfil'].forEach(function(nome) {
+    ['dashboard', 'associados', 'financeiro', 'comunicados', 'usuarios', 'configuracoes', 'meu-perfil'].forEach(function(nome) {
       var item = document.getElementById('aba-' + nome);
       if (item) item.classList.toggle('ativa', nome === idAtiva);
       var secao = document.getElementById('secao-' + nome);
@@ -2271,7 +2217,6 @@
   document.getElementById('aba-financeiro').onclick = function() { ativarAba('financeiro'); carregarCobrancas(); };
   document.getElementById('aba-comunicados').onclick = function() { ativarAba('comunicados'); carregarComunicados(); };
   document.getElementById('aba-usuarios').onclick = function() { ativarAba('usuarios'); carregarUsuarios(); };
-  document.getElementById('aba-meus-dados').onclick = function() { ativarAba('meus-dados'); carregarMeusDados(); };
   document.getElementById('aba-configuracoes').onclick = function() {
     ativarAba('configuracoes');
     carregarConfigPix();
@@ -2490,7 +2435,7 @@
         acoes += '<button class="btn-pequeno" onclick="abrirComprovante(\'' + c.id + '\')">Ver comprovante</button> ';
       }
       if (c.status !== 'pago') {
-        acoes += '<button class="btn-pequeno" onclick="abrirModalPix(\'' + c.id + '\', true)">Pix</button> ';
+        acoes += '<button class="btn-pequeno" onclick="abrirModalPix(\'' + c.id + '\')">Pix</button> ';
         acoes += '<button class="btn-pequeno" onclick="marcarComoPago(\'' + c.id + '\')">Marcar como pago</button> ';
         acoes += '<button class="btn-pequeno" onclick="abrirEdicaoCobranca(\'' + c.id + '\')">Editar</button> ';
       }
@@ -2822,11 +2767,10 @@
         '</div>' +
         '<div class="comunicado-conteudo">' + escapeHtml(c.conteudo) + '</div>' +
         (c.categoria_alvo ? '<span class="comunicado-categoria">' + escapeHtml(c.categoria_alvo) + '</span>' : '') +
-        (estado.papel !== 'associado' ?
-          '<div style="margin-top:10px;">' +
-            '<button class="btn-pequeno" onclick="abrirEdicaoComunicado(\'' + c.id + '\')">Editar</button> ' +
-            '<button class="btn-pequeno" onclick="excluirComunicado(\'' + c.id + '\')">Excluir</button>' +
-          '</div>' : '') +
+        '<div style="margin-top:10px;">' +
+          '<button class="btn-pequeno" onclick="abrirEdicaoComunicado(\'' + c.id + '\')">Editar</button> ' +
+          '<button class="btn-pequeno" onclick="excluirComunicado(\'' + c.id + '\')">Excluir</button>' +
+        '</div>' +
         '</div>';
     });
     container.innerHTML = html;
@@ -3169,94 +3113,14 @@
     .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
   };
 
-  // ---------- Portal do associado ----------
-  function carregarMeusDados() {
-    fetch(API_URL + '/portal/meus-dados', {
-      headers: { 'Authorization': 'Bearer ' + estado.token }
-    })
-    .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
-    .then(function(res) {
-      var container = document.getElementById('perfil-associado-container');
-      if (!res.ok) {
-        container.innerHTML = '<div class="vazio">' + escapeHtml(res.data.erro || 'Erro ao carregar seus dados') + '</div>';
-        return;
-      }
-      var a = res.data;
-      container.innerHTML =
-        '<p style="margin-bottom:8px;"><strong>' + escapeHtml(a.nome_completo) + '</strong></p>' +
-        '<p style="font-size:13px; color:var(--text-muted); margin-bottom:4px;">CPF: ' + escapeHtml(a.cpf || '—') + '</p>' +
-        '<p style="font-size:13px; color:var(--text-muted); margin-bottom:4px;">Categoria: ' + escapeHtml(a.categoria || '—') + '</p>' +
-        '<p style="font-size:13px; color:var(--text-muted); margin-bottom:8px;">Ingresso: ' + formatarData(a.data_ingresso) + '</p>' +
-        '<span class="badge ' + a.status + '">' + a.status + '</span>';
-
-      var avatar = document.getElementById('avatar-associado');
-      if (a.foto_base64) {
-        avatar.innerHTML = '<img src="' + a.foto_base64 + '" alt="Foto de perfil">';
-      }
-    })
-    .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
-
-    fetch(API_URL + '/portal/minhas-cobrancas', {
-      headers: { 'Authorization': 'Bearer ' + estado.token }
-    })
-    .then(function(resp) { return resp.json(); })
-    .then(function(lista) { renderizarMinhasCobrancas(lista); })
-    .catch(function() { mostrarToast('Erro ao carregar suas cobranças', true); });
-  }
-
-  var minhasCobrancasCache = [];
-
-  function renderizarMinhasCobrancas(lista) {
-    minhasCobrancasCache = lista;
-    var container = document.getElementById('tabela-minhas-cobrancas-container');
-    if (!Array.isArray(lista) || lista.length === 0) {
-      container.innerHTML = '<div class="vazio">Nenhuma cobrança encontrada.</div>';
-      return;
-    }
-
-    var html = '<table><thead><tr><th>Descrição</th><th>Valor</th><th>Vencimento</th><th>Status</th><th></th></tr></thead><tbody>';
-    lista.forEach(function(c) {
-      var statusExibicao = c.status_exibicao || c.status;
-      var statusTexto = statusExibicao.replace(/_/g, ' ');
-      if (statusExibicao === 'vencendo_em_breve' && c.dias_restantes != null) {
-        statusTexto = c.dias_restantes === 0 ? 'vence hoje' : 'vence em ' + c.dias_restantes + 'd';
-      }
-      var valorFormatado = 'R$ ' + parseFloat(c.valor).toFixed(2).replace('.', ',');
-      var acao = '';
-      if (c.status === 'pendente' || statusExibicao === 'atrasado' || statusExibicao === 'vencendo_em_breve') {
-        acao = '<button class="btn-pequeno" onclick="abrirModalPix(\'' + c.id + '\')">Pagar com Pix</button>';
-      } else if (c.status === 'aguardando_confirmacao') {
-        acao = '<span style="font-size:12px; color:var(--text-muted);">Comprovante enviado</span>';
-      }
-      html += '<tr>' +
-        '<td>' + escapeHtml(c.descricao) + '</td>' +
-        '<td>' + valorFormatado + '</td>' +
-        '<td>' + formatarData(c.vencimento) + '</td>' +
-        '<td><span class="badge ' + statusExibicao + '">' + statusTexto + '</span></td>' +
-        '<td>' + acao + '</td>' +
-        '</tr>';
-    });
-    html += '</tbody></table>';
-    container.innerHTML = html;
-  }
-
-  // ---------- Modal Pagar com Pix (associado) ----------
-  var comprovanteSelecionadoBase64 = null;
-
-  function abrirModalPix(cobrancaId, modoAdmin) {
-    var origem = modoAdmin ? cobrancasCache : minhasCobrancasCache;
-    var cobranca = origem.find(function(c) { return c.id === cobrancaId; });
+  // ---------- Modal Pagar com Pix (visualização pela diretoria) ----------
+  function abrirModalPix(cobrancaId) {
+    var cobranca = cobrancasCache.find(function(c) { return c.id === cobrancaId; });
     if (!cobranca) return;
 
     document.getElementById('pix-cobranca-id').value = cobrancaId;
     document.getElementById('pix-descricao-valor').textContent =
-      (modoAdmin ? cobranca.associado_nome + ' — ' : '') +
-      cobranca.descricao + ' — R$ ' + parseFloat(cobranca.valor).toFixed(2).replace('.', ',');
-    document.getElementById('nome-arquivo-comprovante').textContent = '';
-    comprovanteSelecionadoBase64 = null;
-
-    document.getElementById('bloco-envio-comprovante-pix').style.display = modoAdmin ? 'none' : 'block';
-    document.getElementById('btn-enviar-comprovante').style.display = modoAdmin ? 'none' : 'inline-block';
+      cobranca.associado_nome + ' — ' + cobranca.descricao + ' — R$ ' + parseFloat(cobranca.valor).toFixed(2).replace('.', ',');
 
     fetch(API_URL + '/configuracoes/pix', {
       headers: { 'Authorization': 'Bearer ' + estado.token }
@@ -3291,140 +3155,6 @@
     });
   };
 
-  document.getElementById('btn-selecionar-comprovante').onclick = function() {
-    document.getElementById('input-comprovante').click();
-  };
-
-  document.getElementById('input-comprovante').onchange = function(e) {
-    var arquivo = e.target.files[0];
-    if (!arquivo) return;
-
-    document.getElementById('nome-arquivo-comprovante').textContent = arquivo.name;
-
-    if (arquivo.type === 'application/pdf') {
-      var leitorPdf = new FileReader();
-      leitorPdf.onload = function(evt) { comprovanteSelecionadoBase64 = evt.target.result; };
-      leitorPdf.readAsDataURL(arquivo);
-      return;
-    }
-
-    var leitor = new FileReader();
-    leitor.onload = function(evt) {
-      var img = new Image();
-      img.onload = function() {
-        var TAMANHO_MAX = 1000;
-        var largura = img.width;
-        var altura = img.height;
-        if (largura > altura && largura > TAMANHO_MAX) {
-          altura = Math.round(altura * (TAMANHO_MAX / largura));
-          largura = TAMANHO_MAX;
-        } else if (altura > TAMANHO_MAX) {
-          largura = Math.round(largura * (TAMANHO_MAX / altura));
-          altura = TAMANHO_MAX;
-        }
-        var canvas = document.createElement('canvas');
-        canvas.width = largura;
-        canvas.height = altura;
-        canvas.getContext('2d').drawImage(img, 0, 0, largura, altura);
-        comprovanteSelecionadoBase64 = canvas.toDataURL('image/jpeg', 0.85);
-      };
-      img.src = evt.target.result;
-    };
-    leitor.readAsDataURL(arquivo);
-  };
-
-  document.getElementById('btn-enviar-comprovante').onclick = function() {
-    var cobrancaId = document.getElementById('pix-cobranca-id').value;
-
-    if (!comprovanteSelecionadoBase64) {
-      mostrarToast('Escolha o arquivo do comprovante antes de enviar', true);
-      return;
-    }
-
-    fetch(API_URL + '/portal/minhas-cobrancas/' + cobrancaId + '/comprovante', {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + estado.token
-      },
-      body: JSON.stringify({ comprovante_base64: comprovanteSelecionadoBase64 })
-    })
-    .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
-    .then(function(res) {
-      if (!res.ok) {
-        mostrarToast(res.data.erro || 'Erro ao enviar comprovante', true);
-        return;
-      }
-      document.getElementById('overlay-modal-pix').style.display = 'none';
-      mostrarToast('Comprovante enviado! Aguarde a confirmação da diretoria.');
-      carregarMeusDados();
-    })
-    .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
-  };
-
-  document.getElementById('btn-trocar-foto').onclick = function() {
-    document.getElementById('input-foto-associado').click();
-  };
-
-  document.getElementById('input-foto-associado').onchange = function(e) {
-    var arquivo = e.target.files[0];
-    if (!arquivo) return;
-
-    if (!arquivo.type.startsWith('image/')) {
-      mostrarToast('Selecione um arquivo de imagem (JPG ou PNG)', true);
-      return;
-    }
-
-    var leitor = new FileReader();
-    leitor.onload = function(evt) {
-      var img = new Image();
-      img.onload = function() {
-        var TAMANHO_MAX = 300;
-        var largura = img.width;
-        var altura = img.height;
-
-        if (largura > altura && largura > TAMANHO_MAX) {
-          altura = Math.round(altura * (TAMANHO_MAX / largura));
-          largura = TAMANHO_MAX;
-        } else if (altura > TAMANHO_MAX) {
-          largura = Math.round(largura * (TAMANHO_MAX / altura));
-          altura = TAMANHO_MAX;
-        }
-
-        var canvas = document.createElement('canvas');
-        canvas.width = largura;
-        canvas.height = altura;
-        var ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, largura, altura);
-
-        var fotoRedimensionada = canvas.toDataURL('image/jpeg', 0.85);
-        salvarFotoAssociado(fotoRedimensionada);
-      };
-      img.src = evt.target.result;
-    };
-    leitor.readAsDataURL(arquivo);
-  };
-
-  function salvarFotoAssociado(fotoBase64) {
-    fetch(API_URL + '/portal/minha-foto', {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + estado.token
-      },
-      body: JSON.stringify({ foto_base64: fotoBase64 })
-    })
-    .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
-    .then(function(res) {
-      if (!res.ok) {
-        mostrarToast(res.data.erro || 'Erro ao salvar foto', true);
-        return;
-      }
-      document.getElementById('avatar-associado').innerHTML = '<img src="' + fotoBase64 + '" alt="Foto de perfil">';
-      mostrarToast('Foto atualizada!');
-    })
-    .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
-  }
 </script>
 
 </body>

@@ -8,9 +8,12 @@ segurança, RLS, modelo de dados e rotas da API.
 
 ## O que é
 
-Front-end da plataforma de gestão de associações — dois arquivos HTML
-autocontidos (`index.html`: painel da associação; `superadmin.html`:
-painel do Super Admin), sem build step, publicados direto no Vercel.
+Front-end da plataforma de gestão de associações — três arquivos HTML
+autocontidos (`index.html`: painel da associação/admin-diretoria;
+`portal.html`: Portal do Associado; `superadmin.html`: painel do Super
+Admin), sem build step, publicados direto no Vercel. Cada um tem login,
+sessão (`localStorage`) e layout próprios — nenhum depende de import ou
+build dos outros.
 
 ## Cuidado ao testar localmente
 
@@ -172,6 +175,43 @@ Supabase), não por nada neste arquivo. `carregarCobrancas`,
 `carregarComunicados` e `carregarUsuarios` agora checam `resp.ok` e
 mostram a mensagem de erro real do backend (em vez de um genérico "Erro ao
 carregar X") — usar essa mensagem como primeira pista.
+
+## Portal do Associado virou arquivo próprio (25/07/2026)
+
+O associado fazia login pelo mesmo `index.html` do admin/diretoria —
+`entrarNoDashboard()` escondia as abas administrativas em runtime
+(`estado.papel === 'associado'`) e mostrava só "Meus Dados". Isso
+significava baixar/executar o código inteiro de administração
+(associados, financeiro, usuários, configurações) sem acesso a nada
+disso, e qualquer mudança no dashboard admin arriscava quebrar por
+engano a tela do associado por estarem no mesmo arquivo.
+
+Passou a seguir o padrão que `superadmin.html` já usava: **`portal.html`
+novo**, autocontido, login e sessão próprios (`sessao_portal`, isolada de
+`sessao_painel`). `index.html` agora rejeita login de papel `associado`
+(mensagem aponta pro portal) e limpa qualquer `sessao_painel` antiga
+salva com esse papel ao restaurar sessão. `portal.html` rejeita login de
+qualquer papel que não seja `associado`. Backend não mudou — já era
+separado (`routes/portal.js`, `autorizar('associado')`), a separação foi
+só de front-end.
+
+O que saiu de `index.html` e foi pra `portal.html`: `secao-meus-dados`
+(cadastro, foto, cobranças), `carregarMeusDados()`,
+`renderizarMinhasCobrancas()`, upload de foto (`salvarFotoAssociado`) e
+o fluxo de pagamento Pix com upload de comprovante (bloco
+`bloco-envio-comprovante-pix` do modal, `btn-enviar-comprovante`). O que
+ficou em `index.html` mas foi simplificado: `abrirModalPix()` perdeu o
+parâmetro `modoAdmin` (só sobrou o uso pela diretoria, visualização de QR
+sem upload — a assinatura antiga `abrirModalPix(id, true)` virou
+`abrirModalPix(id)`); `renderizarComunicados()` perdeu o ternário
+`estado.papel !== 'associado'` nos botões Editar/Excluir (agora sempre
+aparecem, só admin/diretoria chegam nesse arquivo).
+
+`portal.html` reaproveita o mesmo sistema visual (cores, Poppins, sidebar
+off-canvas no mobile) mas com CSS reduzido — sem KPIs/gráficos/Chart.js,
+sem os estilos específicos da lista de associados. Sidebar enxuta: Meus
+Dados (tela inicial) e Comunicados (mural só leitura, sem botão de
+publicar).
 
 ## Convenções
 
