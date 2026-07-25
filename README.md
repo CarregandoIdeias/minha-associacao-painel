@@ -12,12 +12,14 @@ de dados, segurança). Este README cobre só o front-end.
 
 - `index.html` — painel da associação (admin/diretoria/associado). Login,
   dashboard, associados, financeiro, comunicados, usuários, configurações,
-  portal do associado — tudo num arquivo só, com abas mostradas/escondidas
-  por papel. Menu lateral: Dashboard (tela inicial, KPIs + gráfico de novos
-  associados, ver seção própria abaixo) → Associados (submenu: Lista de
-  Associados / Novo Associado) → Financeiro → Comunicados → Usuários →
-  Configurações. Em tablet/celular a sidebar vira um menu off-canvas com
-  botão hambúrguer (☰), ver seção "Layout e responsividade".
+  meu perfil, portal do associado — tudo num arquivo só, com abas
+  mostradas/escondidas por papel. Header fixo no topo (saudação, e-mail,
+  avatar, menu de perfil) acima do conteúdo de cada seção — ver "Header e
+  Meu Perfil" abaixo. Menu lateral, sem submenus: Dashboard (tela inicial,
+  ver seção própria abaixo) → Associados → Financeiro → Comunicados →
+  Usuários → Configurações. Em tablet/celular a sidebar vira um menu
+  off-canvas com botão hambúrguer (☰), ver seção "Layout e
+  responsividade".
 - `superadmin.html` — painel do Super Admin (dono da plataforma). Login
   separado do painel da associação. Layout com sidebar navegável
   (Dashboard + Associações). Dashboard agregado com 7 KPIs, 4 gráficos
@@ -78,37 +80,71 @@ topo (`.mobile-topbar` / `#btn-hamburguer`), com overlay escurecido
 pelo menu já fecha a sidebar sozinha (`ativarAba()` chama
 `fecharSidebarMobile()` no final).
 
+## Header e Meu Perfil (`index.html`)
+
+Header fixo (`.app-header`) acima do conteúdo de cada seção, presente em
+todas as telas: saudação por horário (Bom dia/Boa tarde/Boa noite,
+`saudacaoPorHorario()`) + primeiro nome, e-mail, avatar de iniciais
+(`.avatar-iniciais`, `iniciaisNome()`). Clicar no avatar abre um dropdown
+(`.dropdown-perfil`) com **Meu Perfil**, **Alterar Senha** e **Sair**
+(fecha ao clicar fora, mesmo princípio do `#sidebar-overlay` da sidebar
+mobile).
+
+`nome` vem do login (`res.data.usuario.nome`) e é persistido em
+`sessao_painel` no `localStorage` junto com token/papel. `email` **não**
+tem rota própria — é decodificado do payload do próprio JWT no cliente
+(`decodificarEmailDoToken()`, `atob()` sem verificar assinatura, só pra
+exibição). **Meu Perfil** (`secao-meu-perfil`) é uma tela simples (nome,
+e-mail só leitura, avatar) só para admin/diretoria, acessível apenas pelo
+dropdown — não é item da sidebar principal. **Alterar Senha** é um modal
+que reaproveita a rota já existente `PUT /auth/senha` (mesma da troca
+obrigatória de senha no primeiro acesso).
+
 ## Menu lateral e Dashboard (`index.html`)
 
 A tela inicial após login (admin/diretoria) é o **Dashboard**
-(`secao-dashboard`): os mesmos 4 KPIs (Total, Ativos, Inadimplentes,
-Novos 7 dias) + o gráfico de barras "Novos associados (últimos 7 dias)"
-que antes ficavam dentro da tela de Associados. A tela de **Associados**
-(`secao-associados`) agora tem só a lista/busca/filtro — chegar nela é
-via o submenu "Associados" na sidebar (Lista de Associados / Novo
-Associado). Clicar num KPI do Dashboard (Total/Ativos/Inadimplentes)
-navega para Associados e já aplica o filtro correspondente.
+(`secao-dashboard`), reconstruído em 25/07/2026:
 
-## Mini-dashboard de Associados (`index.html`)
+- **7 KPIs** com ícone, cor e comparativo vs. mês anterior
+  (`renderizarKpiDelta()`): Total de associados, Ativos, Novos no mês,
+  Inadimplentes, Receita do mês, Mensalidades vencidas, Mensalidades a
+  vencer.
+- **4 gráficos** Chart.js (mesmo padrão visual do Super Admin,
+  `coresGrafico()` + `.grafico-card`): crescimento de associados
+  acumulado (linha, 12 meses), novos associados por mês (barra, 12
+  meses) — ambos em `atualizarGraficosAssociados()`, a partir de
+  `data_ingresso` de `GET /associados`; receita mensal recebido-vs-emitido
+  (barras agrupadas) e situação financeira (pizza) — ambos em
+  `atualizarDashboardFinanceiro()`, a partir de `GET /cobrancas` (que
+  agora também retorna `pago_em`).
+- **4 cards de apoio**: atividades recentes (`carregarAtividades()`,
+  consome a rota nova `GET /atividades` do backend), próximos
+  vencimentos (cobranças pendentes vencendo em 7 dias, computado de
+  `cobrancasCache`), últimos associados cadastrados
+  (`atualizarUltimosAssociados()` — mostra avatar de iniciais, **não**
+  carrega `foto_base64` em massa, de propósito, pra não pesar a resposta
+  de `/associados`), comunicados recentes
+  (`atualizarComunicadosRecentes()`, reaproveita o cache já buscado por
+  `carregarComunicados()`).
 
-O gráfico de novos associados (agora no Dashboard, ver seção acima): um
-gráfico de barras Chart.js "Novos associados (últimos 7 dias)" — contagem
-diária de novos associados na última semana, calculada no front-end a
-partir do campo `data_ingresso` já retornado por `GET /associados` (sem
-mudança de backend). Mesmo padrão visual dos gráficos do Super Admin
-(`coresGrafico()`, `.grafico-card`), mas escopado a uma única associação
-e a uma janela de 7 dias (não 12 meses, que não faz sentido para o volume
-de uma associação individual).
+A tela de **Associados** (`secao-associados`) tem só a lista/busca/filtro
+e o botão de novo associado — chegar nela é direto pelo item "Associados"
+da sidebar (sem submenu, desde 25/07/2026). Clicar num KPI do Dashboard
+(Total/Ativos/Inadimplentes) navega para Associados e já aplica o filtro
+correspondente; clicar em Mensalidades vencidas/a vencer navega para
+Financeiro.
 
-Cuidado ao mexer nesse cálculo: os baldes diários usam data **local** do
-navegador (`chaveDataLocal()`), não `toISOString()` — `toISOString()`
-converte para UTC e desloca a data em regiões UTC-negativas (Brasil,
-UTC-3), fazendo o balde de "hoje" aparecer como o dia seguinte à noite.
-O gráfico também usa `maintainAspectRatio: false` com altura fixa no
-container (`.grafico-card canvas` dentro de uma `div` com `height` em
-CSS) — sem isso, em telas largas o canvas do Chart.js estica
-verticalmente também (a proporção padrão é largura/altura, e a largura do
-card cresce muito quando não há mais `max-width` no `.content-area`).
+Cuidado ao mexer nesses cálculos de mês: os buckets usam string
+`YYYY-MM`/`YYYY-MM-DD` (`chaveMesLocal()`, `chaveMesDeData()`,
+comparação lexicográfica), nunca `new Date(a.data_ingresso) < ...` nem
+`toISOString()` — `toISOString()` converte para UTC e desloca a data em
+regiões UTC-negativas (Brasil, UTC-3), fazendo um registro do "mês atual"
+cair no bucket errado perto da virada do mês/dia. Os gráficos também usam
+`maintainAspectRatio: false` com altura fixa no container (`.grafico-card
+canvas` dentro de uma `div` com `height` em CSS) — sem isso, em telas
+largas o canvas do Chart.js estica verticalmente também (a proporção
+padrão é largura/altura, e a largura do card cresce muito quando não há
+mais `max-width` no `.content-area`).
 
 ## Super Admin — funcionalidades específicas
 

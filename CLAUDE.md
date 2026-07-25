@@ -55,7 +55,84 @@ mudança de backend. Ver seção própria no `README.md` para os dois cuidados
 não-óbvios desse gráfico (fuso horário no cálculo dos baldes diários,
 `maintainAspectRatio: false` para não esticar em telas largas).
 
+## Painel da associação — reforma do header, sidebar e Dashboard (25/07/2026, continuação)
+
+Reforma grande em cima da reestruturação de menu do mesmo dia (ver seção
+abaixo) — só `index.html`, `superadmin.html` não foi tocado.
+
+- **Marca "Minha Associação" removida por completo** (era só branding, o
+  usuário decidiu não usar mais): saiu do `<title>`, do `.sidebar .logo` e
+  do `.mobile-topbar .logo`. No lugar, um `.logo-mark` só com ícone (sem
+  texto de produto) — reaproveitar esse padrão se precisar de um espaço de
+  marca de novo no futuro, não reintroduzir texto fixo "Minha Associação".
+- **Header novo** (`.app-header`, sempre visível no topo do
+  `.content-area`, acima do `.page-header` de cada seção): saudação por
+  horário (`saudacaoPorHorario()`) + primeiro nome, e-mail, avatar de
+  iniciais (`.avatar-iniciais`, `iniciaisNome()`), dropdown
+  (`.dropdown-perfil`) com Meu Perfil / Alterar Senha / Sair. O botão
+  "Sair" (`#btn-sair`) **saiu do `.sidebar-footer`** (que agora só tem o
+  toggle de tema) **e foi pro dropdown** — mesmo id, mesmo handler, só
+  mudou de lugar no HTML.
+  - `nome`: já vinha em `res.data.usuario.nome` no login mas não era
+    persistido — agora vai também em `sessao_painel` no `localStorage`
+    (`estado.nome`).
+  - `email`: **não** veio de uma rota nova — é decodificado do próprio JWT
+    no cliente (`decodificarEmailDoToken()`, só `atob()` no payload, sem
+    verificar assinatura porque é só pra exibição) já que `assinarToken()`
+    no backend inclui `email` no payload.
+  - "Alterar Senha" reaproveita a rota já existente `PUT /auth/senha`
+    (mesma usada pela troca obrigatória de senha), num modal próprio
+    (`abrirModalAlterarSenha()`) — não é rota nova.
+- **Sidebar sem submenu de Associados**: o grupo expansível
+  (`.nav-grupo`, `#menu-associados`, `#toggle-associados`,
+  `#submenu-associados`, `.nav-item-pai`, `.icone-chevron`) foi removido —
+  agora é um `nav-item` único `#aba-associados` que cai direto na tela que
+  já tinha lista/busca/filtro/botão de novo associado. Sidebar final:
+  Dashboard, Associados, Financeiro, Comunicados, Usuários,
+  Configurações — só isso.
+- **Dashboard reconstruído** (`secao-dashboard`): 7 KPIs com ícone, cor e
+  comparativo vs. mês anterior (`renderizarKpiDelta()`) — Total, Ativos,
+  Novos no mês (era "Novos 7 dias", trocado pro mês), Inadimplentes,
+  Receita do mês, Mensalidades vencidas, Mensalidades a vencer. 4 gráficos
+  Chart.js: crescimento acumulado 12 meses (`atualizarGraficosAssociados`,
+  linha), novos associados por mês (mesma função, barra), receita mensal
+  recebido-vs-emitido (`atualizarDashboardFinanceiro`, barras agrupadas),
+  situação financeira (mesma função, pizza/doughnut). 4 cards de apoio:
+  atividades recentes (`carregarAtividades()`, consome `GET /atividades`,
+  novo no backend), próximos vencimentos (7 dias, computado de
+  `cobrancasCache`), últimos associados cadastrados
+  (`atualizarUltimosAssociados()`, avatar de iniciais — **não** carrega
+  `foto_base64` em massa, de propósito, pra não pesar a resposta de
+  `/associados`), comunicados recentes (`atualizarComunicadosRecentes()`,
+  reaproveita `comunicadosCache` já buscado por `carregarComunicados()`).
+  O gráfico antigo de "novos associados (últimos 7 dias)" e o KPI
+  `kpi-novos-semana` foram **removidos**, substituídos pelos gráficos
+  mensais.
+- **Meu Perfil** (novo, `secao-meu-perfil`): nome, e-mail (só leitura),
+  avatar de iniciais, botão de alterar senha. Só admin/diretoria (a tela
+  "Meus Dados" do associado, com foto, continua separada e não mudou).
+  Acessível só pelo dropdown do header — **não** é item da sidebar
+  principal.
+- **Padrões novos reutilizáveis** (além dos já existentes
+  `.texto-ajuda`/`.campo-linha`/`.form-footer`): `.kpi-icone`/`.kpi-delta`
+  (ícone colorido + comparativo num KPI card), `.dashboard-cards-apoio`
+  (grid responsivo pra cards de largura livre), `.atividade-item` (linha
+  de atividade com ícone), `.mini-item`/`.avatar-mini` (linha compacta
+  com avatar — usado em "últimos associados" e "comunicados recentes"),
+  `.avatar-iniciais` (círculo com iniciais, usado no header e no Meu
+  Perfil), `.dropdown-perfil` (menu suspenso com click-fora-fecha, mesmo
+  princípio do `#sidebar-overlay`).
+- **Backend ganhou uma tabela nova** (`atividades`) e uma rota nova
+  (`GET /atividades`) só pra isso — ver `CLAUDE.md` do repo do backend,
+  seção "Log de atividades", se for mexer nesse fluxo.
+
 ## Painel da associação — reestruturação do menu (25/07/2026)
+
+**Superseded pela reforma descrita na seção acima, no mesmo dia**: o
+submenu expansível de Associados (`#menu-associados`,
+`#toggle-associados`, `#submenu-associados`, `#aba-novo-associado`)
+descrito abaixo **não existe mais** — virou um `nav-item` único. Fica
+registrado aqui só como histórico de como chegamos no estado atual.
 
 Sidebar reorganizada: **Dashboard** (novo, `secao-dashboard`) virou a tela
 inicial — ganhou os KPIs e o gráfico "Novos associados" que antes ficavam
@@ -110,3 +187,10 @@ carregar X") — usar essa mensagem como primeira pista.
 - `.content-area` não deve ganhar `max-width` de volta — foi removido de
   propósito nos dois arquivos pra evitar espaço vazio em monitores largos;
   tabelas largas usam `overflow-x: auto` no próprio container em vez disso.
+- Padrões do header/Dashboard (25/07/2026, só `index.html` por enquanto):
+  `.avatar-iniciais` (avatar de iniciais), `.kpi-icone`/`.kpi-delta` (ícone
+  colorido + comparativo num KPI card), `.dashboard-cards-apoio` (grid de
+  cards de largura livre), `.atividade-item` e `.mini-item`/`.avatar-mini`
+  (linhas de lista compactas com avatar) — reaproveitar em vez de criar
+  variações novas se `superadmin.html` ganhar Dashboard equivalente algum
+  dia.
