@@ -97,6 +97,60 @@
   .nav-item:hover { background: var(--accent-soft); color: var(--accent); }
   .nav-item.ativa { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
 
+  /* ---------- Submenu (Associados) ---------- */
+  .nav-grupo { margin-bottom: 0; }
+  .nav-item-pai { margin-bottom: 4px; }
+  .nav-item-pai .icone-chevron { width: 14px; height: 14px; flex-shrink: 0; margin-left: auto; transition: transform 0.15s; }
+  .nav-item-pai.expandido .icone-chevron { transform: rotate(90deg); }
+  .nav-submenu {
+    display: none;
+    flex-direction: column;
+    margin: 0 0 6px 15px;
+    padding-left: 11px;
+    border-left: 1px solid var(--border);
+  }
+  .nav-submenu.aberto { display: flex; }
+  .nav-item-sub { font-size: 13px; padding: 8px 14px; margin-bottom: 2px; }
+
+  /* ---------- Menu hambúrguer / sidebar off-canvas (mobile) ---------- */
+  .mobile-topbar {
+    display: none;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 40;
+  }
+  .mobile-topbar .logo { padding: 0; font-weight: 800; font-size: 17px; color: var(--accent); }
+  .mobile-topbar .logo span { color: var(--text); }
+  .btn-hamburguer {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    color: var(--text);
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .btn-hamburguer:hover { background: var(--accent-soft); color: var(--accent); }
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 55;
+  }
+  .sidebar-overlay.aberto { display: block; }
+
   .sidebar-footer {
     margin-top: auto;
     display: flex;
@@ -172,6 +226,10 @@
   #tela-login p.sub { color: var(--text-muted); font-size: 13px; margin-bottom: 24px; }
 
   .campo { margin-bottom: 16px; }
+  .campo-linha { display: flex; gap: 16px; flex-wrap: wrap; }
+  .campo-linha .campo { flex: 1; min-width: 180px; }
+  .texto-ajuda { font-size: 13px; color: var(--text-muted); line-height: 1.5; margin-bottom: 20px; }
+  .form-footer { display: flex; justify-content: flex-end; padding-top: 18px; margin-top: 6px; border-top: 1px solid var(--border); }
   .campo label {
     display: block;
     font-size: 13px;
@@ -426,20 +484,22 @@
   }
 
   @media (max-width: 768px) {
+    .mobile-topbar { display: flex; }
+    .btn-hamburguer { display: flex; }
     .app-layout { flex-direction: column; }
     .sidebar {
-      width: 100%;
-      height: auto;
-      position: static;
-      flex-direction: row;
-      align-items: center;
-      overflow-x: auto;
-      padding: 12px 16px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      width: 260px;
+      max-width: 82vw;
+      transform: translateX(-100%);
+      transition: transform 0.25s ease;
+      z-index: 60;
+      overflow-y: auto;
     }
-    .sidebar .logo { display: none; }
-    .sidebar .rotulo-nav { display: inline; font-size: 13px; }
-    .nav-item { width: auto; white-space: nowrap; margin-bottom: 0; padding: 8px 12px; }
-    .sidebar-footer { margin-top: 0; border-top: none; padding-top: 0; margin-left: auto; }
+    .sidebar.aberta { transform: translateX(0); }
     .content-area { padding: 20px; }
     .page-header h1 { font-size: 20px; }
     .kpi-card { padding: 14px; }
@@ -600,13 +660,33 @@
 <!-- ===== DASHBOARD (com sidebar) ===== -->
 <div class="app-layout" id="tela-dashboard">
 
-  <nav class="sidebar">
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+  <div class="mobile-topbar">
+    <button class="btn-hamburguer" id="btn-hamburguer" aria-label="Abrir menu">☰</button>
+    <div class="logo">Minha<span>Associação</span></div>
+  </div>
+
+  <nav class="sidebar" id="sidebar-principal">
     <div class="logo">Minha<span>Associação</span></div>
 
-    <button class="nav-item ativa" id="aba-associados">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-      Associados
+    <button class="nav-item ativa" id="aba-dashboard">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+      Dashboard
     </button>
+
+    <div class="nav-grupo" id="menu-associados">
+      <button class="nav-item nav-item-pai" id="toggle-associados">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span style="flex:1;">Associados</span>
+        <svg class="icone-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+      <div class="nav-submenu" id="submenu-associados">
+        <button class="nav-item nav-item-sub" id="aba-associados">Lista de Associados</button>
+        <button class="nav-item nav-item-sub" id="aba-novo-associado">Novo Associado</button>
+      </div>
+    </div>
+
     <button class="nav-item" id="aba-financeiro">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
       Financeiro
@@ -636,8 +716,8 @@
 
   <div class="content-area">
 
-    <div id="secao-associados">
-      <div class="page-header"><h1>Associados</h1></div>
+    <div id="secao-dashboard">
+      <div class="page-header"><h1>Dashboard</h1></div>
       <div class="kpis">
         <div class="kpi-card" id="kpi-card-total" style="cursor:pointer;">
           <div class="rotulo">Total de associados</div>
@@ -662,6 +742,10 @@
           <div style="height:220px;"><canvas id="grafico-novos-associados"></canvas></div>
         </div>
       </div>
+    </div>
+
+    <div id="secao-associados" style="display:none;">
+      <div class="page-header"><h1>Associados</h1></div>
       <div class="painel">
         <div class="painel-header">
           <h3>Lista de associados</h3>
@@ -753,39 +837,46 @@
 
     <div id="secao-configuracoes" style="display:none;">
       <div class="page-header"><h1>Configurações</h1></div>
+
       <div class="painel">
         <div class="painel-header"><h3>Chave Pix da associação</h3></div>
         <div style="padding:22px;">
-          <p style="font-size:13px; color:var(--text-muted); margin-bottom:18px;">
+          <p class="texto-ajuda">
             Essa chave é usada para gerar o QR code Pix nas cobranças. Depois que o associado paga, ele envia o comprovante e a diretoria confirma manualmente.
           </p>
           <div class="campo">
             <label>Chave Pix (CPF, CNPJ, e-mail, telefone ou chave aleatória)</label>
             <input type="text" id="config-chave-pix" placeholder="ex: 00000000000">
           </div>
-          <div class="campo">
-            <label>Nome do recebedor (máx. 25 caracteres)</label>
-            <input type="text" id="config-nome-pix" maxlength="25" placeholder="ex: ASSOCIACAO TESTE">
+          <div class="campo-linha">
+            <div class="campo">
+              <label>Nome do recebedor (máx. 25 caracteres)</label>
+              <input type="text" id="config-nome-pix" maxlength="25" placeholder="ex: ASSOCIACAO TESTE">
+            </div>
+            <div class="campo">
+              <label>Cidade (máx. 15 caracteres, sem acento)</label>
+              <input type="text" id="config-cidade-pix" maxlength="15" placeholder="ex: SAO PAULO">
+            </div>
           </div>
-          <div class="campo">
-            <label>Cidade (máx. 15 caracteres, sem acento)</label>
-            <input type="text" id="config-cidade-pix" maxlength="15" placeholder="ex: SAO PAULO">
+          <div class="form-footer">
+            <button class="btn" id="btn-salvar-config-pix">Salvar</button>
           </div>
-          <button class="btn" id="btn-salvar-config-pix">Salvar</button>
         </div>
       </div>
 
       <div class="painel" style="margin-top:24px;">
         <div class="painel-header"><h3>Alertas de vencimento</h3></div>
         <div style="padding:22px;">
-          <p style="font-size:13px; color:var(--text-muted); margin-bottom:18px;">
+          <p class="texto-ajuda">
             Cobranças pendentes dentro desse prazo aparecem destacadas como "vencendo em breve" — tanto para a diretoria quanto para o associado.
           </p>
-          <div class="campo">
+          <div class="campo" style="max-width:280px;">
             <label>Avisar com quantos dias de antecedência?</label>
             <input type="number" id="config-dias-alerta" min="0" max="30" placeholder="ex: 3">
           </div>
-          <button class="btn" id="btn-salvar-config-alertas">Salvar</button>
+          <div class="form-footer">
+            <button class="btn" id="btn-salvar-config-alertas">Salvar</button>
+          </div>
         </div>
       </div>
     </div>
@@ -1230,7 +1321,7 @@
 
     if (estado.papel === 'associado') {
       // Associado só vê seus próprios dados — esconde as abas administrativas
-      ['aba-associados', 'aba-financeiro', 'aba-usuarios', 'aba-configuracoes'].forEach(function(id) {
+      ['aba-dashboard', 'menu-associados', 'aba-financeiro', 'aba-usuarios', 'aba-configuracoes'].forEach(function(id) {
         document.getElementById(id).style.display = 'none';
       });
       document.getElementById('aba-meus-dados').style.display = 'flex';
@@ -1243,7 +1334,7 @@
         document.getElementById('aba-usuarios').style.display = 'flex';
         document.getElementById('aba-configuracoes').style.display = 'flex';
       }
-      ativarAba('associados');
+      ativarAba('dashboard');
       carregarAssociados();
       carregarCobrancas();
     }
@@ -1530,14 +1621,17 @@
   document.getElementById('kpi-card-total').onclick = function() {
     document.getElementById('filtro-status-associado').value = '';
     document.getElementById('busca-associado').value = '';
+    ativarAba('associados');
     aplicarFiltroAssociados();
   };
   document.getElementById('kpi-card-ativos').onclick = function() {
     document.getElementById('filtro-status-associado').value = 'ativo';
+    ativarAba('associados');
     aplicarFiltroAssociados();
   };
   document.getElementById('kpi-card-inadimplentes').onclick = function() {
     document.getElementById('filtro-status-associado').value = 'inadimplente';
+    ativarAba('associados');
     aplicarFiltroAssociados();
   };
 
@@ -1698,14 +1792,34 @@
 
   // ---------- Navegação (sidebar) ----------
   function ativarAba(idAtiva) {
-    ['associados', 'financeiro', 'comunicados', 'usuarios', 'meus-dados', 'configuracoes'].forEach(function(nome) {
+    ['dashboard', 'associados', 'financeiro', 'comunicados', 'usuarios', 'meus-dados', 'configuracoes'].forEach(function(nome) {
       var item = document.getElementById('aba-' + nome);
-      if (!item) return;
-      item.classList.toggle('ativa', nome === idAtiva);
-      document.getElementById('secao-' + nome).style.display = (nome === idAtiva) ? 'block' : 'none';
+      if (item) item.classList.toggle('ativa', nome === idAtiva);
+      var secao = document.getElementById('secao-' + nome);
+      if (secao) secao.style.display = (nome === idAtiva) ? 'block' : 'none';
     });
+
+    var paiAssociados = document.getElementById('toggle-associados');
+    var submenuAssociados = document.getElementById('submenu-associados');
+    paiAssociados.classList.toggle('ativa', idAtiva === 'associados');
+    if (idAtiva === 'associados') {
+      submenuAssociados.classList.add('aberto');
+      paiAssociados.classList.add('expandido');
+    }
+
+    fecharSidebarMobile();
   }
+
+  document.getElementById('aba-dashboard').onclick = function() { ativarAba('dashboard'); };
+  document.getElementById('toggle-associados').onclick = function() {
+    var aberto = document.getElementById('submenu-associados').classList.toggle('aberto');
+    document.getElementById('toggle-associados').classList.toggle('expandido', aberto);
+  };
   document.getElementById('aba-associados').onclick = function() { ativarAba('associados'); };
+  document.getElementById('aba-novo-associado').onclick = function() {
+    ativarAba('associados');
+    document.getElementById('btn-novo-associado').click();
+  };
   document.getElementById('aba-financeiro').onclick = function() { ativarAba('financeiro'); carregarCobrancas(); };
   document.getElementById('aba-comunicados').onclick = function() { ativarAba('comunicados'); carregarComunicados(); };
   document.getElementById('aba-usuarios').onclick = function() { ativarAba('usuarios'); carregarUsuarios(); };
@@ -1715,6 +1829,18 @@
     carregarConfigPix();
     carregarConfigAlertas();
   };
+
+  // ---------- Menu hambúrguer (mobile) ----------
+  function abrirSidebarMobile() {
+    document.getElementById('sidebar-principal').classList.add('aberta');
+    document.getElementById('sidebar-overlay').classList.add('aberto');
+  }
+  function fecharSidebarMobile() {
+    document.getElementById('sidebar-principal').classList.remove('aberta');
+    document.getElementById('sidebar-overlay').classList.remove('aberto');
+  }
+  document.getElementById('btn-hamburguer').onclick = abrirSidebarMobile;
+  document.getElementById('sidebar-overlay').onclick = fecharSidebarMobile;
 
   function carregarConfigAlertas() {
     fetch(API_URL + '/configuracoes/alertas', {
@@ -1798,9 +1924,15 @@
     fetch(API_URL + '/cobrancas', {
       headers: { 'Authorization': 'Bearer ' + estado.token }
     })
-    .then(function(resp) { return resp.json(); })
-    .then(function(lista) { renderizarCobrancas(lista); })
-    .catch(function() { mostrarToast('Erro ao carregar cobranças', true); });
+    .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
+    .then(function(res) {
+      if (!res.ok) {
+        mostrarToast(res.data.erro || 'Erro ao carregar cobranças', true);
+        return;
+      }
+      renderizarCobrancas(res.data);
+    })
+    .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
   }
 
   function renderizarCobrancas(lista) {
@@ -2065,9 +2197,15 @@
     fetch(API_URL + '/comunicados', {
       headers: { 'Authorization': 'Bearer ' + estado.token }
     })
-    .then(function(resp) { return resp.json(); })
-    .then(function(lista) { renderizarComunicados(lista); })
-    .catch(function() { mostrarToast('Erro ao carregar comunicados', true); });
+    .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
+    .then(function(res) {
+      if (!res.ok) {
+        mostrarToast(res.data.erro || 'Erro ao carregar comunicados', true);
+        return;
+      }
+      renderizarComunicados(res.data);
+    })
+    .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
   }
 
   function renderizarComunicados(lista) {
@@ -2203,9 +2341,15 @@
     fetch(API_URL + '/usuarios', {
       headers: { 'Authorization': 'Bearer ' + estado.token }
     })
-    .then(function(resp) { return resp.json(); })
-    .then(function(lista) { renderizarUsuarios(lista); })
-    .catch(function() { mostrarToast('Erro ao carregar usuários', true); });
+    .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
+    .then(function(res) {
+      if (!res.ok) {
+        mostrarToast(res.data.erro || 'Erro ao carregar usuários', true);
+        return;
+      }
+      renderizarUsuarios(res.data);
+    })
+    .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
   }
 
   var rotuloPapel = { admin: 'Admin', diretoria: 'Diretoria', associado: 'Associado' };
