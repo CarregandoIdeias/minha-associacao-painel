@@ -55,6 +55,47 @@ mudança de backend. Ver seção própria no `README.md` para os dois cuidados
 não-óbvios desse gráfico (fuso horário no cálculo dos baldes diários,
 `maintainAspectRatio: false` para não esticar em telas largas).
 
+## Painel da associação — reestruturação do menu (25/07/2026)
+
+Sidebar reorganizada: **Dashboard** (novo, `secao-dashboard`) virou a tela
+inicial — ganhou os KPIs e o gráfico "Novos associados" que antes ficavam
+dentro de Associados. **Associados** virou um grupo expansível
+(`#menu-associados`, `#toggle-associados`, `#submenu-associados`) com dois
+itens: "Lista de Associados" (`#aba-associados`, mesmo id/comportamento de
+antes) e "Novo Associado" (`#aba-novo-associado`, atalho que ativa a aba e
+clica em `#btn-novo-associado` — reaproveita o modal existente, não é uma
+tela própria). `ativarAba(idAtiva)` ganhou `'dashboard'` na lista de seções
+geridas e expande o submenu automaticamente quando `'associados'` está
+ativo.
+
+**Menu hambúrguer (mobile/tablet)**: abaixo de 768px a sidebar agora é
+off-canvas (`position: fixed`, `transform: translateX(-100%)` por padrão,
+classe `.aberta` mostra) com um botão `☰` (`#btn-hamburguer`) numa barra
+fixa no topo (`.mobile-topbar`) e um overlay escurecido
+(`#sidebar-overlay`) que fecha ao clicar fora. Isso **substituiu** o
+comportamento anterior de "sidebar vira barra horizontal com scroll" nesse
+breakpoint. `ativarAba()` chama `fecharSidebarMobile()` ao final, então
+qualquer navegação já fecha o menu sozinha.
+
+**Configurações reformulada**: campos relacionados (Nome do recebedor +
+Cidade do Pix) agora ficam lado a lado via `.campo-linha` (grid/flex,
+quebra sozinho em telas estreitas), texto de ajuda padronizado em
+`.texto-ajuda` (era `style` inline repetido), botão Salvar em
+`.form-footer` (alinhado à direita, com separador). Reaproveitar esses
+três padrões (`.texto-ajuda`, `.campo-linha`, `.form-footer`) em qualquer
+tela de formulário nova em vez de inventar espaçamento/alinhamento do
+zero.
+
+**Se o "Erro ao carregar" voltar a acontecer**: antes de assumir que é bug
+de front-end, checar o backend primeiro — em 25/07/2026 esse sintoma
+(Financeiro/Comunicados/Usuários/Configurações todos com "Erro ao
+carregar") era 100% causado por instabilidade no backend (ver
+`CLAUDE.md`/`README.md` do repo do backend, seção sobre o pooler do
+Supabase), não por nada neste arquivo. `carregarCobrancas`,
+`carregarComunicados` e `carregarUsuarios` agora checam `resp.ok` e
+mostram a mensagem de erro real do backend (em vez de um genérico "Erro ao
+carregar X") — usar essa mensagem como primeira pista.
+
 ## Convenções
 
 - Sem framework/bundler — tudo inline (CSS e JS dentro do próprio HTML).

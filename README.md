@@ -11,10 +11,13 @@ de dados, segurança). Este README cobre só o front-end.
 ## Arquivos
 
 - `index.html` — painel da associação (admin/diretoria/associado). Login,
-  associados, financeiro, comunicados, usuários, configurações, portal do
-  associado — tudo num arquivo só, com abas mostradas/escondidas por papel.
-  Tela de Associados tem um mini-dashboard (KPI "Novos (7 dias)" + gráfico
-  de barras dos últimos 7 dias, ver seção própria abaixo).
+  dashboard, associados, financeiro, comunicados, usuários, configurações,
+  portal do associado — tudo num arquivo só, com abas mostradas/escondidas
+  por papel. Menu lateral: Dashboard (tela inicial, KPIs + gráfico de novos
+  associados, ver seção própria abaixo) → Associados (submenu: Lista de
+  Associados / Novo Associado) → Financeiro → Comunicados → Usuários →
+  Configurações. Em tablet/celular a sidebar vira um menu off-canvas com
+  botão hambúrguer (☰), ver seção "Layout e responsividade".
 - `superadmin.html` — painel do Super Admin (dono da plataforma). Login
   separado do painel da associação. Layout com sidebar navegável
   (Dashboard + Associações). Dashboard agregado com 7 KPIs, 4 gráficos
@@ -60,20 +63,39 @@ usa toda a largura disponível ao lado da sidebar (evita espaço vazio em
 monitores largos enquanto tabelas ainda precisavam de scroll horizontal).
 
 Breakpoints escalonados em ambos os arquivos: 1200px (sidebar/padding
-reduzidos), 900px, 768px (sidebar vira barra horizontal no topo, com
-scroll), 640px (KPIs em 2 colunas, tabelas/modais compactados), 480px
-(KPIs em 1 coluna, fontes reduzidas), 360px (telas muito pequenas). Ajustar
-qualquer novo componente com esses mesmos pontos de corte para manter
-consistência.
+reduzidos), 900px, 640px (KPIs em 2 colunas, tabelas/modais compactados),
+480px (KPIs em 1 coluna, fontes reduzidas), 360px (telas muito pequenas).
+Ajustar qualquer novo componente com esses mesmos pontos de corte para
+manter consistência.
+
+Em `index.html`, abaixo de 768px o comportamento muda: em vez de
+"sidebar vira barra horizontal com scroll" (que ainda é o que
+`superadmin.html` faz), a sidebar vira um **menu off-canvas**
+(`position: fixed`, escondida por `transform: translateX(-100%)`, classe
+`.aberta` revela) acionado por um botão hambúrguer `☰` numa barra fixa no
+topo (`.mobile-topbar` / `#btn-hamburguer`), com overlay escurecido
+(`#sidebar-overlay`) que fecha o menu ao clicar fora. Qualquer navegação
+pelo menu já fecha a sidebar sozinha (`ativarAba()` chama
+`fecharSidebarMobile()` no final).
+
+## Menu lateral e Dashboard (`index.html`)
+
+A tela inicial após login (admin/diretoria) é o **Dashboard**
+(`secao-dashboard`): os mesmos 4 KPIs (Total, Ativos, Inadimplentes,
+Novos 7 dias) + o gráfico de barras "Novos associados (últimos 7 dias)"
+que antes ficavam dentro da tela de Associados. A tela de **Associados**
+(`secao-associados`) agora tem só a lista/busca/filtro — chegar nela é
+via o submenu "Associados" na sidebar (Lista de Associados / Novo
+Associado). Clicar num KPI do Dashboard (Total/Ativos/Inadimplentes)
+navega para Associados e já aplica o filtro correspondente.
 
 ## Mini-dashboard de Associados (`index.html`)
 
-Na tela "Associados", além dos 3 KPIs originais (Total, Ativos,
-Inadimplentes), há um 4º KPI "Novos (7 dias)" e um gráfico de barras
-Chart.js "Novos associados (últimos 7 dias)" — contagem diária de novos
-associados na última semana, calculada no front-end a partir do campo
-`data_ingresso` já retornado por `GET /associados` (sem mudança de
-backend). Mesmo padrão visual dos gráficos do Super Admin
+O gráfico de novos associados (agora no Dashboard, ver seção acima): um
+gráfico de barras Chart.js "Novos associados (últimos 7 dias)" — contagem
+diária de novos associados na última semana, calculada no front-end a
+partir do campo `data_ingresso` já retornado por `GET /associados` (sem
+mudança de backend). Mesmo padrão visual dos gráficos do Super Admin
 (`coresGrafico()`, `.grafico-card`), mas escopado a uma única associação
 e a uma janela de 7 dias (não 12 meses, que não faz sentido para o volume
 de uma associação individual).
