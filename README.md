@@ -13,6 +13,8 @@ de dados, segurança). Este README cobre só o front-end.
 - `index.html` — painel da associação (admin/diretoria/associado). Login,
   associados, financeiro, comunicados, usuários, configurações, portal do
   associado — tudo num arquivo só, com abas mostradas/escondidas por papel.
+  Tela de Associados tem um mini-dashboard (KPI "Novos (7 dias)" + gráfico
+  de barras dos últimos 7 dias, ver seção própria abaixo).
 - `superadmin.html` — painel do Super Admin (dono da plataforma). Login
   separado do painel da associação. Layout com sidebar navegável
   (Dashboard + Associações). Dashboard agregado com 7 KPIs, 4 gráficos
@@ -48,6 +50,43 @@ Só e-mail + senha (não usa mais código/ID da associação). Contas novas
 (criadas pelo Super Admin ou por um admin de associação) recebem senha
 provisória e são obrigadas a trocar no primeiro login — ver a tela
 `tela-trocar-senha-obrigatoria` em `index.html`.
+
+## Layout e responsividade
+
+Ambos os arquivos usam o mesmo padrão visual: sidebar fixa recolhível
+(`.app-layout`, `.sidebar`, `.content-area`), fonte Poppins em tudo (título,
+corpo, números), tema claro/escuro. `.content-area` não tem `max-width` —
+usa toda a largura disponível ao lado da sidebar (evita espaço vazio em
+monitores largos enquanto tabelas ainda precisavam de scroll horizontal).
+
+Breakpoints escalonados em ambos os arquivos: 1200px (sidebar/padding
+reduzidos), 900px, 768px (sidebar vira barra horizontal no topo, com
+scroll), 640px (KPIs em 2 colunas, tabelas/modais compactados), 480px
+(KPIs em 1 coluna, fontes reduzidas), 360px (telas muito pequenas). Ajustar
+qualquer novo componente com esses mesmos pontos de corte para manter
+consistência.
+
+## Mini-dashboard de Associados (`index.html`)
+
+Na tela "Associados", além dos 3 KPIs originais (Total, Ativos,
+Inadimplentes), há um 4º KPI "Novos (7 dias)" e um gráfico de barras
+Chart.js "Novos associados (últimos 7 dias)" — contagem diária de novos
+associados na última semana, calculada no front-end a partir do campo
+`data_ingresso` já retornado por `GET /associados` (sem mudança de
+backend). Mesmo padrão visual dos gráficos do Super Admin
+(`coresGrafico()`, `.grafico-card`), mas escopado a uma única associação
+e a uma janela de 7 dias (não 12 meses, que não faz sentido para o volume
+de uma associação individual).
+
+Cuidado ao mexer nesse cálculo: os baldes diários usam data **local** do
+navegador (`chaveDataLocal()`), não `toISOString()` — `toISOString()`
+converte para UTC e desloca a data em regiões UTC-negativas (Brasil,
+UTC-3), fazendo o balde de "hoje" aparecer como o dia seguinte à noite.
+O gráfico também usa `maintainAspectRatio: false` com altura fixa no
+container (`.grafico-card canvas` dentro de uma `div` com `height` em
+CSS) — sem isso, em telas largas o canvas do Chart.js estica
+verticalmente também (a proporção padrão é largura/altura, e a largura do
+card cresce muito quando não há mais `max-width` no `.content-area`).
 
 ## Super Admin — funcionalidades específicas
 
@@ -88,4 +127,7 @@ na associação permite sobrescrever — útil para negociações customizadas.
 - Toda chamada à API inclui `Authorization: Bearer <token>` a partir de
   `estado.token`; sessão persiste em `localStorage` (`sessao_painel`).
 - Modais de confirmação para ações destrutivas usam `confirmarAcao()`
-  reutilizável (função genérica no Super Admin), não `confirm()` nativo.
+  reutilizável — implementada nos dois arquivos (`index.html` e
+  `superadmin.html`), não `confirm()` nativo. Assinatura:
+  `confirmarAcao({ titulo, mensagem, textoConfirmar, perigo, aoConfirmar })`;
+  `perigo: true` deixa o botão de confirmação vermelho (`.btn-perigo`).

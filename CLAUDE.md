@@ -39,9 +39,21 @@ Reformulação completa do painel Super Admin com sidebar navegável (Dashboard
 Migration aditiva no banco: `cep, site, valor_mensalidade_manual,
 vencimento_assinatura, forma_cobranca` em `associacoes`; `cpf` em `usuarios`.
 Dashboard novo com 7 KPIs + 4 gráficos + alertas em tempo real. Formulário
-de associação estendido. Todos os `confirm()` nativos trocados por modal
-próprio via `confirmarAcao()` — função genérica reutilizável para qualquer
-ação futura que precise confirmação.
+de associação estendido.
+
+## Painel da associação — mudanças recentes (24/07/2026)
+
+`index.html` foi alinhado visualmente ao Super Admin: fonte Poppins em
+tudo (era Playfair Display + Inter + JetBrains Mono), `confirmarAcao()`
+substituindo os 5 `confirm()` nativos (associado, cobrança, estorno,
+comunicado, usuário), `.content-area` sem `max-width` (usa toda a largura
+da tela), breakpoints responsivos reforçados (1200/900/768/640/480/360px).
+Novo mini-dashboard na tela Associados: KPI "Novos (7 dias)" + gráfico de
+barras dos últimos 7 dias (Chart.js, novo `<script>` adicionado ao
+`<head>`), calculado no front-end a partir de `data_ingresso` — não exigiu
+mudança de backend. Ver seção própria no `README.md` para os dois cuidados
+não-óbvios desse gráfico (fuso horário no cálculo dos baldes diários,
+`maintainAspectRatio: false` para não esticar em telas largas).
 
 ## Convenções
 
@@ -51,6 +63,9 @@ ação futura que precise confirmação.
 - Padrão de modal "credenciais geradas" (senha provisória mostrada uma
   única vez, com botão de copiar) se repete em vários fluxos — reaproveitar
   o mesmo padrão visual/JS ao criar um novo, não inventar outro.
-- Super Admin: `confirmarAcao({ titulo, mensagem, textoConfirmar, perigo, aoConfirmar })`
-  centraliza confirmações — qualquer nova ação destrutiva deve usar isso,
-  não `confirm()` nativo.
+- `confirmarAcao({ titulo, mensagem, textoConfirmar, perigo, aoConfirmar })`
+  (implementada em ambos os arquivos) centraliza confirmações — qualquer
+  nova ação destrutiva deve usar isso, não `confirm()` nativo.
+- `.content-area` não deve ganhar `max-width` de volta — foi removido de
+  propósito nos dois arquivos pra evitar espaço vazio em monitores largos;
+  tabelas largas usam `overflow-x: auto` no próprio container em vez disso.
