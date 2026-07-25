@@ -36,6 +36,8 @@
   .btn:hover { background: var(--accent-hover); }
   .btn-ghost { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
   .btn-ghost:hover { background: var(--accent-soft); color: var(--accent); }
+  .btn-perigo { background: var(--danger); color: #fff; }
+  .btn-perigo:hover { background: #c0392b; }
   .btn-pequeno { background: var(--accent-soft); color: var(--accent); border: none; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; }
   .btn-pequeno:hover { background: var(--accent); color: #0A0A0A; }
 
@@ -521,6 +523,18 @@
   </div>
 </div>
 
+<!-- ===== MODAL DE CONFIRMAÇÃO (genérico, usado por qualquer ação) ===== -->
+<div class="overlay" id="overlay-modal-confirmacao">
+  <div class="modal">
+    <h3 id="titulo-modal-confirmacao">Confirmar ação</h3>
+    <p id="texto-modal-confirmacao" style="font-size:13.5px; color:var(--text-muted); line-height:1.5;"></p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="btn-cancelar-confirmacao">Cancelar</button>
+      <button class="btn" id="btn-confirmar-confirmacao">Confirmar</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -582,6 +596,26 @@
     div.textContent = texto || '';
     return div.innerHTML;
   }
+
+  // Modal de confirmação genérico — substitui o confirm() nativo do navegador
+  // em qualquer ação (excluir, redefinir senha, etc). Uso:
+  // confirmarAcao({ mensagem: '...', aoConfirmar: function() { ... } })
+  // Opcional: titulo, textoConfirmar, perigo (deixa o botão de confirmar vermelho).
+  function confirmarAcao(opcoes) {
+    document.getElementById('titulo-modal-confirmacao').textContent = opcoes.titulo || 'Confirmar ação';
+    document.getElementById('texto-modal-confirmacao').textContent = opcoes.mensagem;
+    var btnConfirmar = document.getElementById('btn-confirmar-confirmacao');
+    btnConfirmar.textContent = opcoes.textoConfirmar || 'Confirmar';
+    btnConfirmar.className = 'btn' + (opcoes.perigo ? ' btn-perigo' : '');
+    btnConfirmar.onclick = function() {
+      document.getElementById('overlay-modal-confirmacao').style.display = 'none';
+      opcoes.aoConfirmar();
+    };
+    document.getElementById('overlay-modal-confirmacao').style.display = 'flex';
+  }
+  document.getElementById('btn-cancelar-confirmacao').onclick = function() {
+    document.getElementById('overlay-modal-confirmacao').style.display = 'none';
+  };
 
   function salvarSessao() { localStorage.setItem('sessao_superadmin', JSON.stringify({ token: estado.token, nome: estado.nome })); }
   function limparSessao() { localStorage.removeItem('sessao_superadmin'); }
@@ -1005,16 +1039,23 @@
   }
 
   function excluirAssociacao(id) {
-    if (!confirm('Excluir essa associação? Isso remove PERMANENTEMENTE todos os associados, cobranças, comunicados e usuários dela. Não pode ser desfeito.')) return;
-    fetch(API_URL + '/superadmin/associacoes/' + id, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + estado.token } })
-    .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
-    .then(function(res) {
-      if (!res.ok) { mostrarToast(res.data.erro || 'Erro ao excluir', true); return; }
-      mostrarToast('Associação excluída.');
-      carregarAssociacoes();
-      carregarDashboard();
-    })
-    .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
+    confirmarAcao({
+      titulo: 'Excluir associação',
+      mensagem: 'Excluir essa associação? Isso remove PERMANENTEMENTE todos os associados, cobranças, comunicados e usuários dela. Não pode ser desfeito.',
+      textoConfirmar: 'Excluir',
+      perigo: true,
+      aoConfirmar: function() {
+        fetch(API_URL + '/superadmin/associacoes/' + id, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + estado.token } })
+        .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
+        .then(function(res) {
+          if (!res.ok) { mostrarToast(res.data.erro || 'Erro ao excluir', true); return; }
+          mostrarToast('Associação excluída.');
+          carregarAssociacoes();
+          carregarDashboard();
+        })
+        .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
+      }
+    });
   }
 
   document.getElementById('btn-salvar-associacao').onclick = function() {
@@ -1211,20 +1252,25 @@
   }
 
   document.getElementById('btn-resetar-senha-admin').onclick = function() {
-    if (!confirm('Gerar uma nova senha provisória para esse admin? A senha atual dele deixa de funcionar.')) return;
-
-    fetch(API_URL + '/superadmin/associacoes/' + associacaoDetalheAtual + '/resetar-senha-admin', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + estado.token }
-    })
-    .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
-    .then(function(res) {
-      if (!res.ok) { mostrarToast(res.data.erro || 'Erro ao redefinir senha', true); return; }
-      document.getElementById('cred-email-admin').value = res.data.email;
-      document.getElementById('cred-senha-provisoria').value = res.data.senha_provisoria;
-      document.getElementById('overlay-modal-credenciais').style.display = 'flex';
-    })
-    .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
+    confirmarAcao({
+      titulo: 'Redefinir senha do admin',
+      mensagem: 'Gerar uma nova senha provisória para esse admin? A senha atual dele deixa de funcionar.',
+      textoConfirmar: 'Gerar nova senha',
+      aoConfirmar: function() {
+        fetch(API_URL + '/superadmin/associacoes/' + associacaoDetalheAtual + '/resetar-senha-admin', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + estado.token }
+        })
+        .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
+        .then(function(res) {
+          if (!res.ok) { mostrarToast(res.data.erro || 'Erro ao redefinir senha', true); return; }
+          document.getElementById('cred-email-admin').value = res.data.email;
+          document.getElementById('cred-senha-provisoria').value = res.data.senha_provisoria;
+          document.getElementById('overlay-modal-credenciais').style.display = 'flex';
+        })
+        .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
+      }
+    });
   };
 
   document.getElementById('btn-editar-associacao-detalhe').onclick = function() {
