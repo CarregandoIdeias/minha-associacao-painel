@@ -247,6 +247,12 @@ PLUS)".
 
 `estado` ganhou `id`/`papel` (persistidos em `sessao_superadmin`). Padrão novo: `#tabela-administradores-container` precisou do mesmo `overflow-x: auto` que `#tabela-associacoes-container` já tinha — qualquer tabela nova em `superadmin.html` precisa desse container, senão colunas somem sem scroll em telas estreitas (bug real encontrado e corrigido nesta sessão).
 
+## Super Admin — tela de Auditoria (Fase 2 da melhoria do Super Admin, 26/07/2026)
+
+Nova tela `secao-auditoria` em `superadmin.html`, acessível a qualquer nível de permissão (não gated por papel, diferente de "Administradores"): filtros (usuário, associação, módulo, tipo de ação, período, ordenação), tabela paginada (`carregarLogs()`, `GET /superadmin/logs`), modal de detalhes (`abrirDetalhesLog()`, mostra `dados_anteriores`/`dados_novos` lado a lado como JSON formatado) e exportação Excel/PDF (`exportarLogs()`, baixa via `fetch` + blob porque a rota exige `Authorization: Bearer` — não dá pra só navegar pra URL/usar `<a href>` direto).
+
+Padrão novo: paginação com texto "Mostrando X–Y de Z" + botões Anterior/Próxima desabilitados via `.disabled` (novo `.btn-pequeno:disabled`/`.btn:disabled` no CSS, opacidade + `cursor: not-allowed`) — reaproveitar em qualquer lista paginada nova.
+
 ## Convenções
 
 - Sem framework/bundler — tudo inline (CSS e JS dentro do próprio HTML).

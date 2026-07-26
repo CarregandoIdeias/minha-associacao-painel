@@ -253,7 +253,8 @@
   .painel-header { display: flex; justify-content: space-between; align-items: center; padding: 18px 22px; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 10px; }
   .painel-header h3 { font-size: 15px; font-weight: 600; }
 
-  #tabela-associacoes-container, #tabela-administradores-container { overflow-x: auto; }
+  #tabela-associacoes-container, #tabela-administradores-container, #tabela-logs-container { overflow-x: auto; }
+  .btn-pequeno:disabled, .btn:disabled { opacity: 0.5; cursor: not-allowed; }
   table { width: 100%; border-collapse: collapse; min-width: 980px; }
   th, td { text-align: left; padding: 14px 16px; font-size: 14px; border-bottom: 1px solid var(--border); }
   th { color: var(--text-muted); font-weight: 500; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
@@ -333,6 +334,10 @@
     <button class="nav-item" id="aba-administradores">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
       <span class="rotulo-nav">Administradores</span>
+    </button>
+    <button class="nav-item" id="aba-auditoria">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
+      <span class="rotulo-nav">Auditoria</span>
     </button>
     <button class="nav-item" id="aba-meu-perfil">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -444,6 +449,59 @@
           <button class="btn" id="btn-novo-administrador">+ Novo administrador</button>
         </div>
         <div id="tabela-administradores-container"><div class="vazio">Carregando...</div></div>
+      </div>
+    </div>
+
+    <div id="secao-auditoria" class="secao-conteudo">
+      <div class="painel">
+        <div class="painel-header">
+          <h3>Logs de auditoria</h3>
+          <div class="topo-acoes">
+            <button class="btn btn-ghost" id="btn-exportar-excel">Exportar Excel</button>
+            <button class="btn btn-ghost" id="btn-exportar-pdf">Exportar PDF</button>
+          </div>
+        </div>
+        <div class="filtros-associacoes">
+          <input type="text" id="filtro-log-usuario" placeholder="Usuário (nome ou e-mail)...">
+          <input type="text" id="filtro-log-associacao" placeholder="Associação...">
+          <select id="filtro-log-modulo">
+            <option value="">Todos os módulos</option>
+            <option value="associacoes">Associações</option>
+            <option value="administradores">Administradores</option>
+            <option value="associados">Associados</option>
+            <option value="cobrancas">Cobranças</option>
+            <option value="comunicados">Comunicados</option>
+            <option value="usuarios">Usuários</option>
+            <option value="configuracoes">Configurações</option>
+            <option value="autenticacao">Autenticação</option>
+            <option value="auditoria">Auditoria</option>
+          </select>
+          <select id="filtro-log-tipo-acao">
+            <option value="">Todas as ações</option>
+            <option value="login">Login</option>
+            <option value="logout">Logout</option>
+            <option value="criacao">Criação</option>
+            <option value="edicao">Edição</option>
+            <option value="exclusao">Exclusão</option>
+            <option value="alteracao_senha">Alteração de senha</option>
+            <option value="alteracao_permissoes">Alteração de permissões</option>
+            <option value="exportacao">Exportação de dados</option>
+          </select>
+          <input type="date" id="filtro-log-data-inicio" style="max-width:150px;">
+          <input type="date" id="filtro-log-data-fim" style="max-width:150px;">
+          <select id="filtro-log-ordenar" style="max-width:150px;">
+            <option value="desc">Mais recentes</option>
+            <option value="asc">Mais antigos</option>
+          </select>
+        </div>
+        <div id="tabela-logs-container"><div class="vazio">Carregando...</div></div>
+        <div class="painel-header" style="border-top:1px solid var(--border); border-bottom:none;">
+          <span id="texto-paginacao-logs" style="font-size:13px; color:var(--text-muted);"></span>
+          <div class="topo-acoes">
+            <button class="btn-pequeno" id="btn-pagina-anterior-logs">← Anterior</button>
+            <button class="btn-pequeno" id="btn-pagina-proxima-logs">Próxima →</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -666,6 +724,18 @@
   </div>
 </div>
 
+<!-- ===== MODAL DETALHES DO LOG DE AUDITORIA ===== -->
+<div class="overlay" id="overlay-modal-log">
+  <div class="modal" style="max-width:640px;">
+    <h3>Detalhes do registro</h3>
+    <div id="lista-detalhes-log" style="margin-bottom:16px;"></div>
+    <div id="bloco-diff-log"></div>
+    <div class="modal-actions">
+      <button class="btn" id="btn-fechar-modal-log">Fechar</button>
+    </div>
+  </div>
+</div>
+
 <!-- ===== MODAL DE CONFIRMAÇÃO (genérico, usado por qualquer ação) ===== -->
 <div class="overlay" id="overlay-modal-confirmacao">
   <div class="modal">
@@ -686,6 +756,19 @@
   var associacoesCache = [];
   var administradoresCache = [];
   var ROTULOS_PAPEL_SUPERADMIN = { super_admin: 'Super Admin', administrador: 'Administrador', suporte: 'Suporte' };
+  var ROTULOS_MODULO_LOG = {
+    associacoes: 'Associações', administradores: 'Administradores', associados: 'Associados',
+    cobrancas: 'Cobranças', comunicados: 'Comunicados', usuarios: 'Usuários',
+    configuracoes: 'Configurações', autenticacao: 'Autenticação', auditoria: 'Auditoria'
+  };
+  var ROTULOS_TIPO_ACAO_LOG = {
+    login: 'Login', logout: 'Logout', criacao: 'Criação', edicao: 'Edição', exclusao: 'Exclusão',
+    alteracao_senha: 'Alteração de senha', alteracao_permissoes: 'Alteração de permissões', exportacao: 'Exportação de dados'
+  };
+  var logsCache = [];
+  var paginaAtualLogs = 1;
+  var totalLogs = 0;
+  var porPaginaLogs = 50;
   var graficoCrescimento = null;
   var graficoAssociados = null;
   var graficoReceita = null;
@@ -788,17 +871,19 @@
 
   // ---------- Navegação (sidebar) ----------
   function ativarSecaoSuperAdmin(nome) {
-    ['dashboard', 'associacoes', 'administradores', 'meu-perfil'].forEach(function(secao) {
+    ['dashboard', 'associacoes', 'administradores', 'auditoria', 'meu-perfil'].forEach(function(secao) {
       document.getElementById('aba-' + secao).classList.toggle('ativa', secao === nome);
       document.getElementById('secao-' + secao).classList.toggle('ativa', secao === nome);
     });
     if (nome === 'associacoes') carregarAssociacoes();
     if (nome === 'administradores') carregarAdministradores();
+    if (nome === 'auditoria') { paginaAtualLogs = 1; carregarLogs(); }
     if (nome === 'meu-perfil') preencherMeuPerfil();
   }
   document.getElementById('aba-dashboard').onclick = function() { ativarSecaoSuperAdmin('dashboard'); };
   document.getElementById('aba-associacoes').onclick = function() { ativarSecaoSuperAdmin('associacoes'); };
   document.getElementById('aba-administradores').onclick = function() { ativarSecaoSuperAdmin('administradores'); };
+  document.getElementById('aba-auditoria').onclick = function() { ativarSecaoSuperAdmin('auditoria'); };
   document.getElementById('aba-meu-perfil').onclick = function() { ativarSecaoSuperAdmin('meu-perfil'); };
 
   document.getElementById('btn-recolher-sidebar').onclick = function() {
@@ -1605,6 +1690,153 @@
       }
     });
   }
+
+  // ---------- Auditoria ----------
+  function filtrosLogsQueryString() {
+    var params = [];
+    var usuario = document.getElementById('filtro-log-usuario').value.trim();
+    var associacao = document.getElementById('filtro-log-associacao').value.trim();
+    var modulo = document.getElementById('filtro-log-modulo').value;
+    var tipoAcao = document.getElementById('filtro-log-tipo-acao').value;
+    var dataInicio = document.getElementById('filtro-log-data-inicio').value;
+    var dataFim = document.getElementById('filtro-log-data-fim').value;
+    var ordenar = document.getElementById('filtro-log-ordenar').value;
+    if (usuario) params.push('usuario=' + encodeURIComponent(usuario));
+    if (associacao) params.push('associacao=' + encodeURIComponent(associacao));
+    if (modulo) params.push('modulo=' + encodeURIComponent(modulo));
+    if (tipoAcao) params.push('tipo_acao=' + encodeURIComponent(tipoAcao));
+    if (dataInicio) params.push('data_inicio=' + encodeURIComponent(dataInicio));
+    if (dataFim) params.push('data_fim=' + encodeURIComponent(dataFim));
+    if (ordenar) params.push('ordenar=' + encodeURIComponent(ordenar));
+    return params;
+  }
+
+  function carregarLogs() {
+    var params = filtrosLogsQueryString();
+    params.push('pagina=' + paginaAtualLogs);
+    params.push('por_pagina=' + porPaginaLogs);
+    var container = document.getElementById('tabela-logs-container');
+    container.innerHTML = '<div class="vazio">Carregando...</div>';
+
+    fetch(API_URL + '/superadmin/logs?' + params.join('&'), { headers: { 'Authorization': 'Bearer ' + estado.token }, cache: 'no-store' })
+    .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
+    .then(function(res) {
+      if (!res.ok) { mostrarToast(res.data.erro || 'Erro ao carregar logs', true); return; }
+      logsCache = res.data.registros;
+      totalLogs = res.data.total;
+      renderizarLogs(logsCache);
+      atualizarPaginacaoLogs();
+    })
+    .catch(function() { mostrarToast('Erro ao carregar logs', true); });
+  }
+
+  ['filtro-log-usuario', 'filtro-log-associacao'].forEach(function(id) {
+    document.getElementById(id).oninput = function() { paginaAtualLogs = 1; carregarLogs(); };
+  });
+  ['filtro-log-modulo', 'filtro-log-tipo-acao', 'filtro-log-data-inicio', 'filtro-log-data-fim', 'filtro-log-ordenar'].forEach(function(id) {
+    document.getElementById(id).onchange = function() { paginaAtualLogs = 1; carregarLogs(); };
+  });
+
+  function renderizarLogs(lista) {
+    var container = document.getElementById('tabela-logs-container');
+    if (lista.length === 0) {
+      container.innerHTML = '<div class="vazio">Nenhum registro encontrado.</div>';
+      return;
+    }
+    var html = '<table><thead><tr><th>Data/Hora</th><th>Usuário</th><th>Associação</th><th>Módulo</th><th>Ação</th><th>Descrição</th><th></th></tr></thead><tbody>';
+    lista.forEach(function(l) {
+      var nomeAtor = l.super_admin_nome || l.usuario_nome || l.usuario_email || l.super_admin_email || '—';
+      html += '<tr>' +
+        '<td style="white-space:nowrap;">' + new Date(l.criado_em).toLocaleString('pt-BR') + '</td>' +
+        '<td>' + escapeHtml(nomeAtor) + '</td>' +
+        '<td>' + escapeHtml(l.associacao_nome || '—') + '</td>' +
+        '<td>' + (ROTULOS_MODULO_LOG[l.modulo] || l.modulo) + '</td>' +
+        '<td>' + (ROTULOS_TIPO_ACAO_LOG[l.tipo_acao] || l.tipo_acao) + '</td>' +
+        '<td>' + escapeHtml(l.descricao) + '</td>' +
+        '<td><button class="btn-pequeno" onclick="abrirDetalhesLog(\'' + l.id + '\')">Detalhes</button></td>' +
+        '</tr>';
+    });
+    html += '</tbody></table>';
+    container.innerHTML = html;
+  }
+
+  function atualizarPaginacaoLogs() {
+    var inicio = totalLogs === 0 ? 0 : (paginaAtualLogs - 1) * porPaginaLogs + 1;
+    var fim = Math.min(paginaAtualLogs * porPaginaLogs, totalLogs);
+    document.getElementById('texto-paginacao-logs').textContent = totalLogs === 0
+      ? 'Nenhum registro'
+      : ('Mostrando ' + inicio + '–' + fim + ' de ' + totalLogs);
+    document.getElementById('btn-pagina-anterior-logs').disabled = paginaAtualLogs <= 1;
+    document.getElementById('btn-pagina-proxima-logs').disabled = (paginaAtualLogs * porPaginaLogs) >= totalLogs;
+  }
+
+  document.getElementById('btn-pagina-anterior-logs').onclick = function() {
+    if (paginaAtualLogs > 1) { paginaAtualLogs--; carregarLogs(); }
+  };
+  document.getElementById('btn-pagina-proxima-logs').onclick = function() {
+    if ((paginaAtualLogs * porPaginaLogs) < totalLogs) { paginaAtualLogs++; carregarLogs(); }
+  };
+
+  function abrirDetalhesLog(id) {
+    var log = logsCache.find(function(l) { return l.id === id; });
+    if (!log) return;
+    var nomeAtor = log.super_admin_nome || log.usuario_nome || log.usuario_email || log.super_admin_email || '—';
+    var emailAtor = log.usuario_email || log.super_admin_email || '—';
+
+    document.getElementById('lista-detalhes-log').innerHTML =
+      linhaInfo('Data/Hora', new Date(log.criado_em).toLocaleString('pt-BR')) +
+      linhaInfo('Usuário', nomeAtor) +
+      linhaInfo('E-mail', emailAtor) +
+      linhaInfo('Associação', log.associacao_nome) +
+      linhaInfo('Módulo', ROTULOS_MODULO_LOG[log.modulo] || log.modulo) +
+      linhaInfo('Tipo de ação', ROTULOS_TIPO_ACAO_LOG[log.tipo_acao] || log.tipo_acao) +
+      linhaInfo('Descrição', log.descricao) +
+      linhaInfo('IP', log.ip) +
+      linhaInfo('Dispositivo/Navegador', log.user_agent);
+
+    var blocoDiff = document.getElementById('bloco-diff-log');
+    if (log.dados_anteriores || log.dados_novos) {
+      blocoDiff.innerHTML =
+        '<p style="font-size:13px; font-weight:600; margin-bottom:8px;">Valor anterior / novo</p>' +
+        '<div style="display:flex; gap:10px; flex-wrap:wrap;">' +
+          '<pre style="flex:1; min-width:220px; background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:10px; font-size:12px; overflow-x:auto;">' + escapeHtml(log.dados_anteriores ? JSON.stringify(log.dados_anteriores, null, 2) : '—') + '</pre>' +
+          '<pre style="flex:1; min-width:220px; background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:10px; font-size:12px; overflow-x:auto;">' + escapeHtml(log.dados_novos ? JSON.stringify(log.dados_novos, null, 2) : '—') + '</pre>' +
+        '</div>';
+    } else {
+      blocoDiff.innerHTML = '';
+    }
+
+    document.getElementById('overlay-modal-log').style.display = 'flex';
+  }
+
+  document.getElementById('btn-fechar-modal-log').onclick = function() {
+    document.getElementById('overlay-modal-log').style.display = 'none';
+  };
+
+  function exportarLogs(formato) {
+    var params = filtrosLogsQueryString();
+    fetch(API_URL + '/superadmin/logs/exportar/' + formato + '?' + params.join('&'), {
+      headers: { 'Authorization': 'Bearer ' + estado.token }
+    })
+    .then(function(resp) {
+      if (!resp.ok) { return resp.json().then(function(d) { throw new Error(d.erro || 'Erro ao exportar'); }); }
+      return resp.blob();
+    })
+    .then(function(blob) {
+      var url = URL.createObjectURL(blob);
+      var link = document.createElement('a');
+      link.href = url;
+      link.download = 'logs-auditoria.' + (formato === 'excel' ? 'xlsx' : 'pdf');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    })
+    .catch(function(err) { mostrarToast(err.message || 'Erro ao exportar logs', true); });
+  }
+
+  document.getElementById('btn-exportar-excel').onclick = function() { exportarLogs('excel'); };
+  document.getElementById('btn-exportar-pdf').onclick = function() { exportarLogs('pdf'); };
 
   // ---------- Meu Perfil ----------
   function preencherMeuPerfil() {
