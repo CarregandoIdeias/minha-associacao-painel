@@ -152,30 +152,71 @@
     .kpi-card .valor { font-size: 22px; }
   }
 
+  /* ---------- Menu hambúrguer (mobile) ---------- */
+  .mobile-topbar {
+    display: none;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 40;
+  }
+  .mobile-topbar .logo { padding: 0; font-size: 14px; font-weight: 700; }
+  .btn-hamburguer {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    color: var(--text);
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .btn-hamburguer:hover { background: var(--accent-soft); color: var(--accent); }
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 55;
+  }
+  .sidebar-overlay.aberto { display: block; }
+
   @media (max-width: 768px) {
     .app-layout { flex-direction: column; }
+    .mobile-topbar { display: flex; }
+    .btn-hamburguer { display: flex; }
     .sidebar {
-      width: 100%;
-      height: auto;
-      position: static;
-      flex-direction: row;
-      align-items: center;
-      overflow-x: auto;
-      padding: 12px 16px;
+      width: 240px;
+      height: 100%;
+      position: fixed;
+      left: -240px;
+      top: 0;
+      flex-direction: column;
+      padding: 24px 16px;
+      transition: left .3s ease;
+      z-index: 60;
+      overflow-y: auto;
     }
-    .sidebar.recolhida { width: 100%; }
-    .sidebar .logo, .btn-recolher-sidebar { display: none; }
-    .nav-item { width: auto; white-space: nowrap; margin-bottom: 0; padding: 8px 12px; }
-    .sidebar.recolhida .rotulo-nav { display: inline; font-size: 13px; }
-    .sidebar-footer { margin-top: 0; border-top: none; padding-top: 0; margin-left: auto; }
+    .sidebar.aberto { left: 0; }
+    .sidebar .logo { font-size: 16px; padding: 0 0 20px 0; }
+    .btn-recolher-sidebar { display: none; }
     .content-area { padding: 20px; }
     .topo-conteudo { margin-bottom: 16px; }
     .saudacao { font-size: 17px; }
     .nome-mini { display: none; }
     .perfil-chip { padding: 6px 8px; font-size: 12px; }
     .kpi-card { padding: 14px; }
-    .kpi-card .rotulo { font-size: 11px; }
-    .kpi-card .valor { font-size: 20px; }
+    .kpi-card .rotulo { font-size: 10px; }
+    .kpi-card .valor { font-size: 18px; }
     .painel-header { padding: 12px 16px; font-size: 14px; }
     .painel-header h3 { font-size: 14px; }
     th, td { padding: 10px 12px; font-size: 13px; }
@@ -184,6 +225,8 @@
     .filtros-associacoes { padding: 14px 16px; gap: 8px; }
     .filtros-associacoes input, .filtros-associacoes select { min-width: 0; font-size: 13px; }
     .dropdown-notificacoes { right: -60px; width: 320px; }
+    .kpis { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .graficos { grid-template-columns: 1fr; }
   }
 
   @media (max-width: 640px) {
@@ -302,6 +345,12 @@
   .info-linha { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
   .info-linha:last-child { border-bottom: none; }
   .info-linha span:first-child { color: var(--text-muted); }
+
+  .item-lista { padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .item-lista:last-child { border-bottom: none; }
+  .item-lista-titulo { font-weight: 600; color: var(--text); }
+  .item-lista-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .item-lista-badge { display: inline-block; background: var(--accent-soft); color: var(--accent); padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 600; margin-top: 4px; }
 </style>
 </head>
 <body>
@@ -314,6 +363,13 @@
   <button class="btn" style="width:100%;" id="btn-login">Entrar</button>
   <p id="erro-login"></p>
 </div>
+
+<div class="mobile-topbar" id="mobile-topbar">
+  <button class="btn-hamburguer" id="btn-hamburguer" aria-label="Abrir menu">☰</button>
+  <div class="logo">Super Admin</div>
+</div>
+
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
 
 <div class="app-layout" id="tela-dashboard">
 
@@ -377,41 +433,44 @@
 
     <div id="secao-dashboard" class="secao-conteudo ativa">
       <div class="kpis">
-        <div class="kpi-card"><div class="rotulo">🏢 Associações</div><div class="valor" id="kpi-total-associacoes">0</div></div>
-        <div class="kpi-card"><div class="rotulo">👥 Associados</div><div class="valor" id="kpi-total-associados">0</div></div>
-        <div class="kpi-card"><div class="rotulo">💰 MRR (mensalidade recorrente)</div><div class="valor" id="kpi-mrr">R$ 0</div></div>
-        <div class="kpi-card alerta"><div class="rotulo">⚠️ Mensalidades vencidas</div><div class="valor" id="kpi-total-atrasadas">0</div></div>
-        <div class="kpi-card"><div class="rotulo">🟢 Associações ativas</div><div class="valor" id="kpi-associacoes-ativas">0</div></div>
-        <div class="kpi-card perigo"><div class="rotulo">🔴 Bloqueadas</div><div class="valor" id="kpi-associacoes-bloqueadas">0</div></div>
+        <div class="kpi-card"><div class="rotulo">Associações</div><div class="valor" id="kpi-total-associacoes">0</div></div>
+        <div class="kpi-card"><div class="rotulo">Associados</div><div class="valor" id="kpi-total-associados">0</div></div>
+        <div class="kpi-card"><div class="rotulo">MRR</div><div class="valor" id="kpi-mrr">R$ 0</div></div>
+        <div class="kpi-card alerta"><div class="rotulo">Vencidas</div><div class="valor" id="kpi-total-atrasadas">0</div></div>
+        <div class="kpi-card"><div class="rotulo">Ativas</div><div class="valor" id="kpi-associacoes-ativas">0</div></div>
+        <div class="kpi-card perigo"><div class="rotulo">Bloqueadas</div><div class="valor" id="kpi-associacoes-bloqueadas">0</div></div>
       </div>
 
       <div class="graficos">
         <div class="grafico-card">
-          <h4>Crescimento de associações (12 meses)</h4>
-          <canvas id="grafico-crescimento" height="180"></canvas>
+          <h4>Crescimento (12 meses)</h4>
+          <canvas id="grafico-crescimento" height="160"></canvas>
         </div>
         <div class="grafico-card">
-          <h4>Novos associados cadastrados (12 meses)</h4>
-          <canvas id="grafico-associados" height="180"></canvas>
-        </div>
-        <div class="grafico-card">
-          <h4>Receita recebida por mês</h4>
-          <canvas id="grafico-receita" height="180"></canvas>
-        </div>
-        <div class="grafico-card">
-          <h4>Distribuição por plano</h4>
-          <canvas id="grafico-planos" height="180"></canvas>
+          <h4>Novos associados (12 meses)</h4>
+          <canvas id="grafico-associados" height="160"></canvas>
         </div>
       </div>
 
-      <div class="painel" style="margin-bottom: 20px;">
-        <div class="painel-header"><h3>Últimas associações cadastradas</h3></div>
-        <div id="tabela-ultimas-associacoes"><div class="vazio">Carregando...</div></div>
-      </div>
-
-      <div class="painel" id="painel-alertas">
-        <div class="painel-header"><h3>Alertas</h3></div>
-        <div id="lista-alertas"><div class="vazio">Carregando...</div></div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 20px;">
+        <div class="painel">
+          <div class="painel-header"><h3 style="font-size: 14px;">Últimas associações</h3></div>
+          <div id="lista-ultimas-associacoes" style="max-height: 280px; overflow-y: auto;">
+            <div class="vazio" style="padding: 20px;">Carregando...</div>
+          </div>
+        </div>
+        <div class="painel">
+          <div class="painel-header"><h3 style="font-size: 14px;">Últimos admins</h3></div>
+          <div id="lista-ultimos-admins" style="max-height: 280px; overflow-y: auto;">
+            <div class="vazio" style="padding: 20px;">Carregando...</div>
+          </div>
+        </div>
+        <div class="painel">
+          <div class="painel-header"><h3 style="font-size: 14px;">Últimas atividades</h3></div>
+          <div id="lista-ultimas-atividades" style="max-height: 280px; overflow-y: auto;">
+            <div class="vazio" style="padding: 20px;">Carregando...</div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -869,6 +928,90 @@
   }
   function limparSessao() { localStorage.removeItem('sessao_superadmin'); }
 
+  // ---------- Menu mobile (hamburger) ----------
+  function abrirSidebarMobile() {
+    document.getElementById('sidebar-superadmin').classList.add('aberto');
+    document.getElementById('sidebar-overlay').classList.add('aberto');
+  }
+  function fecharSidebarMobile() {
+    document.getElementById('sidebar-superadmin').classList.remove('aberto');
+    document.getElementById('sidebar-overlay').classList.remove('aberto');
+  }
+  document.getElementById('btn-hamburguer').onclick = abrirSidebarMobile;
+  document.getElementById('sidebar-overlay').onclick = fecharSidebarMobile;
+  document.querySelectorAll('.sidebar .nav-item').forEach(function(item) {
+    item.addEventListener('click', fecharSidebarMobile);
+  });
+
+  // ---------- Carregar "Últimas" pro Dashboard ----------
+  function carregarUltimasAssociacoes() {
+    fetch(API_URL + '/superadmin/associacoes?limite=3', { headers: { 'Authorization': 'Bearer ' + estado.token }, cache: 'no-store' })
+    .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
+    .then(function(res) {
+      if (!res.ok) return;
+      var html = '';
+      if (res.data.length === 0) {
+        html = '<div class="vazio" style="padding:20px;">Nenhuma associação ainda.</div>';
+      } else {
+        res.data.slice(0, 3).forEach(function(a) {
+          var statusClass = a.ativo ? 'ativo' : 'inativo';
+          html += '<div class="item-lista">' +
+            '<div class="item-lista-titulo">' + escapeHtml(a.nome) + '</div>' +
+            '<div class="item-lista-sub">' + (a.cidade || '—') + ', ' + (a.estado || '?') + '</div>' +
+            '<span class="item-lista-badge">' + (ROTULOS_PLANO[a.plano] || a.plano) + '</span>' +
+            '</div>';
+        });
+      }
+      document.getElementById('lista-ultimas-associacoes').innerHTML = html;
+    })
+    .catch(function() { document.getElementById('lista-ultimas-associacoes').innerHTML = '<div class="vazio" style="padding:20px;">Erro ao carregar.</div>'; });
+  }
+
+  function carregarUltimosAdmins() {
+    fetch(API_URL + '/superadmin/admins?limite=3', { headers: { 'Authorization': 'Bearer ' + estado.token }, cache: 'no-store' })
+    .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
+    .then(function(res) {
+      if (!res.ok) return;
+      var html = '';
+      if (res.data.length === 0) {
+        html = '<div class="vazio" style="padding:20px;">Nenhum admin ainda.</div>';
+      } else {
+        res.data.slice(0, 3).forEach(function(a) {
+          html += '<div class="item-lista">' +
+            '<div class="item-lista-titulo">' + escapeHtml(a.nome) + '</div>' +
+            '<div class="item-lista-sub">' + escapeHtml(a.email) + '</div>' +
+            '<span class="item-lista-badge">' + (ROTULOS_PAPEL_SUPERADMIN[a.papel] || a.papel) + '</span>' +
+            '</div>';
+        });
+      }
+      document.getElementById('lista-ultimos-admins').innerHTML = html;
+    })
+    .catch(function() { document.getElementById('lista-ultimos-admins').innerHTML = '<div class="vazio" style="padding:20px;">Erro ao carregar.</div>'; });
+  }
+
+  function carregarUltimasAtividades() {
+    fetch(API_URL + '/superadmin/logs?limite=5&ordenar=desc', { headers: { 'Authorization': 'Bearer ' + estado.token }, cache: 'no-store' })
+    .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
+    .then(function(res) {
+      if (!res.ok) return;
+      var html = '';
+      var registros = res.data.registros || [];
+      if (registros.length === 0) {
+        html = '<div class="vazio" style="padding:20px;">Nenhuma atividade ainda.</div>';
+      } else {
+        registros.slice(0, 5).forEach(function(log) {
+          var nomeAtor = log.super_admin_nome || log.usuario_nome || log.usuario_email || log.super_admin_email || '—';
+          html += '<div class="item-lista">' +
+            '<div class="item-lista-titulo">' + (ROTULOS_TIPO_ACAO_LOG[log.tipo_acao] || log.tipo_acao) + '</div>' +
+            '<div class="item-lista-sub">' + escapeHtml(nomeAtor) + ' • ' + new Date(log.criado_em).toLocaleDateString('pt-BR') + '</div>' +
+            '</div>';
+        });
+      }
+      document.getElementById('lista-ultimas-atividades').innerHTML = html;
+    })
+    .catch(function() { document.getElementById('lista-ultimas-atividades').innerHTML = '<div class="vazio" style="padding:20px;">Erro ao carregar.</div>'; });
+  }
+
   // ---------- Navegação (sidebar) ----------
   function ativarSecaoSuperAdmin(nome) {
     ['dashboard', 'associacoes', 'administradores', 'auditoria', 'meu-perfil'].forEach(function(secao) {
@@ -1012,8 +1155,10 @@
       document.getElementById('kpi-total-atrasadas').textContent = d.total_atrasadas || 0;
       document.getElementById('kpi-mrr').textContent = formatarMoeda(d.receita_mrr);
       desenharGraficos(d.crescimento_associacoes || [], d.novos_associados || [], d.receita_historico || [], d.distribuicao_planos || []);
-      renderizarUltimasAssociacoes(d.ultimas_associacoes || []);
       renderizarAlertas(d.alertas || []);
+      carregarUltimasAssociacoes();
+      carregarUltimosAdmins();
+      carregarUltimasAtividades();
     })
     .catch(function() { mostrarToast('Erro ao carregar dashboard', true); });
   }
