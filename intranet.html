@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Intranet — Painel Central</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F7F5EF;
+    --bg-card: #ffffff;
+    --text: #1A1712;
+    --text-muted: #6B6558;
+    --border: #E4E0D2;
+    --accent: #C9A84C;
+    --accent-hover: #E8CC80;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-lg: 0 10px 30px -12px rgba(26,23,18,0.18);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0A0A0A;
+      --bg-card: #1A1A1A;
+      --text: #F9F8F5;
+      --text-muted: #888888;
+      --border: #232323;
+      --accent: #C9A84C;
+      --accent-hover: #E8CC80;
+      --shadow: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
+      --shadow-lg: 0 10px 34px -12px rgba(0,0,0,0.55);
+    }
+  }
+  [data-theme="dark"] {
+    --bg: #0A0A0A;
+    --bg-card: #1A1A1A;
+    --text: #F9F8F5;
+    --text-muted: #888888;
+    --border: #232323;
+    --accent: #C9A84C;
+    --accent-hover: #E8CC80;
+    --shadow: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
+    --shadow-lg: 0 10px 34px -12px rgba(0,0,0,0.55);
+  }
+  [data-theme="light"] {
+    --bg: #F7F5EF;
+    --bg-card: #ffffff;
+    --text: #1A1712;
+    --text-muted: #6B6558;
+    --border: #E4E0D2;
+    --accent: #C9A84C;
+    --accent-hover: #E8CC80;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-lg: 0 10px 30px -12px rgba(26,23,18,0.18);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Poppins', -apple-system, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 40px 20px;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 50px;
+    border-bottom: 2px solid var(--accent);
+    padding-bottom: 30px;
+  }
+
+  .header h1 {
+    margin: 0 0 10px;
+    font-size: 36px;
+    font-weight: 700;
+  }
+
+  .header p {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 16px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+  }
+
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px;
+    box-shadow: var(--shadow);
+    transition: all 0.2s;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--accent);
+  }
+
+  .card-icon {
+    font-size: 40px;
+    margin-bottom: 16px;
+  }
+
+  .card h3 {
+    margin: 0 0 8px;
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  .card p {
+    margin: 0;
+    font-size: 14px;
+    color: var(--text-muted);
+    flex-grow: 1;
+    margin-bottom: 16px;
+  }
+
+  .card-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--accent);
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+  .card-link:hover {
+    color: var(--accent-hover);
+  }
+
+  .footer {
+    text-align: center;
+    margin-top: 50px;
+    padding-top: 30px;
+    border-top: 1px solid var(--border);
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  .theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 20px;
+    transition: all 0.2s;
+    box-shadow: var(--shadow);
+  }
+
+  .theme-toggle:hover {
+    box-shadow: var(--shadow-lg);
+  }
+</style>
+</head>
+<body>
+
+<button class="theme-toggle" id="themeToggle">🌙</button>
+
+<div class="container">
+  <div class="header">
+    <h1>Painel Central</h1>
+    <p>Acesso rápido a todas as áreas da plataforma</p>
+  </div>
+
+  <div class="grid">
+    <a href="index.html" class="card">
+      <div class="card-icon">📊</div>
+      <h3>Painel da Associação</h3>
+      <p>Dashboard, associados, financeiro, comunicados e configurações da sua associação.</p>
+      <span class="card-link">Acessar →</span>
+    </a>
+
+    <a href="portal.html" class="card">
+      <div class="card-icon">👤</div>
+      <h3>Portal do Associado</h3>
+      <p>Consulte seus dados, cobranças, comprovantes de pagamento e comunicados.</p>
+      <span class="card-link">Acessar →</span>
+    </a>
+
+    <a href="superadmin.html" class="card">
+      <div class="card-icon">⚙️</div>
+      <h3>Super Admin</h3>
+      <p>Gerenciar associações, planos, KPIs globais e alertas da plataforma.</p>
+      <span class="card-link">Acessar →</span>
+    </a>
+
+    <a href="landing.html" class="card">
+      <div class="card-icon">🚀</div>
+      <h3>Landing Page</h3>
+      <p>Página de vendas do ASSOCIA PLUS — conheça os planos e funcionalidades.</p>
+      <span class="card-link">Acessar →</span>
+    </a>
+  </div>
+
+  <div class="footer">
+    <p>© 2026 ASSOCIA PLUS — Organize. Comunique. Evolua.</p>
+  </div>
+</div>
+
+<script>
+(function() {
+  var themeToggle = document.getElementById('themeToggle');
+  var temaSalvo = localStorage.getItem('tema-preferido') || 'light';
+
+  function aplicarTema(tema) {
+    document.documentElement.setAttribute('data-theme', tema);
+    localStorage.setItem('tema-preferido', tema);
+    themeToggle.textContent = tema === 'dark' ? '☀️' : '🌙';
+  }
+
+  themeToggle.addEventListener('click', function() {
+    var temAtual = document.documentElement.getAttribute('data-theme');
+    var novoTema = temAtual === 'dark' ? 'light' : 'dark';
+    aplicarTema(novoTema);
+  });
+
+  aplicarTema(temaSalvo);
+})();
+</script>
+
+</body>
+</html>
