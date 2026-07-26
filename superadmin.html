@@ -253,7 +253,7 @@
   .painel-header { display: flex; justify-content: space-between; align-items: center; padding: 18px 22px; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 10px; }
   .painel-header h3 { font-size: 15px; font-weight: 600; }
 
-  #tabela-associacoes-container { overflow-x: auto; }
+  #tabela-associacoes-container, #tabela-administradores-container { overflow-x: auto; }
   table { width: 100%; border-collapse: collapse; min-width: 980px; }
   th, td { text-align: left; padding: 14px 16px; font-size: 14px; border-bottom: 1px solid var(--border); }
   th { color: var(--text-muted); font-weight: 500; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
@@ -329,6 +329,14 @@
     <button class="nav-item" id="aba-associacoes">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 9h1"/><path d="M9 13h1"/><path d="M14 9h1"/><path d="M14 13h1"/><path d="M10 21v-4h4v4"/></svg>
       <span class="rotulo-nav">Associações</span>
+    </button>
+    <button class="nav-item" id="aba-administradores">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span class="rotulo-nav">Administradores</span>
+    </button>
+    <button class="nav-item" id="aba-meu-perfil">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span class="rotulo-nav">Meu Perfil</span>
     </button>
 
     <div class="sidebar-footer">
@@ -426,6 +434,30 @@
           </select>
         </div>
         <div id="tabela-associacoes-container"><div class="vazio">Carregando...</div></div>
+      </div>
+    </div>
+
+    <div id="secao-administradores" class="secao-conteudo">
+      <div class="painel">
+        <div class="painel-header">
+          <h3>Administradores da plataforma</h3>
+          <button class="btn" id="btn-novo-administrador">+ Novo administrador</button>
+        </div>
+        <div id="tabela-administradores-container"><div class="vazio">Carregando...</div></div>
+      </div>
+    </div>
+
+    <div id="secao-meu-perfil" class="secao-conteudo">
+      <div class="painel">
+        <div class="painel-header"><h3>Meu perfil</h3></div>
+        <div style="padding:22px;">
+          <div class="info-linha"><span>Nome</span><span id="perfil-nome">—</span></div>
+          <div class="info-linha"><span>E-mail</span><span id="perfil-email">—</span></div>
+          <div class="info-linha"><span>Nível de permissão</span><span id="perfil-papel">—</span></div>
+          <div style="margin-top:20px;">
+            <button class="btn" id="btn-abrir-alterar-senha">Alterar minha senha</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -583,13 +615,53 @@
 <!-- ===== MODAL CREDENCIAIS GERADAS ===== -->
 <div class="overlay" id="overlay-modal-credenciais">
   <div class="modal">
-    <h3>Associação criada!</h3>
-    <p style="font-size:13px; color:var(--text-muted); margin-bottom:16px;">Essa senha só aparece agora — copie e envie para o responsável pela associação. No primeiro login, o sistema vai pedir para ele definir uma senha nova.</p>
+    <h3 id="titulo-modal-credenciais">Associação criada!</h3>
+    <p id="texto-modal-credenciais" style="font-size:13px; color:var(--text-muted); margin-bottom:16px;">Essa senha só aparece agora — copie e envie para o responsável pela associação. No primeiro login, o sistema vai pedir para ele definir uma senha nova.</p>
     <div class="campo"><label>E-mail de login</label><input type="text" id="cred-email-admin" readonly></div>
     <div class="campo"><label>Senha provisória</label><input type="text" id="cred-senha-provisoria" readonly></div>
     <div class="modal-actions">
       <button class="btn btn-ghost" id="btn-copiar-credenciais">Copiar senha</button>
       <button class="btn" id="btn-fechar-credenciais">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL NOVO/EDITAR ADMINISTRADOR ===== -->
+<div class="overlay" id="overlay-modal-administrador">
+  <div class="modal">
+    <h3 id="titulo-modal-administrador">Novo administrador</h3>
+    <input type="hidden" id="editar-administrador-id" value="">
+
+    <div class="campo"><label>Nome</label><input type="text" id="admin-nome"></div>
+    <div class="campo"><label>E-mail</label><input type="email" id="admin-email"></div>
+    <div class="campo">
+      <label>Nível de permissão</label>
+      <select id="admin-papel">
+        <option value="super_admin">Super Admin</option>
+        <option value="administrador" selected>Administrador</option>
+        <option value="suporte">Suporte</option>
+      </select>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="btn-cancelar-modal-administrador">Cancelar</button>
+      <button class="btn" id="btn-salvar-administrador">Criar administrador</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL ALTERAR MINHA SENHA ===== -->
+<div class="overlay" id="overlay-modal-alterar-senha">
+  <div class="modal">
+    <h3>Alterar minha senha</h3>
+    <p id="aviso-troca-obrigatoria" style="font-size:13px; color:var(--text-muted); margin-bottom:16px; display:none;">Você está usando uma senha provisória — defina uma senha nova para continuar.</p>
+    <div class="campo"><label>Senha atual</label><input type="password" id="senha-atual-superadmin"></div>
+    <div class="campo"><label>Nova senha</label><input type="password" id="senha-nova-superadmin"></div>
+    <div class="campo"><label>Confirmar nova senha</label><input type="password" id="senha-nova-confirmar-superadmin"></div>
+    <p id="erro-alterar-senha" style="color:var(--danger); font-size:13px; display:none;"></p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="btn-cancelar-alterar-senha">Cancelar</button>
+      <button class="btn" id="btn-confirmar-alterar-senha">Salvar nova senha</button>
     </div>
   </div>
 </div>
@@ -610,8 +682,10 @@
 
 <script>
   var API_URL = 'https://minha-associacao-backend.onrender.com';
-  var estado = { token: null, nome: null };
+  var estado = { token: null, nome: null, id: null, papel: null };
   var associacoesCache = [];
+  var administradoresCache = [];
+  var ROTULOS_PAPEL_SUPERADMIN = { super_admin: 'Super Admin', administrador: 'Administrador', suporte: 'Suporte' };
   var graficoCrescimento = null;
   var graficoAssociados = null;
   var graficoReceita = null;
@@ -688,19 +762,44 @@
     document.getElementById('overlay-modal-confirmacao').style.display = 'none';
   };
 
-  function salvarSessao() { localStorage.setItem('sessao_superadmin', JSON.stringify({ token: estado.token, nome: estado.nome })); }
+  function decodificarEmailDoToken(token) {
+    try {
+      var payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.email || '';
+    } catch (e) {
+      return '';
+    }
+  }
+
+  // Reaproveitado por criação/redefinição de senha de admin de associação E
+  // de administrador da plataforma -- só o título/texto muda por contexto.
+  function abrirModalCredenciais(email, senhaProvisoria, titulo, mensagem) {
+    document.getElementById('titulo-modal-credenciais').textContent = titulo;
+    document.getElementById('texto-modal-credenciais').textContent = mensagem;
+    document.getElementById('cred-email-admin').value = email;
+    document.getElementById('cred-senha-provisoria').value = senhaProvisoria;
+    document.getElementById('overlay-modal-credenciais').style.display = 'flex';
+  }
+
+  function salvarSessao() {
+    localStorage.setItem('sessao_superadmin', JSON.stringify({ token: estado.token, nome: estado.nome, id: estado.id, papel: estado.papel }));
+  }
   function limparSessao() { localStorage.removeItem('sessao_superadmin'); }
 
   // ---------- Navegação (sidebar) ----------
   function ativarSecaoSuperAdmin(nome) {
-    ['dashboard', 'associacoes'].forEach(function(secao) {
+    ['dashboard', 'associacoes', 'administradores', 'meu-perfil'].forEach(function(secao) {
       document.getElementById('aba-' + secao).classList.toggle('ativa', secao === nome);
       document.getElementById('secao-' + secao).classList.toggle('ativa', secao === nome);
     });
     if (nome === 'associacoes') carregarAssociacoes();
+    if (nome === 'administradores') carregarAdministradores();
+    if (nome === 'meu-perfil') preencherMeuPerfil();
   }
   document.getElementById('aba-dashboard').onclick = function() { ativarSecaoSuperAdmin('dashboard'); };
   document.getElementById('aba-associacoes').onclick = function() { ativarSecaoSuperAdmin('associacoes'); };
+  document.getElementById('aba-administradores').onclick = function() { ativarSecaoSuperAdmin('administradores'); };
+  document.getElementById('aba-meu-perfil').onclick = function() { ativarSecaoSuperAdmin('meu-perfil'); };
 
   document.getElementById('btn-recolher-sidebar').onclick = function() {
     var recolhida = document.getElementById('sidebar-superadmin').classList.toggle('recolhida');
@@ -726,6 +825,7 @@
     document.getElementById('tela-dashboard').style.display = 'flex';
     document.getElementById('nome-superadmin').textContent = estado.nome || 'Administrador';
     document.getElementById('avatar-superadmin').textContent = (estado.nome || 'A').charAt(0).toUpperCase();
+    document.getElementById('aba-administradores').style.display = (estado.papel === 'super_admin') ? 'flex' : 'none';
     atualizarSaudacao();
     ativarSecaoSuperAdmin('dashboard');
     carregarDashboard();
@@ -739,6 +839,8 @@
       if (!dados.token) return;
       estado.token = dados.token;
       estado.nome = dados.nome;
+      estado.id = dados.id;
+      estado.papel = dados.papel;
     } catch (e) { return; }
 
     fetch(API_URL + '/superadmin/dashboard', { headers: { 'Authorization': 'Bearer ' + estado.token }, cache: 'no-store' })
@@ -774,8 +876,13 @@
       }
       estado.token = res.data.token;
       estado.nome = res.data.nome;
+      estado.id = res.data.id;
+      estado.papel = res.data.papel;
       salvarSessao();
       entrarNoDashboard();
+      if (res.data.deve_trocar_senha) {
+        abrirModalAlterarSenha(true);
+      }
     })
     .catch(function() {
       erroEl.textContent = 'Não foi possível conectar ao servidor.';
@@ -1197,9 +1304,11 @@
     .then(function(res) {
       if (!res.ok) { mostrarToast(res.data.erro || 'Erro ao criar associação', true); return; }
       document.getElementById('overlay-modal-associacao').style.display = 'none';
-      document.getElementById('cred-email-admin').value = res.data.admin.email;
-      document.getElementById('cred-senha-provisoria').value = res.data.senha_provisoria;
-      document.getElementById('overlay-modal-credenciais').style.display = 'flex';
+      abrirModalCredenciais(
+        res.data.admin.email, res.data.senha_provisoria,
+        'Associação criada!',
+        'Essa senha só aparece agora — copie e envie para o responsável pela associação. No primeiro login, o sistema vai pedir para ele definir uma senha nova.'
+      );
       carregarAssociacoes();
       carregarDashboard();
     })
@@ -1335,9 +1444,11 @@
         .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
         .then(function(res) {
           if (!res.ok) { mostrarToast(res.data.erro || 'Erro ao redefinir senha', true); return; }
-          document.getElementById('cred-email-admin').value = res.data.email;
-          document.getElementById('cred-senha-provisoria').value = res.data.senha_provisoria;
-          document.getElementById('overlay-modal-credenciais').style.display = 'flex';
+          abrirModalCredenciais(
+            res.data.email, res.data.senha_provisoria,
+            'Senha redefinida!',
+            'Essa senha só aparece agora — copie e envie para o responsável pela associação. No próximo login, o sistema vai pedir para ele definir uma senha nova.'
+          );
         })
         .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
       }
@@ -1346,6 +1457,218 @@
 
   document.getElementById('btn-editar-associacao-detalhe').onclick = function() {
     abrirEdicaoAssociacao(associacaoDetalheAtual);
+  };
+
+  // ---------- Administradores da plataforma ----------
+  function carregarAdministradores() {
+    fetch(API_URL + '/superadmin/admins', { headers: { 'Authorization': 'Bearer ' + estado.token }, cache: 'no-store' })
+    .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
+    .then(function(res) {
+      if (!res.ok) { mostrarToast(res.data.erro || 'Erro ao carregar administradores', true); return; }
+      renderizarAdministradores(res.data);
+    })
+    .catch(function() { mostrarToast('Erro ao carregar administradores', true); });
+  }
+
+  function renderizarAdministradores(lista) {
+    administradoresCache = lista;
+    var container = document.getElementById('tabela-administradores-container');
+    if (lista.length === 0) {
+      container.innerHTML = '<div class="vazio">Nenhum administrador cadastrado.</div>';
+      return;
+    }
+    var html = '<table><thead><tr><th>Nome</th><th>E-mail</th><th>Nível</th><th>Status</th><th>Cadastro</th><th></th></tr></thead><tbody>';
+    lista.forEach(function(a) {
+      var souEu = a.id === estado.id;
+      html += '<tr>' +
+        '<td><strong>' + escapeHtml(a.nome) + '</strong>' + (souEu ? ' <span style="color:var(--text-muted); font-size:12px;">(você)</span>' : '') + '</td>' +
+        '<td>' + escapeHtml(a.email) + '</td>' +
+        '<td>' + (ROTULOS_PAPEL_SUPERADMIN[a.papel] || a.papel) + '</td>' +
+        '<td><span class="badge ' + (a.ativo ? 'ativo' : 'inativo') + '">' + (a.ativo ? 'ativo' : 'inativo') + '</span></td>' +
+        '<td>' + new Date(a.criado_em).toLocaleDateString('pt-BR') + '</td>' +
+        '<td style="white-space:nowrap;">' +
+          '<button class="btn-pequeno" onclick="abrirEdicaoAdministrador(\'' + a.id + '\')">Editar</button> ' +
+          '<button class="btn-pequeno" onclick="redefinirSenhaAdministrador(\'' + a.id + '\')">Redefinir senha</button> ' +
+          (souEu ? '' : '<button class="btn-pequeno" onclick="alternarStatusAdministrador(\'' + a.id + '\', ' + !a.ativo + ')">' + (a.ativo ? 'Desativar' : 'Ativar') + '</button>') +
+        '</td>' +
+        '</tr>';
+    });
+    html += '</tbody></table>';
+    container.innerHTML = html;
+  }
+
+  document.getElementById('btn-novo-administrador').onclick = function() {
+    document.getElementById('titulo-modal-administrador').textContent = 'Novo administrador';
+    document.getElementById('editar-administrador-id').value = '';
+    document.getElementById('admin-nome').value = '';
+    document.getElementById('admin-email').value = '';
+    document.getElementById('admin-papel').value = 'administrador';
+    document.getElementById('btn-salvar-administrador').textContent = 'Criar administrador';
+    document.getElementById('overlay-modal-administrador').style.display = 'flex';
+  };
+
+  document.getElementById('btn-cancelar-modal-administrador').onclick = function() {
+    document.getElementById('overlay-modal-administrador').style.display = 'none';
+  };
+
+  function abrirEdicaoAdministrador(id) {
+    var admin = administradoresCache.find(function(a) { return a.id === id; });
+    if (!admin) return;
+    document.getElementById('titulo-modal-administrador').textContent = 'Editar administrador';
+    document.getElementById('editar-administrador-id').value = admin.id;
+    document.getElementById('admin-nome').value = admin.nome;
+    document.getElementById('admin-email').value = admin.email;
+    document.getElementById('admin-papel').value = admin.papel;
+    document.getElementById('btn-salvar-administrador').textContent = 'Salvar';
+    document.getElementById('overlay-modal-administrador').style.display = 'flex';
+  }
+
+  document.getElementById('btn-salvar-administrador').onclick = function() {
+    var idEdicao = document.getElementById('editar-administrador-id').value;
+    var nome = document.getElementById('admin-nome').value.trim();
+    var email = document.getElementById('admin-email').value.trim();
+    var papel = document.getElementById('admin-papel').value;
+
+    if (!nome) { mostrarToast('Informe o nome', true); return; }
+    if (!email) { mostrarToast('Informe o e-mail', true); return; }
+
+    var url = API_URL + '/superadmin/admins' + (idEdicao ? '/' + idEdicao : '');
+    fetch(url, {
+      method: idEdicao ? 'PUT' : 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + estado.token },
+      body: JSON.stringify({ nome: nome, email: email, papel: papel })
+    })
+    .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
+    .then(function(res) {
+      if (!res.ok) { mostrarToast(res.data.erro || 'Erro ao salvar administrador', true); return; }
+      document.getElementById('overlay-modal-administrador').style.display = 'none';
+      if (idEdicao) {
+        mostrarToast('Administrador atualizado!');
+        carregarAdministradores();
+      } else {
+        abrirModalCredenciais(
+          res.data.admin.email, res.data.senha_provisoria,
+          'Administrador criado!',
+          'Essa senha só aparece agora — copie e envie para o novo administrador. No primeiro login, o sistema vai pedir para ele definir uma senha nova.'
+        );
+        carregarAdministradores();
+      }
+    })
+    .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
+  };
+
+  function alternarStatusAdministrador(id, novoAtivo) {
+    confirmarAcao({
+      titulo: novoAtivo ? 'Ativar administrador' : 'Desativar administrador',
+      mensagem: novoAtivo
+        ? 'Reativar o acesso desse administrador à plataforma?'
+        : 'Desativar esse administrador? O acesso dele à plataforma é bloqueado imediatamente.',
+      textoConfirmar: novoAtivo ? 'Ativar' : 'Desativar',
+      perigo: !novoAtivo,
+      aoConfirmar: function() {
+        fetch(API_URL + '/superadmin/admins/' + id + '/status', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + estado.token },
+          body: JSON.stringify({ ativo: novoAtivo })
+        })
+        .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
+        .then(function(res) {
+          if (!res.ok) { mostrarToast(res.data.erro || 'Erro ao alterar status', true); return; }
+          mostrarToast('Status atualizado!');
+          carregarAdministradores();
+        })
+        .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
+      }
+    });
+  }
+
+  function redefinirSenhaAdministrador(id) {
+    confirmarAcao({
+      titulo: 'Redefinir senha',
+      mensagem: 'Gerar uma nova senha provisória para esse administrador? A senha atual dele deixa de funcionar.',
+      textoConfirmar: 'Gerar nova senha',
+      aoConfirmar: function() {
+        fetch(API_URL + '/superadmin/admins/' + id + '/senha', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + estado.token }
+        })
+        .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
+        .then(function(res) {
+          if (!res.ok) { mostrarToast(res.data.erro || 'Erro ao redefinir senha', true); return; }
+          abrirModalCredenciais(
+            res.data.email, res.data.senha_provisoria,
+            'Senha redefinida!',
+            'Essa senha só aparece agora — copie e envie para o administrador. No próximo login, o sistema vai pedir para ele definir uma senha nova.'
+          );
+        })
+        .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
+      }
+    });
+  }
+
+  // ---------- Meu Perfil ----------
+  function preencherMeuPerfil() {
+    document.getElementById('perfil-nome').textContent = estado.nome || '—';
+    document.getElementById('perfil-papel').textContent = ROTULOS_PAPEL_SUPERADMIN[estado.papel] || estado.papel || '—';
+    var admin = administradoresCache.find(function(a) { return a.id === estado.id; });
+    document.getElementById('perfil-email').textContent = admin ? admin.email : (decodificarEmailDoToken(estado.token) || '—');
+  }
+
+  var trocaSenhaForcada = false;
+  function abrirModalAlterarSenha(forcado) {
+    trocaSenhaForcada = !!forcado;
+    document.getElementById('senha-atual-superadmin').value = '';
+    document.getElementById('senha-nova-superadmin').value = '';
+    document.getElementById('senha-nova-confirmar-superadmin').value = '';
+    document.getElementById('erro-alterar-senha').style.display = 'none';
+    document.getElementById('aviso-troca-obrigatoria').style.display = forcado ? 'block' : 'none';
+    document.getElementById('btn-cancelar-alterar-senha').style.display = forcado ? 'none' : 'inline-block';
+    document.getElementById('overlay-modal-alterar-senha').style.display = 'flex';
+  }
+
+  document.getElementById('btn-abrir-alterar-senha').onclick = function() { abrirModalAlterarSenha(false); };
+  document.getElementById('btn-cancelar-alterar-senha').onclick = function() {
+    document.getElementById('overlay-modal-alterar-senha').style.display = 'none';
+  };
+
+  document.getElementById('btn-confirmar-alterar-senha').onclick = function() {
+    var senhaAtual = document.getElementById('senha-atual-superadmin').value;
+    var senhaNova = document.getElementById('senha-nova-superadmin').value;
+    var senhaConfirmar = document.getElementById('senha-nova-confirmar-superadmin').value;
+    var erroEl = document.getElementById('erro-alterar-senha');
+    erroEl.style.display = 'none';
+
+    if (!senhaAtual || !senhaNova || !senhaConfirmar) {
+      erroEl.textContent = 'Preencha todos os campos.';
+      erroEl.style.display = 'block';
+      return;
+    }
+    if (senhaNova !== senhaConfirmar) {
+      erroEl.textContent = 'A confirmação não confere com a nova senha.';
+      erroEl.style.display = 'block';
+      return;
+    }
+
+    fetch(API_URL + '/superadmin/perfil/senha', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + estado.token },
+      body: JSON.stringify({ senha_atual: senhaAtual, senha_nova: senhaNova })
+    })
+    .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
+    .then(function(res) {
+      if (!res.ok) {
+        erroEl.textContent = res.data.erro || 'Erro ao trocar senha';
+        erroEl.style.display = 'block';
+        return;
+      }
+      document.getElementById('overlay-modal-alterar-senha').style.display = 'none';
+      trocaSenhaForcada = false;
+      mostrarToast('Senha alterada com sucesso!');
+    })
+    .catch(function() {
+      erroEl.textContent = 'Erro ao conectar ao servidor.';
+      erroEl.style.display = 'block';
+    });
   };
 </script>
 

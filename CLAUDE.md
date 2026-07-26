@@ -241,6 +241,12 @@ uma classe só deve controlar parte do espaçamento. Detalhe completo de
 como cada bug se manifestou em `README.md`, seção "Landing page (ASSOCIA
 PLUS)".
 
+## Super Admin — gerenciamento de administradores (Fase 1 da melhoria do Super Admin, 26/07/2026)
+
+`superadmin.html` ganhou duas telas novas na sidebar: **Administradores** (`secao-administradores`, só visível se `estado.papel === 'super_admin'` — CRUD completo: criar/editar/ativar-desativar/redefinir senha, reaproveitando o `overlay-modal-credenciais` já existente, agora com título/texto dinâmicos via `abrirModalCredenciais()` em vez de texto fixo de associação) e **Meu Perfil** (`secao-meu-perfil`, sempre visível — troca da própria senha via `overlay-modal-alterar-senha`, que também é reaproveitado em modo forçado sem botão cancelar quando `deve_trocar_senha` vem `true` no login).
+
+`estado` ganhou `id`/`papel` (persistidos em `sessao_superadmin`). Padrão novo: `#tabela-administradores-container` precisou do mesmo `overflow-x: auto` que `#tabela-associacoes-container` já tinha — qualquer tabela nova em `superadmin.html` precisa desse container, senão colunas somem sem scroll em telas estreitas (bug real encontrado e corrigido nesta sessão).
+
 ## Convenções
 
 - Sem framework/bundler — tudo inline (CSS e JS dentro do próprio HTML).
