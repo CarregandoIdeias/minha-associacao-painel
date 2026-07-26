@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manual da Plataforma — ASSOCIA PLUS</title>
+<meta name="description" content="Guia passo a passo de como usar o Super Admin, o Painel da Associação e o Portal do Associado no ASSOCIA PLUS.">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F7F5EF;
+    --bg-card: #ffffff;
+    --bg-alt: #F0ECE0;
+    --text: #1A1712;
+    --text-muted: #6B6558;
+    --border: #E4E0D2;
+    --accent: #C9A84C;
+    --accent-hover: #E8CC80;
+    --accent-soft: rgba(201, 168, 76, 0.12);
+    --success: #2ECC71;
+    --success-soft: rgba(46,204,113,0.12);
+    --warning: #D9A441;
+    --danger: #E74C3C;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-lg: 0 10px 30px -12px rgba(26,23,18,0.18);
+    --sans: 'Poppins', -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --mono: ui-monospace, 'SF Mono', 'Cascadia Mono', Consolas, monospace;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0A0A0A; --bg-card: #1A1A1A; --bg-alt: #141414;
+      --text: #F9F8F5; --text-muted: #888888; --border: #232323;
+      --accent: #C9A84C; --accent-hover: #E8CC80; --accent-soft: rgba(201, 168, 76, 0.14);
+      --success: #2ECC71; --success-soft: rgba(46,204,113,0.14); --warning: #D9A441; --danger: #E74C3C;
+      --shadow: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
+      --shadow-lg: 0 10px 34px -12px rgba(0,0,0,0.55);
+      color-scheme: dark;
+    }
+  }
+  [data-theme="dark"] {
+    --bg: #0A0A0A; --bg-card: #1A1A1A; --bg-alt: #141414;
+    --text: #F9F8F5; --text-muted: #888888; --border: #232323;
+    --accent: #C9A84C; --accent-hover: #E8CC80; --accent-soft: rgba(201, 168, 76, 0.14);
+    --success: #2ECC71; --success-soft: rgba(46,204,113,0.14); --warning: #D9A441; --danger: #E74C3C;
+    --shadow: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
+    --shadow-lg: 0 10px 34px -12px rgba(0,0,0,0.55);
+    color-scheme: dark;
+  }
+  [data-theme="light"] {
+    --bg: #F7F5EF; --bg-card: #ffffff; --bg-alt: #F0ECE0;
+    --text: #1A1712; --text-muted: #6B6558; --border: #E4E0D2;
+    --accent: #C9A84C; --accent-hover: #E8CC80; --accent-soft: rgba(201, 168, 76, 0.12);
+    --success: #2ECC71; --success-soft: rgba(46,204,113,0.12); --warning: #D9A441; --danger: #E74C3C;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-lg: 0 10px 30px -12px rgba(26,23,18,0.18);
+    color-scheme: light;
+  }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--sans); line-height: 1.55; -webkit-font-smoothing: antialiased; }
+  h1, h2, h3, h4 { font-family: var(--sans); font-weight: 700; text-wrap: balance; color: var(--text); margin: 0; }
+  p { margin: 0; }
+  a { color: inherit; }
+  svg { display: block; }
+  ::selection { background: var(--accent); color: #0A0A0A; }
+
+  .ap-shell { max-width: 1100px; margin: 0 auto; padding: 0 32px; }
+  @media (min-width: 1400px) { .ap-shell { max-width: 1240px; padding: 0 48px; } }
+  @media (min-width: 1800px) { .ap-shell { max-width: 1360px; padding: 0 64px; } }
+  @media (max-width: 640px) { .ap-shell { padding: 0 20px; } }
+
+  .ap-hairline { height: 3px; background: linear-gradient(90deg, var(--accent), var(--accent-hover), var(--accent)); }
+
+  /* ---------- nav ---------- */
+  .ap-nav { position: sticky; top: 0; z-index: 40; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); }
+  .ap-nav-row { display: flex; align-items: center; justify-content: space-between; padding-top: 16px; padding-bottom: 16px; gap: 20px; }
+  .ap-mark { font-size: 20px; font-weight: 800; letter-spacing: .01em; display: flex; align-items: baseline; gap: 6px; flex-shrink: 0; }
+  .ap-mark .ap-plus { font-weight: 700; font-size: 12px; letter-spacing: .12em; color: #0A0A0A; background: var(--accent); padding: 3px 7px 2px; border-radius: 4px; transform: translateY(-6px); }
+  .ap-nav-links { display: flex; align-items: center; gap: 26px; }
+  .ap-nav-links a { text-decoration: none; color: var(--text-muted); font-size: 14px; font-weight: 500; transition: color .15s; white-space: nowrap; }
+  .ap-nav-links a:hover, .ap-nav-links a.ativo { color: var(--accent); }
+
+  /* ---------- menu sanduíche (mobile) ---------- */
+  .ap-hamburger {
+    display: none; align-items: center; justify-content: center;
+    width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--border);
+    background: var(--bg-card); color: var(--text); cursor: pointer; flex-shrink: 0;
+  }
+  .ap-hamburger svg { width: 20px; height: 20px; }
+  @media (max-width: 780px) {
+    .ap-hamburger { display: flex; }
+    .ap-nav-links {
+      display: none; position: absolute; top: 100%; left: 0; right: 0; z-index: 39;
+      flex-direction: column; align-items: flex-start; gap: 4px; padding: 8px 24px 20px;
+      background: var(--bg); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+      max-height: calc(100vh - 57px); overflow-y: auto; box-shadow: var(--shadow-lg);
+    }
+    .ap-nav-links.aberto { display: flex; }
+    .ap-nav-links a { width: 100%; padding: 14px 4px; border-bottom: 1px solid var(--border); font-size: 16px; }
+  }
+
+  /* ---------- hero ---------- */
+  .ap-hero { padding: 64px 0 56px; }
+  .ap-eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 16px; }
+  .ap-eyebrow::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
+  .ap-hero h1 { font-size: clamp(30px, 4.2vw, 46px); line-height: 1.1; max-width: 20ch; }
+  .ap-hero h1 em { font-style: normal; color: var(--accent); }
+  .ap-hero-sub { margin-top: 18px; max-width: 60ch; font-size: 16.5px; color: var(--text-muted); font-weight: 300; }
+
+  /* ---------- quick nav cards (3 apps) ---------- */
+  .ap-app-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 40px; }
+  @media (max-width: 900px) { .ap-app-grid { grid-template-columns: 1fr; } }
+  .ap-app-card { display: block; text-decoration: none; background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 24px; transition: border-color .15s, transform .15s; }
+  .ap-app-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .ap-app-card .tag { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+  .ap-app-card h3 { font-size: 17px; margin: 6px 0 6px; }
+  .ap-app-card p { font-size: 13.5px; color: var(--text-muted); font-weight: 300; }
+  .ap-app-card .arrow { margin-top: 14px; font-size: 13px; font-weight: 700; color: var(--accent); }
+
+  /* ---------- section shells ---------- */
+  .ap-section { padding: 72px 0; border-top: 1px solid var(--border); }
+  .ap-section.alt { background: var(--bg-alt); }
+  .ap-section-head { max-width: 720px; margin-bottom: 40px; }
+  .ap-section-head .tag { font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); display: block; margin-bottom: 10px; }
+  .ap-section-head h2 { font-size: clamp(24px, 3.2vw, 32px); }
+  .ap-section-head p { margin-top: 12px; font-size: 15.5px; color: var(--text-muted); max-width: 62ch; font-weight: 300; }
+
+  /* ---------- step list (numbered, sequential how-to) ---------- */
+  .ap-steps { display: grid; gap: 0; }
+  .ap-step { display: flex; gap: 20px; padding: 24px 0; border-bottom: 1px solid var(--border); }
+  .ap-step:last-child { border-bottom: none; }
+  .ap-step-num { flex-shrink: 0; width: 40px; height: 40px; border-radius: 50%; background: var(--accent); color: #0A0A0A; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; }
+  .ap-step-body h4 { font-size: 16px; margin-bottom: 6px; }
+  .ap-step-body p { font-size: 14.5px; color: var(--text-muted); font-weight: 300; max-width: 68ch; }
+  .ap-step-body .quem { display: inline-block; margin-top: 10px; font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--accent); background: var(--accent-soft); padding: 3px 10px; border-radius: 20px; }
+  .ap-step-body ul { list-style: none; padding: 0; margin: 12px 0 0; display: grid; gap: 8px; }
+  .ap-step-body li { font-size: 14px; color: var(--text-muted); padding-left: 18px; position: relative; font-weight: 300; }
+  .ap-step-body li::before { content: ""; position: absolute; left: 0; top: 8px; width: 6px; height: 6px; background: var(--accent); border-radius: 50%; }
+
+  /* ---------- feature cards (grid, no sequence) ---------- */
+  .ap-feature-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+  @media (max-width: 780px) { .ap-feature-grid { grid-template-columns: 1fr; } }
+  .ap-feature { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 24px 22px; }
+  .ap-feature h4 { font-size: 15.5px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
+  .ap-feature .ico { width: 32px; height: 32px; border-radius: 8px; background: var(--accent-soft); color: var(--accent); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .ap-feature p { font-size: 14px; color: var(--text-muted); font-weight: 300; }
+
+  /* ---------- callout box ---------- */
+  .ap-callout { background: var(--bg-card); border: 1px solid var(--accent); border-radius: 12px; padding: 18px 22px; display: flex; gap: 14px; align-items: flex-start; margin-bottom: 32px; }
+  .ap-callout .ico { flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: #0A0A0A; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; }
+  .ap-callout p { font-size: 14px; color: var(--text-muted); font-weight: 300; }
+  .ap-callout strong { color: var(--text); font-weight: 600; }
+
+  /* ---------- app section header (colored bar) ---------- */
+  .ap-app-header { padding: 48px 0 8px; }
+  .ap-app-header .tag { font-size: 12.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+  .ap-app-header h2 { font-size: clamp(26px, 3.6vw, 36px); margin-top: 8px; }
+  .ap-app-header p { margin-top: 12px; font-size: 15.5px; color: var(--text-muted); max-width: 68ch; font-weight: 300; }
+  .ap-app-header .quem-acessa { display: inline-flex; align-items: center; gap: 8px; margin-top: 16px; font-size: 13px; color: var(--text-muted); background: var(--bg-card); border: 1px solid var(--border); padding: 8px 14px; border-radius: 20px; }
+  .ap-app-header .quem-acessa strong { color: var(--text); }
+
+  /* ---------- back to top ---------- */
+  .ap-backtotop { text-align: center; padding: 8px 0 0; }
+  .ap-backtotop a { font-size: 13px; color: var(--text-muted); text-decoration: none; }
+  .ap-backtotop a:hover { color: var(--accent); }
+
+  /* ---------- footer ---------- */
+  .ap-footer { border-top: 1px solid var(--border); padding: 36px 0; }
+  .ap-footer-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .ap-footer p { font-size: 13px; color: var(--text-muted); }
+  .ap-footer a { color: var(--text-muted); text-decoration: none; font-size: 13px; }
+  .ap-footer a:hover { color: var(--accent); }
+
+  /* ---------- reveal ---------- */
+  .ap-reveal { opacity: 0; transform: translateY(14px); transition: opacity .5s ease, transform .5s ease; }
+  .ap-reveal.in { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce) { .ap-reveal { opacity: 1; transform: none; transition: none; } }
+</style>
+</head>
+<body>
+  <div class="ap-hairline"></div>
+
+  <nav class="ap-nav">
+    <div class="ap-shell ap-nav-row">
+      <div class="ap-mark">ASSOCIA<span class="ap-plus">PLUS</span></div>
+      <div class="ap-nav-links" id="apNavLinks">
+        <a href="#super-admin">Super Admin</a>
+        <a href="#painel-associacao">Painel da Associação</a>
+        <a href="#portal-associado">Portal do Associado</a>
+        <a href="landing.html">← Voltar ao site</a>
+      </div>
+      <button class="ap-hamburger" id="apHamburger" aria-label="Abrir menu" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+      </button>
+    </div>
+  </nav>
+
+  <header class="ap-hero">
+    <div class="ap-shell">
+      <span class="ap-eyebrow">Manual da plataforma</span>
+      <h1>Como cada parte do <em>ASSOCIA PLUS</em> funciona, passo a passo</h1>
+      <p class="ap-hero-sub">A plataforma tem três aplicações separadas, cada uma pra um tipo de acesso: o <strong>Super Admin</strong> (você, gerenciando todas as associações-clientes), o <strong>Painel da Associação</strong> (a diretoria de cada associação-cliente) e o <strong>Portal do Associado</strong> (cada associado individual). Este guia explica o que cada tela faz e como usar, na ordem em que normalmente se usa.</p>
+
+      <div class="ap-app-grid">
+        <a class="ap-app-card ap-reveal" href="#super-admin">
+          <span class="tag">01 · Você</span>
+          <h3>Super Admin</h3>
+          <p>Cadastra associações-clientes, aprova contratações de plano, acompanha a plataforma inteira e audita tudo o que acontece.</p>
+          <div class="arrow">Ver passo a passo →</div>
+        </a>
+        <a class="ap-app-card ap-reveal" href="#painel-associacao">
+          <span class="tag">02 · Diretoria</span>
+          <h3>Painel da Associação</h3>
+          <p>Cadastra associados, cobra mensalidade por Pix, publica comunicados e acompanha o financeiro da própria associação.</p>
+          <div class="arrow">Ver passo a passo →</div>
+        </a>
+        <a class="ap-app-card ap-reveal" href="#portal-associado">
+          <span class="tag">03 · Associado</span>
+          <h3>Portal do Associado</h3>
+          <p>Cada associado vê seus próprios dados, paga a mensalidade pelo Pix e lê os comunicados da associação.</p>
+          <div class="arrow">Ver passo a passo →</div>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= SUPER ADMIN ================= -->
+  <section id="super-admin">
+    <div class="ap-shell ap-app-header ap-reveal">
+      <span class="tag">Aplicação 1 de 3</span>
+      <h2>Super Admin</h2>
+      <p>É onde você — dono da plataforma — gerencia todas as associações-clientes, os outros administradores da plataforma, e acompanha tudo o que acontece em qualquer associação, sem depender de pedir acesso a ninguém.</p>
+      <div class="quem-acessa">👤 Acesso: <strong>você e os administradores da plataforma</strong> (superadmin.html)</div>
+    </div>
+  </section>
+
+  <section class="ap-section">
+    <div class="ap-shell">
+      <div class="ap-section-head ap-reveal">
+        <span class="tag">Passo a passo</span>
+        <h2>Do login à sua rotina diária</h2>
+      </div>
+      <div class="ap-steps ap-reveal">
+        <div class="ap-step">
+          <div class="ap-step-num">1</div>
+          <div class="ap-step-body">
+            <h4>Login</h4>
+            <p>Entre com seu e-mail e senha em <strong>superadmin.html</strong>. No primeiro acesso de um administrador novo, o sistema pede pra trocar a senha provisória antes de liberar o resto da tela.</p>
+          </div>
+        </div>
+        <div class="ap-step">
+          <div class="ap-step-num">2</div>
+          <div class="ap-step-body">
+            <h4>Dashboard — visão geral da plataforma</h4>
+            <p>A primeira tela mostra o retrato da plataforma inteira: total de associações, associados, MRR (receita mensal recorrente), mensalidades vencidas, associações ativas/bloqueadas, gráficos de crescimento, e três listas rápidas — últimas associações cadastradas, últimos administradores e últimas atividades registradas.</p>
+            <span class="quem">Alertas</span>
+            <p>O sininho no topo avisa sobre assinaturas vencendo/vencidas e solicitações de contratação de plano aguardando aprovação.</p>
+          </div>
+        </div>
+        <div class="ap-step">
+          <div class="ap-step-num">3</div>
+          <div class="ap-step-body">
+            <h4>Associações — cadastrar e gerenciar clientes</h4>
+            <p>Em <strong>Associações</strong>, clique em <strong>+ Nova associação</strong> pra cadastrar um cliente novo: dados da associação, nome do responsável (vira o admin inicial dela), plano contratado e duração do período trial. Uma senha provisória é gerada na hora — copie e envie pro responsável, ela só aparece uma vez.</p>
+            <ul>
+              <li>Buscar/filtrar por nome, cidade, UF, plano ou status</li>
+              <li>Editar dados a qualquer momento, inclusive bloquear/desbloquear o acesso</li>
+              <li>Abrir o detalhe de uma associação pra ver associados, cobranças e financeiro dela</li>
+              <li>Excluir remove permanentemente tudo daquela associação (associados, cobranças, usuários) — ação irreversível</li>
+            </ul>
+          </div>
+        </div>
+        <div class="ap-step">
+          <div class="ap-step-num">4</div>
+          <div class="ap-step-body">
+            <h4>Administradores — quem mais acessa o Super Admin</h4>
+            <p>Cadastre outras pessoas da sua equipe com três níveis de permissão: <strong>Super Admin</strong> (acesso total, inclusive gerenciar outros administradores), <strong>Administrador</strong> e <strong>Suporte</strong>. Dá pra ativar/desativar, redefinir senha e trocar o nível de qualquer um — exceto o seu próprio nível e o último Super Admin ativo, pra evitar ficar trancado fora da própria plataforma.</p>
+            <span class="quem">Só visível pra quem é Super Admin</span>
+          </div>
+        </div>
+        <div class="ap-step">
+          <div class="ap-step-num">5</div>
+          <div class="ap-step-body">
+            <h4>Contratações — aprovar pagamento de plano</h4>
+            <p>Toda vez que uma associação pede pra contratar ou trocar de plano, a solicitação cai aqui como <strong>pendente</strong>, com o comprovante de Pix anexado. Abra os detalhes, confira o comprovante e clique em <strong>Aprovar</strong> (ativa o plano na hora) ou <strong>Rejeitar</strong> (com motivo opcional). Um badge no menu mostra quantas estão esperando resposta.</p>
+          </div>
+        </div>
+        <div class="ap-step">
+          <div class="ap-step-num">6</div>
+          <div class="ap-step-body">
+            <h4>Config. Pix — sua própria chave de recebimento</h4>
+            <p>Cadastre a chave Pix, o nome do recebedor e a cidade que aparecem no QR Code que as associações escaneiam pra <strong>pagar a mensalidade da plataforma</strong> — é uma chave diferente da chave Pix de cada associação (aquela é usada por elas pra cobrar os próprios associados). Sem essa configuração, a tela de contratação não gera QR Code.</p>
+            <span class="quem">Só visível pra quem é Super Admin</span>
+          </div>
+        </div>
+        <div class="ap-step">
+          <div class="ap-step-num">7</div>
+          <div class="ap-step-body">
+            <h4>Auditoria — o que aconteceu, quando e quem fez</h4>
+            <p>Um log central de tudo que acontece em qualquer associação e no próprio Super Admin: login, criação/edição/exclusão de registros, troca de senha, alteração de permissão, exportação de dados. Filtre por usuário, associação, módulo, tipo de ação ou período; cada linha mostra o valor antes/depois quando for uma edição. Exporte em Excel ou PDF pra guardar ou compartilhar.</p>
+          </div>
+        </div>
+        <div class="ap-step">
+          <div class="ap-step-num">8</div>
+          <div class="ap-step-body">
+            <h4>Meu Perfil</h4>
+            <p>Veja seus próprios dados e troque sua senha a qualquer momento.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="ap-shell ap-backtotop"><a href="#painel-associacao">Continuar para o Painel da Associação ↓</a></div>
+  </section>
+
+  <!-- ================= PAINEL DA ASSOCIAÇÃO ================= -->
+  <section id="painel-associacao">
+    <div class="ap-shell ap-app-header ap-reveal">
+      <span class="tag">Aplicação 2 de 3</span>
+      <h2>Painel da Associação</h2>
+      <p>É a tela do dia a dia de quem administra uma associação-cliente: cadastra associados, cobra mensalidade, publica avisos e acompanha o financeiro. Cada associação só enxerga os próprios dados.</p>
+      <div class="quem-acessa">👤 Acesso: <strong>administrador e diretoria de cada associação</strong> (index.html)</div>
+    </div>
+  </section>
+
+  <section class="ap-section alt">
+    <div class="ap-shell">
+      <div class="ap-section-head ap-reveal">
+        <span class="tag">Passo a passo</span>
+        <h2>Do login à gestão do dia a dia</h2>
+      </div>
+      <div class="ap-steps ap-reveal">
+        <div class="ap-step">
+          <div class="ap-step-num">1</div>
+          <div class="ap-step-body">
+            <h4>Login</h4>
+            <p>Entre com o e-mail e a senha da conta (criada pelo Super Admin na hora de cadastrar a associação, ou por convite de outro admin). Senha provisória? O sistema pede pra trocar antes de liberar o resto.</p>
+          </div>
+        </div>
+        <div class="ap-step">
+          <div class="ap-step-num">2</div>
+          <div class="ap-step-body">
+            <h4>Dashboard — indicadores da associação</h4>
+            <p>KPIs de associados (total, ativos, novos no mês, inadimplentes), receita do mês, mensalidades vencidas/a vencer, gráficos de crescimento e receita, e cards de apoio com atividades recentes, próximos vencimentos, últimos associados e comunicados recentes.</p>
+            <span class="quem">Plano e trial</span>
+            <p>No topo do Dashboard aparece um card com o plano atual: se está no <strong>Trial</strong>, mostra a contagem regressiva (dias/horas/minutos) até expirar e um botão <strong>Contratar Plano</strong>; se já é um plano pago, mostra status, próxima renovação, valor da mensalidade e um botão <strong>Gerenciar Plano</strong> pra pedir upgrade. Ao clicar em contratar, escolha o plano, pague via Pix (QR Code ou copia-e-cola) e envie o comprovante — a solicitação fica aguardando aprovação do Super Admin.</p>
+          </div>
+        </div>
+        <div class="ap-step">
+          <div class="ap-step-num">3</div>
+          <div class="ap-step-body">
+            <h4>Associados — cadastro da base</h4>
+            <p>Cadastre um associado novo com nome, CPF, telefone, categoria e e-mail — isso já cria o login dele pro Portal do Associado, com senha provisória gerada na hora. Edite dados, mude o status (ativo, inadimplente, desligado, suspenso) ou exclua quando necessário.</p>
+          </div>
+        </div>
+        <div class="ap-step">
+          <div class="ap-step-num">4</div>
+          <div class="ap-step-body">
+            <h4>Financeiro — cobranças e recebimento por Pix</h4>
+            <p>Crie uma cobrança pra um associado (descrição, valor, vencimento). O associado paga usando a chave Pix da própria associação (QR Code gerado automaticamente) e envia o comprovante pelo Portal dele. Aqui na diretoria, você vê o comprovante enviado e clica em <strong>Confirmar pagamento</strong> pra marcar como pago — ou estorna se foi engano.</p>
+            <ul>
+              <li>Filtro por status (pendente, pago, vencido)</li>
+              <li>Alerta automático de vencimento (configurável em dias)</li>
+              <li>Edição só é permitida enquanto a cobrança não estiver paga</li>
+            </ul>
+          </div>
+        </div>
+        <div class="ap-step">
+          <div class="ap-step-num">5</div>
+          <div class="ap-step-body">
+            <h4>Comunicados — avisos com confirmação de leitura</h4>
+            <p>Publique um comunicado (com destaque opcional e agendamento de publicação) e acompanhe quantos associados já leram. Cada associado vê o mural dele no Portal, com o que ainda não leu em destaque.</p>
+          </div>
+        </div>
+        <div class="ap-step">
+          <div class="ap-step-num">6</div>
+          <div class="ap-step-body">
+            <h4>Usuários — quem mais acessa o painel</h4>
+            <p>Convide outra pessoa da diretoria (papel <strong>diretoria</strong> — acesso amplo, sem gerenciar usuários/configurações) ou vincule o login de um associado já cadastrado. Dá pra editar nome/papel, desativar ou excluir — exceto a própria conta.</p>
+            <span class="quem">Só visível pra quem é admin</span>
+          </div>
+        </div>
+        <div class="ap-step">
+          <div class="ap-step-num">7</div>
+          <div class="ap-step-body">
+            <h4>Configurações</h4>
+            <p>Cadastre a chave Pix da própria associação (usada nas cobranças aos associados) e defina com quantos dias de antecedência o sistema deve alertar sobre uma mensalidade perto de vencer.</p>
+            <span class="quem">Só visível pra quem é admin</span>
+          </div>
+        </div>
+        <div class="ap-step">
+          <div class="ap-step-num">8</div>
+          <div class="ap-step-body">
+            <h4>Meu Perfil / Alterar Senha</h4>
+            <p>No menu do avatar, no canto superior direito: veja seus dados ou troque sua senha a qualquer momento.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="ap-shell ap-backtotop"><a href="#portal-associado">Continuar para o Portal do Associado ↓</a></div>
+  </section>
+
+  <!-- ================= PORTAL DO ASSOCIADO ================= -->
+  <section id="portal-associado">
+    <div class="ap-shell ap-app-header ap-reveal">
+      <span class="tag">Aplicação 3 de 3</span>
+      <h2>Portal do Associado</h2>
+      <p>A tela mais simples das três: cada associado entra só pra ver os próprios dados, pagar a mensalidade e ler os comunicados da associação — sem enxergar dado de nenhum outro associado.</p>
+      <div class="quem-acessa">👤 Acesso: <strong>cada associado, individualmente</strong> (portal.html)</div>
+    </div>
+  </section>
+
+  <section class="ap-section">
+    <div class="ap-shell">
+      <div class="ap-section-head ap-reveal">
+        <span class="tag">Passo a passo</span>
+        <h2>Tudo o que o associado consegue fazer</h2>
+      </div>
+      <div class="ap-steps ap-reveal">
+        <div class="ap-step">
+          <div class="ap-step-num">1</div>
+          <div class="ap-step-body">
+            <h4>Login</h4>
+            <p>Entra com o e-mail e a senha provisória gerados quando a diretoria cadastrou ele como associado. No primeiro acesso, o sistema pede pra definir uma senha própria.</p>
+          </div>
+        </div>
+        <div class="ap-step">
+          <div class="ap-step-num">2</div>
+          <div class="ap-step-body">
+            <h4>Meus Dados — cadastro e cobranças</h4>
+            <p>Vê o próprio cadastro (nome, CPF, categoria, status) e a lista de cobranças em aberto e já pagas.</p>
+            <span class="quem">Pagar com Pix</span>
+            <p>Em cada cobrança pendente, clica em <strong>Pix</strong> pra abrir o QR Code (ou copia o código "copia e cola") gerado com a chave Pix daquela associação. Depois de pagar, escolhe o arquivo do comprovante (foto ou PDF) e envia — a cobrança fica "aguardando confirmação" até a diretoria validar o recebimento.</p>
+          </div>
+        </div>
+        <div class="ap-step">
+          <div class="ap-step-num">3</div>
+          <div class="ap-step-body">
+            <h4>Comunicados</h4>
+            <p>Lê o mural de avisos publicados pela associação. O que ainda não foi lido aparece em destaque; ao abrir, o sistema registra a leitura pra diretoria acompanhar quem já viu cada aviso.</p>
+          </div>
+        </div>
+        <div class="ap-step">
+          <div class="ap-step-num">4</div>
+          <div class="ap-step-body">
+            <h4>Alterar Senha</h4>
+            <p>Disponível a qualquer momento pelo menu do usuário — sem precisar pedir ajuda pra diretoria.</p>
+          </div>
+        </div>
+        <div class="ap-step">
+          <div class="ap-step-num">5</div>
+          <div class="ap-step-body">
+            <h4>Se a associação estiver com o acesso bloqueado</h4>
+            <p>Quando o período trial da associação vence e a diretoria ainda não contratou um plano, o Portal mostra um aviso simples de acesso temporariamente indisponível — o associado não precisa (nem consegue) resolver isso, é a diretoria quem contrata o plano pelo Painel da Associação.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="ap-section alt">
+    <div class="ap-shell">
+      <div class="ap-callout ap-reveal">
+        <div class="ico">i</div>
+        <p><strong>Como as três aplicações se conectam:</strong> o Super Admin cadastra a associação → a diretoria dela usa o Painel da Associação pra cadastrar associados e cobrar mensalidade → cada associado usa o Portal do Associado pra pagar e acompanhar os próprios dados. Todo o isolamento entre associações diferentes é garantido pelo próprio banco de dados, não só por regra de tela.</p>
+      </div>
+      <div class="ap-section-head ap-reveal">
+        <span class="tag">Resumo rápido</span>
+        <h2>Um olhar geral sobre as três aplicações</h2>
+      </div>
+      <div class="ap-feature-grid ap-reveal">
+        <div class="ap-feature">
+          <h4><span class="ico">👑</span>Super Admin</h4>
+          <p>superadmin.html — gerenciar associações-clientes, administradores da plataforma, aprovar planos e auditar tudo.</p>
+        </div>
+        <div class="ap-feature">
+          <h4><span class="ico">🏢</span>Painel da Associação</h4>
+          <p>index.html — gerenciar associados, cobranças, comunicados e usuários de uma única associação.</p>
+        </div>
+        <div class="ap-feature">
+          <h4><span class="ico">👤</span>Portal do Associado</h4>
+          <p>portal.html — cada associado vê seus dados, paga a mensalidade e lê os comunicados.</p>
+        </div>
+        <div class="ap-feature">
+          <h4><span class="ico">🔒</span>Isolamento de dados</h4>
+          <p>Cada associação enxerga só os próprios dados — imposto pelo banco de dados, não só por regra de tela.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="ap-footer">
+    <div class="ap-shell ap-footer-row">
+      <div class="ap-mark" style="font-size:17px;">ASSOCIA<span class="ap-plus" style="transform:translateY(-4px);">PLUS</span></div>
+      <div style="display:flex; gap:20px; align-items:center;">
+        <a href="landing.html">Site</a>
+        <p>ASSOCIA PLUS · © 2026</p>
+      </div>
+    </div>
+  </footer>
+
+<script>
+(function () {
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if ('IntersectionObserver' in window && !reduceMotion) {
+    var revealEls = document.querySelectorAll('.ap-reveal');
+    var obs = new IntersectionObserver(function (entries) {
+      for (var i = 0; i < entries.length; i++) {
+        if (entries[i].isIntersecting) {
+          entries[i].target.classList.add('in');
+          obs.unobserve(entries[i].target);
+        }
+      }
+    }, { threshold: 0.1 });
+    for (var i = 0; i < revealEls.length; i++) obs.observe(revealEls[i]);
+  } else {
+    var revealElsFallback = document.querySelectorAll('.ap-reveal');
+    for (var i = 0; i < revealElsFallback.length; i++) revealElsFallback[i].classList.add('in');
+  }
+
+  // Destaca o link da seção visível no nav ao rolar
+  var navLinks = document.querySelectorAll('.ap-nav-links a[href^="#"]');
+  var sections = [];
+  navLinks.forEach(function(a) {
+    var sec = document.querySelector(a.getAttribute('href'));
+    if (sec) sections.push({ link: a, el: sec });
+  });
+  window.addEventListener('scroll', function() {
+    var pos = window.scrollY + 120;
+    var atual = null;
+    sections.forEach(function(s) {
+      if (s.el.offsetTop <= pos) atual = s;
+    });
+    navLinks.forEach(function(a) { a.classList.remove('ativo'); });
+    if (atual) atual.link.classList.add('ativo');
+  });
+
+  // Menu sanduíche (mobile)
+  var hamburger = document.getElementById('apHamburger');
+  var navLinksEl = document.getElementById('apNavLinks');
+  hamburger.addEventListener('click', function() {
+    var aberto = navLinksEl.classList.toggle('aberto');
+    hamburger.setAttribute('aria-expanded', aberto ? 'true' : 'false');
+  });
+  navLinksEl.querySelectorAll('a').forEach(function(a) {
+    a.addEventListener('click', function() {
+      navLinksEl.classList.remove('aberto');
+      hamburger.setAttribute('aria-expanded', 'false');
+    });
+  });
+})();
+</script>
+</body>
+</html>
