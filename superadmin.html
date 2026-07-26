@@ -346,11 +346,14 @@
   .info-linha:last-child { border-bottom: none; }
   .info-linha span:first-child { color: var(--text-muted); }
 
-  .item-lista { padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .grid-resumos { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 20px; }
+  .lista-resumo { padding: 6px 0; max-height: 280px; overflow-y: auto; }
+  .lista-resumo .vazio { padding: 24px 22px; }
+  .item-lista { padding: 12px 22px; border-bottom: 1px solid var(--border); font-size: 13px; }
   .item-lista:last-child { border-bottom: none; }
   .item-lista-titulo { font-weight: 600; color: var(--text); }
-  .item-lista-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
-  .item-lista-badge { display: inline-block; background: var(--accent-soft); color: var(--accent); padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 600; margin-top: 4px; }
+  .item-lista-sub { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+  .item-lista-badge { display: inline-block; background: var(--accent-soft); color: var(--accent); padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; margin-top: 6px; }
 </style>
 </head>
 <body>
@@ -452,23 +455,23 @@
         </div>
       </div>
 
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 20px;">
+      <div class="grid-resumos">
         <div class="painel">
-          <div class="painel-header"><h3 style="font-size: 14px;">Últimas associações</h3></div>
-          <div id="lista-ultimas-associacoes" style="max-height: 280px; overflow-y: auto;">
-            <div class="vazio" style="padding: 20px;">Carregando...</div>
+          <div class="painel-header"><h3>Últimas associações</h3></div>
+          <div id="lista-ultimas-associacoes" class="lista-resumo">
+            <div class="vazio">Carregando...</div>
           </div>
         </div>
         <div class="painel">
-          <div class="painel-header"><h3 style="font-size: 14px;">Últimos admins</h3></div>
-          <div id="lista-ultimos-admins" style="max-height: 280px; overflow-y: auto;">
-            <div class="vazio" style="padding: 20px;">Carregando...</div>
+          <div class="painel-header"><h3>Últimos admins</h3></div>
+          <div id="lista-ultimos-admins" class="lista-resumo">
+            <div class="vazio">Carregando...</div>
           </div>
         </div>
         <div class="painel">
-          <div class="painel-header"><h3 style="font-size: 14px;">Últimas atividades</h3></div>
-          <div id="lista-ultimas-atividades" style="max-height: 280px; overflow-y: auto;">
-            <div class="vazio" style="padding: 20px;">Carregando...</div>
+          <div class="painel-header"><h3>Últimas atividades</h3></div>
+          <div id="lista-ultimas-atividades" class="lista-resumo">
+            <div class="vazio">Carregando...</div>
           </div>
         </div>
       </div>
@@ -949,7 +952,7 @@
       if (!res.ok) return;
       var html = '';
       if (res.data.length === 0) {
-        html = '<div class="vazio" style="padding:20px;">Nenhuma associação ainda.</div>';
+        html = '<div class="vazio">Nenhuma associação ainda.</div>';
       } else {
         res.data.slice(0, 3).forEach(function(a) {
           var statusClass = a.ativo ? 'ativo' : 'inativo';
@@ -962,7 +965,7 @@
       }
       document.getElementById('lista-ultimas-associacoes').innerHTML = html;
     })
-    .catch(function() { document.getElementById('lista-ultimas-associacoes').innerHTML = '<div class="vazio" style="padding:20px;">Erro ao carregar.</div>'; });
+    .catch(function() { document.getElementById('lista-ultimas-associacoes').innerHTML = '<div class="vazio">Erro ao carregar.</div>'; });
   }
 
   function carregarUltimosAdmins() {
@@ -972,7 +975,7 @@
       if (!res.ok) return;
       var html = '';
       if (res.data.length === 0) {
-        html = '<div class="vazio" style="padding:20px;">Nenhum admin ainda.</div>';
+        html = '<div class="vazio">Nenhum admin ainda.</div>';
       } else {
         res.data.slice(0, 3).forEach(function(a) {
           html += '<div class="item-lista">' +
@@ -984,7 +987,7 @@
       }
       document.getElementById('lista-ultimos-admins').innerHTML = html;
     })
-    .catch(function() { document.getElementById('lista-ultimos-admins').innerHTML = '<div class="vazio" style="padding:20px;">Erro ao carregar.</div>'; });
+    .catch(function() { document.getElementById('lista-ultimos-admins').innerHTML = '<div class="vazio">Erro ao carregar.</div>'; });
   }
 
   function carregarUltimasAtividades() {
@@ -995,7 +998,7 @@
       var html = '';
       var registros = res.data.registros || [];
       if (registros.length === 0) {
-        html = '<div class="vazio" style="padding:20px;">Nenhuma atividade ainda.</div>';
+        html = '<div class="vazio">Nenhuma atividade ainda.</div>';
       } else {
         registros.slice(0, 5).forEach(function(log) {
           var nomeAtor = log.super_admin_nome || log.usuario_nome || log.usuario_email || log.super_admin_email || '—';
@@ -1007,7 +1010,7 @@
       }
       document.getElementById('lista-ultimas-atividades').innerHTML = html;
     })
-    .catch(function() { document.getElementById('lista-ultimas-atividades').innerHTML = '<div class="vazio" style="padding:20px;">Erro ao carregar.</div>'; });
+    .catch(function() { document.getElementById('lista-ultimas-atividades').innerHTML = '<div class="vazio">Erro ao carregar.</div>'; });
   }
 
   // ---------- Navegação (sidebar) ----------
