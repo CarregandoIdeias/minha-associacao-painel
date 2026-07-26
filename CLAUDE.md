@@ -213,6 +213,34 @@ sem os estilos específicos da lista de associados. Sidebar enxuta: Meus
 Dados (tela inicial) e Comunicados (mural só leitura, sem botão de
 publicar).
 
+## Landing page ASSOCIA PLUS (25/07/2026)
+
+Novo arquivo `landing.html`, página de vendas pública — separado por
+completo de `index.html`/`portal.html`/`superadmin.html` (não importa
+nada deles, não foi tocado por eles). Marca nova só para essa página
+(**ASSOCIA PLUS**, slogan "Organize. Comunique. Evolua.") — o resto do
+painel continua sem nome de produto, decisão já tomada antes. Reaproveita
+a paleta/fonte do `index.html` (dourado `#C9A84C`, Poppins, tema
+claro/escuro) a pedido do usuário, em vez de uma identidade nova. Preços
+mostrados por **porte** (pequeno/médio/grande) usam os mesmos valores de
+`backend/utils/precos.js` (básico/profissional/enterprise), só
+reapresentados — não são preços novos. Página 100% estática, sem
+`API_URL`/sessão/login — é a porta de entrada antes de qualquer
+autenticação. Trial "15 dias sem cartão" é só texto de marketing por
+enquanto, **não tem fluxo automatizado no backend** ainda.
+
+**Dois bugs de especificidade CSS já corrigidos** (guardar para não
+repetir o padrão em telas novas): (1) nunca duplicar em `style=` inline
+uma propriedade que uma media query mais adiante precisa sobrescrever —
+inline sempre ganha, não importa a especificidade da classe; (2) evitar
+`padding`/`margin` como shorthand (`padding: 16px 0`) em duas classes
+diferentes no mesmo elemento quando as duas mexem nos mesmos lados — a
+que vem depois no CSS vence a propriedade inteira e "cancela" a outra
+silenciosamente; usar longhand (`padding-top`, `padding-bottom`) quando
+uma classe só deve controlar parte do espaçamento. Detalhe completo de
+como cada bug se manifestou em `README.md`, seção "Landing page (ASSOCIA
+PLUS)".
+
 ## Convenções
 
 - Sem framework/bundler — tudo inline (CSS e JS dentro do próprio HTML).

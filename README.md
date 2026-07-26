@@ -38,6 +38,10 @@ de dados, segurança). Este README cobre só o front-end.
   atrasadas). Tela de Associações com CRUD completo, filtros (nome,
   cidade, UF, plano, status) e formulário estendido (plano contratado,
   vencimento, forma de cobrança, logo/CEP/site, CPF responsável).
+- `landing.html` — página de vendas pública (marca **ASSOCIA PLUS**, novo
+  posicionamento comercial, 25/07/2026). Sem login, sem chamada à API —
+  só HTML/CSS/JS estático. Ver seção própria "Landing page (ASSOCIA
+  PLUS)" abaixo.
 
 ## Separação do Portal do Associado (25/07/2026)
 
@@ -72,12 +76,16 @@ completo (QR + copia-e-cola + upload de comprovante) vive só em
 
 ## Hospedagem
 
-Vercel, mesmo domínio para os três arquivos:
+Vercel, mesmo domínio para os quatro arquivos:
 - `https://minha-associacao-painel.vercel.app/` → `index.html`
 - `https://minha-associacao-painel.vercel.app/portal.html`
 - `https://minha-associacao-painel.vercel.app/superadmin.html`
+- `https://minha-associacao-painel.vercel.app/landing.html`
 
-Deploy automático a cada push no GitHub (branch `main`).
+Deploy automático a cada push no GitHub (branch `main`). A raiz do
+domínio continua sendo o login do painel administrativo (`index.html`) —
+`landing.html` foi adicionada como página nova, sem virar a home do
+domínio (decisão consciente, ver seção "Landing page" abaixo).
 
 ## Configuração
 
@@ -218,6 +226,75 @@ tem preço-base + preço por associado ativo; fórmula aplicada no backend
 (GET `/superadmin/dashboard`, GET `/superadmin/associacoes`,
 POST/PUT `/superadmin/associacoes/:id`). Campo `valor_mensalidade_manual`
 na associação permite sobrescrever — útil para negociações customizadas.
+
+## Landing page (ASSOCIA PLUS) — 25/07/2026
+
+Página de vendas pública, arquivo próprio (`landing.html`), separado dos
+outros três por completo — não importa nada deles, não é tocado por eles,
+e eles não foram tocados por essa adição. Motivação: o usuário decidiu um
+novo posicionamento comercial para o produto (marca **ASSOCIA PLUS**,
+slogan "Organize. Comunique. Evolua.") e pediu uma landing para vender a
+plataforma, mantendo a marca "sem nome" no restante do painel (decisão
+já tomada antes, na reforma de header/sidebar de 25/07 — ver seção do
+`CLAUDE.md`).
+
+**Identidade visual**: pediu-se explicitamente para reaproveitar a
+paleta e a fonte já usadas em `index.html`/`superadmin.html`, não criar
+uma identidade nova — `--bg:#F7F5EF`, `--bg-card:#fff`, `--text:#1A1712`,
+`--text-muted:#6B6558`, `--border:#E4E0D2`, `--accent:#C9A84C` (dourado),
+Poppins (mesmo link do Google Fonts do painel). Tema claro/escuro
+completo (`prefers-color-scheme` + `[data-theme]`, mesmos valores de
+dark do `index.html`). Botões sempre dourado com texto `#0A0A0A` (mesmo
+padrão do `.btn`/`.avatar-iniciais` do painel).
+
+**Conteúdo**: hero com mini-dashboard ilustrativo (dado fictício, não é
+print real) + rede de pontos animada em canvas (motivo: associados
+conectados). Três "problemas que toda diretoria conhece" com
+antes/depois. Os três pilares da marca (Organize/Comunique/Evolua)
+tratados como sequência real (numerada 1/2/3), cada um ligado a
+funcionalidades reais do produto. Bloco de segurança (RLS, senhas com
+hash, conexão criptografada — mesmas garantias documentadas no
+`README.md` do backend, em linguagem simples pro público leigo). Preços
+em 3 planos por **porte** da associação (pequeno/médio/grande = mesmos
+valores de básico/profissional/enterprise em
+`backend/utils/precos.js` — não são preços novos, só reapresentados por
+porte em vez de nome de plano), com fórmula visível (base + valor por
+associado) e exemplo de cálculo por card. Teste grátis de 15 dias sem
+cartão de crédito (decisão de negócio do usuário, reduzir fricção de
+entrada) — hoje é só texto de marketing, **não existe fluxo de trial
+automatizado no backend ainda** (o botão de CTA não faz nada, é só link
+âncora `#planos`; criar esse fluxo de verdade é trabalho futuro). FAQ em
+acordeão.
+
+**Sem chamada a API** — página 100% estática, sem `API_URL`, sem
+`localStorage`, sem sessão. Isso é intencional: é a porta de entrada
+pública, antes de qualquer login.
+
+**Bugs de CSS encontrados e corrigidos depois do primeiro deploy** (não
+óbvios, guardar aqui para não repetir):
+- `.ap-nav-links-inner` tinha `style="display:flex"` **inline** no HTML,
+  além da classe. Estilo inline sempre vence regra de `@media` (que
+  tentava esconder esse bloco de links abaixo de 780px) — o menu
+  "Recursos/Planos/Perguntas frequentes" nunca sumia no mobile e
+  empurrava o botão "Teste grátis por 15 dias" pra fora da tela. Corrigido
+  movendo o `display:flex` para dentro da classe no CSS, onde o `@media`
+  consegue sobrescrever normalmente. **Lição**: nunca duplicar em `style=`
+  inline uma propriedade que precisa ser sobrescrita por media query mais
+  adiante — o inline sempre ganha, independente de especificidade de
+  classe.
+- `.ap-nav-row` usava o atalho `padding: 16px 0` (zera left/right) e
+  `.ap-shell` definia `padding: 0 32px` (ou `24px` no mobile) — como as
+  duas classes estão no mesmo elemento e têm a mesma especificidade
+  (uma classe cada), a que vem **depois** no CSS vence a propriedade
+  inteira, e `.ap-nav-row` vinha depois. Resultado: a margem lateral do
+  cabeçalho nunca funcionava (logo e botão colados na borda da tela,
+  mais visível no mobile). Corrigido trocando `.ap-nav-row` para
+  `padding-top`/`padding-bottom` isolados, sem tocar em left/right, que
+  ficam só por conta do `.ap-shell`. **Lição**: evitar `padding`/`margin`
+  como atalho (shorthand) em duas classes diferentes aplicadas ao mesmo
+  elemento quando ambas mexem nos mesmos lados — usar propriedades
+  longhand (`padding-top`, etc.) quando for necessário que uma delas
+  sobrescreva só parte do espaçamento.
 
 ## Convenções
 
