@@ -657,6 +657,18 @@
 </div>
 
 
+<!-- ===== TELA DE BLOQUEIO (trial da associação expirado) ===== -->
+<div id="tela-trial-expirado" style="display:none; min-height:100vh; align-items:center; justify-content:center; padding:24px;">
+  <div style="max-width:440px; background:var(--bg-card); border:1px solid var(--border); border-radius:18px; padding:40px 36px; text-align:center; box-shadow:var(--shadow);">
+    <div style="font-size:40px; margin-bottom:16px;">⏳</div>
+    <h2 style="font-size:20px; margin-bottom:10px;">Acesso temporariamente indisponível</h2>
+    <p style="font-size:14px; color:var(--text-muted); line-height:1.6; margin-bottom:22px;">O período de avaliação da sua associação terminou. Fale com a diretoria/administração para regularizar o plano — assim que confirmado, o acesso volta automaticamente.</p>
+    <p style="text-align:center; font-size:13px;">
+      <a href="#" id="link-sair-trial-expirado" style="color:var(--accent); text-decoration:none;">Sair</a>
+    </p>
+  </div>
+</div>
+
 <!-- ===== PORTAL (com sidebar) ===== -->
 <div class="app-layout" id="tela-dashboard">
 
@@ -1298,7 +1310,7 @@
     });
   };
 
-  document.getElementById('btn-sair').onclick = function() {
+  function fazerLogout() {
     if (estado.token) {
       fetch(API_URL + '/auth/logout', {
         method: 'POST',
@@ -1308,7 +1320,13 @@
     estado.token = null;
     limparSessao();
     document.getElementById('tela-dashboard').style.display = 'none';
+    document.getElementById('tela-trial-expirado').style.display = 'none';
     document.getElementById('tela-login').style.display = 'block';
+  }
+  document.getElementById('btn-sair').onclick = fazerLogout;
+  document.getElementById('link-sair-trial-expirado').onclick = function(e) {
+    e.preventDefault();
+    fazerLogout();
   };
 
   // ---------- Navegação (sidebar) ----------
@@ -1377,6 +1395,19 @@
   }
 
   // ---------- Meus Dados ----------
+  // Se qualquer rota do portal responder com esse código (trial da
+  // associação expirado -- ver middleware/auth.js bloquearTrialExpirado),
+  // troca a tela inteira por um aviso simples. O associado não gerencia
+  // plano, então não tem fluxo de contratação aqui, só uma explicação.
+  function tratarTrialExpirado(dadosResposta) {
+    if (dadosResposta && dadosResposta.codigo === 'TRIAL_EXPIRADO') {
+      document.getElementById('tela-dashboard').style.display = 'none';
+      document.getElementById('tela-trial-expirado').style.display = 'flex';
+      return true;
+    }
+    return false;
+  }
+
   function carregarMeusDados() {
     fetch(API_URL + '/portal/meus-dados', {
       headers: { 'Authorization': 'Bearer ' + estado.token }
@@ -1385,6 +1416,7 @@
     .then(function(res) {
       var container = document.getElementById('perfil-associado-container');
       if (!res.ok) {
+        if (tratarTrialExpirado(res.data)) return;
         container.innerHTML = '<div class="vazio">' + escapeHtml(res.data.erro || 'Erro ao carregar seus dados') + '</div>';
         return;
       }

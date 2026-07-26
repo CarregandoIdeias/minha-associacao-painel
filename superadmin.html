@@ -296,7 +296,7 @@
   .painel-header { display: flex; justify-content: space-between; align-items: center; padding: 18px 22px; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 10px; }
   .painel-header h3 { font-size: 15px; font-weight: 600; }
 
-  #tabela-associacoes-container, #tabela-administradores-container, #tabela-logs-container { overflow-x: auto; }
+  #tabela-associacoes-container, #tabela-administradores-container, #tabela-logs-container, #tabela-contratacoes-container { overflow-x: auto; }
   .btn-pequeno:disabled, .btn:disabled { opacity: 0.5; cursor: not-allowed; }
   table { width: 100%; border-collapse: collapse; min-width: 980px; }
   th, td { text-align: left; padding: 14px 16px; font-size: 14px; border-bottom: 1px solid var(--border); }
@@ -397,6 +397,15 @@
     <button class="nav-item" id="aba-auditoria">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
       <span class="rotulo-nav">Auditoria</span>
+    </button>
+    <button class="nav-item" id="aba-contratacoes">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+      <span class="rotulo-nav">Contratações</span>
+      <span class="badge-notificacao" id="badge-contratacoes-pendentes" style="display:none; position:static; margin-left:auto;">0</span>
+    </button>
+    <button class="nav-item" id="aba-config-plataforma" style="display:none;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span class="rotulo-nav">Config. Pix</span>
     </button>
     <button class="nav-item" id="aba-meu-perfil">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -567,6 +576,35 @@
       </div>
     </div>
 
+    <div id="secao-contratacoes" class="secao-conteudo">
+      <div class="painel">
+        <div class="painel-header">
+          <h3>Contratações de plano</h3>
+          <select id="filtro-contratacoes-status" style="max-width:180px;">
+            <option value="pendente">Pendentes</option>
+            <option value="todas">Todas</option>
+          </select>
+        </div>
+        <div id="tabela-contratacoes-container"><div class="vazio">Carregando...</div></div>
+      </div>
+    </div>
+
+    <div id="secao-config-plataforma" class="secao-conteudo">
+      <div class="painel">
+        <div class="painel-header"><h3>Configuração de Pix da plataforma</h3></div>
+        <div style="padding:22px;">
+          <p style="font-size:13px; color:var(--text-muted); margin-bottom:18px;">
+            Essa é a chave Pix usada no QR Code que as associações escaneiam para <strong>pagar a mensalidade da plataforma</strong> —
+            diferente da chave Pix de cada associação (essa é configurada por elas mesmas, para cobrar os próprios associados).
+          </p>
+          <div class="campo"><label>Chave Pix</label><input type="text" id="plataforma-chave-pix" placeholder="CPF, CNPJ, e-mail, telefone ou chave aleatória"></div>
+          <div class="campo"><label>Nome do recebedor</label><input type="text" id="plataforma-nome-recebedor" maxlength="25" placeholder="máx. 25 caracteres"></div>
+          <div class="campo"><label>Cidade</label><input type="text" id="plataforma-cidade" maxlength="15" placeholder="máx. 15 caracteres"></div>
+          <button class="btn" id="btn-salvar-config-plataforma">Salvar</button>
+        </div>
+      </div>
+    </div>
+
     <div id="secao-meu-perfil" class="secao-conteudo">
       <div class="painel">
         <div class="painel-header"><h3>Meu perfil</h3></div>
@@ -704,6 +742,10 @@
         <option value="enterprise">Enterprise</option>
       </select>
     </div>
+    <div class="campo" id="campo-trial-dias">
+      <label>Duração do trial (dias)</label>
+      <input type="number" min="1" max="365" id="assoc-trial-dias" value="15">
+    </div>
     <div style="display:flex; gap:10px;">
       <div class="campo" style="flex:1;"><label>Valor da mensalidade</label><input type="number" step="0.01" min="0" id="assoc-valor-mensalidade" placeholder="calculado automaticamente"></div>
       <div class="campo" style="flex:1;"><label>Vencimento da assinatura</label><input type="date" id="assoc-vencimento-assinatura"></div>
@@ -786,6 +828,25 @@
   </div>
 </div>
 
+<!-- ===== MODAL DETALHES DA SOLICITAÇÃO DE PLANO ===== -->
+<div class="overlay" id="overlay-modal-contratacao">
+  <div class="modal" style="max-width:560px;">
+    <h3>Solicitação de contratação</h3>
+    <input type="hidden" id="contratacao-id" value="">
+    <div id="lista-detalhes-contratacao" style="margin-bottom:16px;"></div>
+    <div id="comprovante-contratacao-conteudo" style="margin-bottom:18px; text-align:center;"></div>
+    <div class="campo" id="campo-motivo-rejeicao" style="display:none;">
+      <label>Motivo da rejeição (opcional)</label>
+      <input type="text" id="contratacao-motivo-rejeicao" placeholder="ex.: comprovante ilegível, valor incorreto...">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="btn-fechar-modal-contratacao">Fechar</button>
+      <button class="btn btn-perigo" id="btn-rejeitar-contratacao">Rejeitar</button>
+      <button class="btn" id="btn-aprovar-contratacao">Aprovar</button>
+    </div>
+  </div>
+</div>
+
 <!-- ===== MODAL DETALHES DO LOG DE AUDITORIA ===== -->
 <div class="overlay" id="overlay-modal-log">
   <div class="modal" style="max-width:640px;">
@@ -846,7 +907,8 @@
   };
   var ROTULOS_PLANO = { trial: 'Trial', basico: 'Básico', profissional: 'Profissional', enterprise: 'Enterprise' };
   // status_assinatura (backend) -> classe CSS do badge (reaproveita .badge.ativo/.inativo já existentes)
-  var CLASSE_BADGE_STATUS = { ativa: 'ativo', bloqueada: 'inativo', trial: 'trial', vencida: 'vencida', vencendo: 'vencendo' };
+  var CLASSE_BADGE_STATUS = { ativa: 'ativo', bloqueada: 'inativo', trial: 'trial', trial_expirado: 'vencida', vencida: 'vencida', vencendo: 'vencendo' };
+  var ROTULO_STATUS_ASSINATURA = { trial_expirado: 'trial expirado' };
 
   var MESES_PT = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
   var DIAS_PT = ['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
@@ -1015,19 +1077,23 @@
 
   // ---------- Navegação (sidebar) ----------
   function ativarSecaoSuperAdmin(nome) {
-    ['dashboard', 'associacoes', 'administradores', 'auditoria', 'meu-perfil'].forEach(function(secao) {
+    ['dashboard', 'associacoes', 'administradores', 'auditoria', 'contratacoes', 'config-plataforma', 'meu-perfil'].forEach(function(secao) {
       document.getElementById('aba-' + secao).classList.toggle('ativa', secao === nome);
       document.getElementById('secao-' + secao).classList.toggle('ativa', secao === nome);
     });
     if (nome === 'associacoes') carregarAssociacoes();
     if (nome === 'administradores') carregarAdministradores();
     if (nome === 'auditoria') { paginaAtualLogs = 1; carregarLogs(); }
+    if (nome === 'contratacoes') carregarContratacoes();
+    if (nome === 'config-plataforma') carregarConfigPlataforma();
     if (nome === 'meu-perfil') preencherMeuPerfil();
   }
   document.getElementById('aba-dashboard').onclick = function() { ativarSecaoSuperAdmin('dashboard'); };
   document.getElementById('aba-associacoes').onclick = function() { ativarSecaoSuperAdmin('associacoes'); };
   document.getElementById('aba-administradores').onclick = function() { ativarSecaoSuperAdmin('administradores'); };
   document.getElementById('aba-auditoria').onclick = function() { ativarSecaoSuperAdmin('auditoria'); };
+  document.getElementById('aba-contratacoes').onclick = function() { ativarSecaoSuperAdmin('contratacoes'); };
+  document.getElementById('aba-config-plataforma').onclick = function() { ativarSecaoSuperAdmin('config-plataforma'); };
   document.getElementById('aba-meu-perfil').onclick = function() { ativarSecaoSuperAdmin('meu-perfil'); };
 
   document.getElementById('btn-recolher-sidebar').onclick = function() {
@@ -1055,9 +1121,11 @@
     document.getElementById('nome-superadmin').textContent = estado.nome || 'Administrador';
     document.getElementById('avatar-superadmin').textContent = (estado.nome || 'A').charAt(0).toUpperCase();
     document.getElementById('aba-administradores').style.display = (estado.papel === 'super_admin') ? 'flex' : 'none';
+    document.getElementById('aba-config-plataforma').style.display = (estado.papel === 'super_admin') ? 'flex' : 'none';
     atualizarSaudacao();
     ativarSecaoSuperAdmin('dashboard');
     carregarDashboard();
+    atualizarBadgeContratacoesPendentes();
   }
 
   (function restaurarSessao() {
@@ -1273,7 +1341,7 @@
         '<td>' + (ROTULOS_PLANO[a.plano] || a.plano) + '</td>' +
         '<td>' + a.total_associados + '</td>' +
         '<td>' + formatarMoeda(a.valor_mensalidade) + '</td>' +
-        '<td><span class="badge ' + (CLASSE_BADGE_STATUS[a.status_assinatura] || '') + '">' + a.status_assinatura + '</span></td>' +
+        '<td><span class="badge ' + (CLASSE_BADGE_STATUS[a.status_assinatura] || '') + '">' + (ROTULO_STATUS_ASSINATURA[a.status_assinatura] || a.status_assinatura) + '</span></td>' +
         '<td>' + new Date(a.criado_em).toLocaleDateString('pt-BR') + '</td>' +
         '<td>' + (a.vencimento_assinatura ? new Date(a.vencimento_assinatura).toLocaleDateString('pt-BR') : '—') + '</td>' +
         '<td style="white-space:nowrap;">' +
@@ -1345,6 +1413,7 @@
     ].forEach(function(id) { document.getElementById(id).value = ''; });
     document.getElementById('assoc-tipo').value = 'outra';
     document.getElementById('assoc-plano').value = 'trial';
+    document.getElementById('assoc-trial-dias').value = '15';
     document.getElementById('assoc-forma-cobranca').value = '';
     resetarLogoPreview(null);
     atualizarPlaceholderMensalidade(0);
@@ -1376,6 +1445,7 @@
       document.getElementById('assoc-cep').value = a.cep || '';
       document.getElementById('assoc-cpf-responsavel').value = (a.admin && a.admin.cpf) || '';
       document.getElementById('assoc-plano').value = a.plano || 'trial';
+      document.getElementById('assoc-trial-dias').value = a.trial_dias || 15;
       document.getElementById('assoc-valor-mensalidade').value = a.valor_mensalidade_manual != null ? a.valor_mensalidade_manual : '';
       document.getElementById('assoc-vencimento-assinatura').value = a.vencimento_assinatura ? a.vencimento_assinatura.substring(0, 10) : '';
       document.getElementById('assoc-forma-cobranca').value = a.forma_cobranca || '';
@@ -1427,6 +1497,7 @@
     var valorMensalidadeManual = document.getElementById('assoc-valor-mensalidade').value;
     var vencimentoAssinatura = document.getElementById('assoc-vencimento-assinatura').value;
     var formaCobranca = document.getElementById('assoc-forma-cobranca').value;
+    var trialDias = document.getElementById('assoc-trial-dias').value;
 
     if (!nome) { mostrarToast('Informe o nome da associação', true); return; }
     if (!idEdicao && !email) { mostrarToast('Informe o e-mail da associação (será o login do admin)', true); return; }
@@ -1435,7 +1506,7 @@
       cep: cep, site: site, logo_base64: logoSelecionadaBase64,
       plano: plano, valor_mensalidade_manual: valorMensalidadeManual ? parseFloat(valorMensalidadeManual) : null,
       vencimento_assinatura: vencimentoAssinatura || null, forma_cobranca: formaCobranca || null,
-      cpf: cpf || null
+      cpf: cpf || null, trial_dias: trialDias ? parseInt(trialDias, 10) : null
     };
 
     if (idEdicao) {
@@ -1518,7 +1589,7 @@
     .then(function(a) {
       document.getElementById('detalhe-nome-associacao').textContent = a.nome;
       var badge = document.getElementById('detalhe-badge-status');
-      badge.textContent = a.status_assinatura;
+      badge.textContent = ROTULO_STATUS_ASSINATURA[a.status_assinatura] || a.status_assinatura;
       badge.className = 'badge ' + (CLASSE_BADGE_STATUS[a.status_assinatura] || '');
 
       document.getElementById('lista-informacoes').innerHTML =
@@ -1926,6 +1997,191 @@
 
   document.getElementById('btn-exportar-excel').onclick = function() { exportarLogs('excel'); };
   document.getElementById('btn-exportar-pdf').onclick = function() { exportarLogs('pdf'); };
+
+  // ---------- Contratações de plano ----------
+  var contratacoesCache = [];
+
+  function atualizarBadgeContratacoesPendentes() {
+    fetch(API_URL + '/superadmin/solicitacoes-plano?status=pendente', { headers: { 'Authorization': 'Bearer ' + estado.token }, cache: 'no-store' })
+    .then(function(resp) { return resp.json(); })
+    .then(function(lista) {
+      var badge = document.getElementById('badge-contratacoes-pendentes');
+      if (Array.isArray(lista) && lista.length > 0) {
+        badge.textContent = lista.length;
+        badge.style.display = 'flex';
+      } else {
+        badge.style.display = 'none';
+      }
+    })
+    .catch(function() {});
+  }
+
+  function carregarContratacoes() {
+    var status = document.getElementById('filtro-contratacoes-status').value;
+    var container = document.getElementById('tabela-contratacoes-container');
+    container.innerHTML = '<div class="vazio">Carregando...</div>';
+
+    fetch(API_URL + '/superadmin/solicitacoes-plano?status=' + status, { headers: { 'Authorization': 'Bearer ' + estado.token }, cache: 'no-store' })
+    .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
+    .then(function(res) {
+      if (!res.ok) { mostrarToast(res.data.erro || 'Erro ao carregar contratações', true); return; }
+      contratacoesCache = res.data;
+      renderizarContratacoes(res.data);
+    })
+    .catch(function() { mostrarToast('Erro ao carregar contratações', true); });
+  }
+  document.getElementById('filtro-contratacoes-status').onchange = carregarContratacoes;
+
+  var ROTULOS_STATUS_CONTRATACAO = { pendente: 'Pendente', aprovada: 'Aprovada', rejeitada: 'Rejeitada' };
+  var CLASSE_BADGE_CONTRATACAO = { pendente: 'vencendo', aprovada: 'ativo', rejeitada: 'inativo' };
+
+  function renderizarContratacoes(lista) {
+    var container = document.getElementById('tabela-contratacoes-container');
+    if (lista.length === 0) {
+      container.innerHTML = '<div class="vazio">Nenhuma solicitação encontrada.</div>';
+      return;
+    }
+    var html = '<table><thead><tr><th>Associação</th><th>Plano solicitado</th><th>Valor</th><th>Solicitado por</th><th>Data</th><th>Status</th><th></th></tr></thead><tbody>';
+    lista.forEach(function(s) {
+      html += '<tr>' +
+        '<td><strong>' + escapeHtml(s.associacao_nome) + '</strong></td>' +
+        '<td>' + (ROTULOS_PLANO[s.plano_solicitado] || s.plano_solicitado) + '</td>' +
+        '<td>' + formatarMoeda(s.valor_referencia) + '</td>' +
+        '<td>' + escapeHtml(s.solicitado_por_nome || '—') + '</td>' +
+        '<td>' + new Date(s.solicitado_em).toLocaleDateString('pt-BR') + '</td>' +
+        '<td><span class="badge ' + (CLASSE_BADGE_CONTRATACAO[s.status] || '') + '">' + (ROTULOS_STATUS_CONTRATACAO[s.status] || s.status) + '</span></td>' +
+        '<td><button class="btn-pequeno" onclick="abrirDetalhesContratacao(\'' + s.id + '\')">Detalhes</button></td>' +
+        '</tr>';
+    });
+    html += '</tbody></table>';
+    container.innerHTML = html;
+  }
+
+  function abrirDetalhesContratacao(id) {
+    var s = contratacoesCache.find(function(x) { return x.id === id; });
+    if (!s) return;
+
+    document.getElementById('contratacao-id').value = id;
+    document.getElementById('contratacao-motivo-rejeicao').value = '';
+    document.getElementById('lista-detalhes-contratacao').innerHTML =
+      linhaInfo('Associação', s.associacao_nome) +
+      linhaInfo('Plano solicitado', ROTULOS_PLANO[s.plano_solicitado] || s.plano_solicitado) +
+      linhaInfo('Valor de referência', formatarMoeda(s.valor_referencia)) +
+      linhaInfo('Solicitado por', s.solicitado_por_nome) +
+      linhaInfo('Data da solicitação', new Date(s.solicitado_em).toLocaleString('pt-BR')) +
+      linhaInfo('Status', ROTULOS_STATUS_CONTRATACAO[s.status] || s.status) +
+      (s.respondido_em ? linhaInfo('Respondido em', new Date(s.respondido_em).toLocaleString('pt-BR')) : '') +
+      (s.observacao_resposta ? linhaInfo('Motivo da rejeição', s.observacao_resposta) : '');
+
+    var conteudo = document.getElementById('comprovante-contratacao-conteudo');
+    conteudo.innerHTML = '<p class="vazio">Carregando comprovante...</p>';
+    fetch(API_URL + '/superadmin/solicitacoes-plano/' + id + '/comprovante', { headers: { 'Authorization': 'Bearer ' + estado.token }, cache: 'no-store' })
+    .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
+    .then(function(res) {
+      if (!res.ok) { conteudo.innerHTML = '<p class="vazio">Comprovante não encontrado.</p>'; return; }
+      var arquivo = res.data.comprovante_base64;
+      if (arquivo.startsWith('data:application/pdf')) {
+        conteudo.innerHTML = '<a class="btn btn-ghost" href="' + arquivo + '" target="_blank" rel="noopener">Abrir comprovante (PDF)</a>';
+      } else {
+        conteudo.innerHTML = '<img src="' + arquivo + '" alt="Comprovante" style="max-width:100%; border-radius:10px;">';
+      }
+    })
+    .catch(function() { conteudo.innerHTML = '<p class="vazio">Erro ao carregar comprovante.</p>'; });
+
+    var podeResponder = s.status === 'pendente';
+    document.getElementById('campo-motivo-rejeicao').style.display = podeResponder ? 'block' : 'none';
+    document.getElementById('btn-aprovar-contratacao').style.display = podeResponder ? 'inline-block' : 'none';
+    document.getElementById('btn-rejeitar-contratacao').style.display = podeResponder ? 'inline-block' : 'none';
+
+    document.getElementById('overlay-modal-contratacao').style.display = 'flex';
+  }
+
+  document.getElementById('btn-fechar-modal-contratacao').onclick = function() {
+    document.getElementById('overlay-modal-contratacao').style.display = 'none';
+  };
+
+  document.getElementById('btn-aprovar-contratacao').onclick = function() {
+    var id = document.getElementById('contratacao-id').value;
+    confirmarAcao({
+      titulo: 'Aprovar contratação',
+      mensagem: 'Confirma que o pagamento foi recebido? Isso ativa o plano imediatamente para a associação.',
+      textoConfirmar: 'Aprovar',
+      aoConfirmar: function() {
+        fetch(API_URL + '/superadmin/solicitacoes-plano/' + id + '/aprovar', { method: 'PATCH', headers: { 'Authorization': 'Bearer ' + estado.token } })
+        .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
+        .then(function(res) {
+          if (!res.ok) { mostrarToast(res.data.erro || 'Erro ao aprovar', true); return; }
+          document.getElementById('overlay-modal-contratacao').style.display = 'none';
+          mostrarToast('Contratação aprovada!');
+          carregarContratacoes();
+          atualizarBadgeContratacoesPendentes();
+        })
+        .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
+      }
+    });
+  };
+
+  document.getElementById('btn-rejeitar-contratacao').onclick = function() {
+    var id = document.getElementById('contratacao-id').value;
+    var motivo = document.getElementById('contratacao-motivo-rejeicao').value.trim();
+    confirmarAcao({
+      titulo: 'Rejeitar contratação',
+      mensagem: 'Confirma que quer rejeitar essa solicitação de contratação?',
+      textoConfirmar: 'Rejeitar',
+      perigo: true,
+      aoConfirmar: function() {
+        fetch(API_URL + '/superadmin/solicitacoes-plano/' + id + '/rejeitar', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + estado.token },
+          body: JSON.stringify({ motivo: motivo || null })
+        })
+        .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
+        .then(function(res) {
+          if (!res.ok) { mostrarToast(res.data.erro || 'Erro ao rejeitar', true); return; }
+          document.getElementById('overlay-modal-contratacao').style.display = 'none';
+          mostrarToast('Contratação rejeitada.');
+          carregarContratacoes();
+          atualizarBadgeContratacoesPendentes();
+        })
+        .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
+      }
+    });
+  };
+
+  // ---------- Configuração de Pix da plataforma ----------
+  function carregarConfigPlataforma() {
+    fetch(API_URL + '/superadmin/configuracoes-plataforma', { headers: { 'Authorization': 'Bearer ' + estado.token }, cache: 'no-store' })
+    .then(function(resp) { return resp.json(); })
+    .then(function(d) {
+      document.getElementById('plataforma-chave-pix').value = d.chave_pix || '';
+      document.getElementById('plataforma-nome-recebedor').value = d.nome_recebedor_pix || '';
+      document.getElementById('plataforma-cidade').value = d.cidade_pix || '';
+    })
+    .catch(function() { mostrarToast('Erro ao carregar configuração da plataforma', true); });
+  }
+
+  document.getElementById('btn-salvar-config-plataforma').onclick = function() {
+    var chavePix = document.getElementById('plataforma-chave-pix').value.trim();
+    var nomeRecebedor = document.getElementById('plataforma-nome-recebedor').value.trim();
+    var cidade = document.getElementById('plataforma-cidade').value.trim();
+
+    if (!chavePix || !nomeRecebedor || !cidade) {
+      mostrarToast('Preencha chave Pix, nome do recebedor e cidade', true);
+      return;
+    }
+
+    fetch(API_URL + '/superadmin/configuracoes-plataforma', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + estado.token },
+      body: JSON.stringify({ chave_pix: chavePix, nome_recebedor_pix: nomeRecebedor, cidade_pix: cidade })
+    })
+    .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
+    .then(function(res) {
+      if (!res.ok) { mostrarToast(res.data.erro || 'Erro ao salvar', true); return; }
+      mostrarToast('Configuração de Pix da plataforma salva!');
+    })
+    .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
+  };
 
   // ---------- Meu Perfil ----------
   function preencherMeuPerfil() {

@@ -399,6 +399,43 @@
   }
   .painel-header h3 { font-size: 15px; font-weight: 600; }
 
+  /* ---------- Card de Plano/Trial no Dashboard ---------- */
+  .card-plano {
+    display: flex; justify-content: space-between; align-items: center; gap: 20px;
+    flex-wrap: wrap; padding: 22px 26px; border-radius: 14px; margin-bottom: 24px;
+    box-shadow: var(--shadow);
+  }
+  .card-plano.trial { background: linear-gradient(135deg, var(--accent-soft), var(--bg-card)); border: 1px solid var(--accent); }
+  .card-plano.pago { background: var(--bg-card); border: 1px solid var(--border); }
+  .card-plano-titulo { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+  .card-plano-titulo .badge-plano { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; background: var(--accent); color: #0A0A0A; padding: 3px 10px; border-radius: 20px; margin-left: 8px; vertical-align: middle; }
+  .card-plano-contador { display: flex; gap: 14px; margin: 10px 0; }
+  .card-plano-contador .unidade { text-align: center; }
+  .card-plano-contador .unidade .num { font-size: 26px; font-weight: 800; color: var(--accent); line-height: 1; }
+  .card-plano-contador .unidade .rot { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; }
+  .card-plano-info { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+  .card-plano-info strong { color: var(--text); }
+  .card-plano-info.vencido { color: var(--danger); font-weight: 600; }
+
+  /* ---------- Tela de bloqueio (trial expirado) ---------- */
+  #tela-trial-expirado { display: none; min-height: 100vh; align-items: center; justify-content: center; padding: 24px; }
+  .bloqueio-caixa { max-width: 480px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 18px; padding: 40px 36px; text-align: center; box-shadow: var(--shadow); }
+  .bloqueio-caixa .icone-bloqueio { font-size: 40px; margin-bottom: 16px; }
+  .bloqueio-caixa h2 { font-size: 22px; margin-bottom: 10px; }
+  .bloqueio-caixa p { font-size: 14px; color: var(--text-muted); line-height: 1.6; margin-bottom: 22px; }
+  .bloqueio-caixa .aviso-dados { font-size: 12px; color: var(--text-muted); margin-top: 18px; }
+
+  /* ---------- Seleção de plano no modal de contratação ---------- */
+  .opcoes-plano { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
+  .opcao-plano { border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; cursor: pointer; transition: border-color .15s, background .15s; }
+  .opcao-plano:hover { border-color: var(--accent); }
+  .opcao-plano.selecionada { border-color: var(--accent); background: var(--accent-soft); }
+  .opcao-plano .opcao-plano-topo { display: flex; justify-content: space-between; align-items: baseline; }
+  .opcao-plano .opcao-plano-nome { font-weight: 700; font-size: 14px; }
+  .opcao-plano .opcao-plano-preco { font-weight: 700; color: var(--accent); font-size: 14px; }
+  .opcao-plano .opcao-plano-porte { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .opcao-plano .opcao-plano-simulacao { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+
   table { width: 100%; border-collapse: collapse; }
   th, td {
     text-align: left;
@@ -752,6 +789,20 @@
 </div>
 
 
+<!-- ===== TELA DE BLOQUEIO (trial expirado) ===== -->
+<div id="tela-trial-expirado">
+  <div class="bloqueio-caixa">
+    <div class="icone-bloqueio">⏳</div>
+    <h2>Seu período de avaliação terminou</h2>
+    <p>Todos os dados da sua associação foram preservados. Para continuar usando a plataforma, contrate um dos planos abaixo.</p>
+    <button class="btn" style="width:100%;" id="btn-contratar-trial-expirado">Contratar Plano</button>
+    <p class="aviso-dados">Já enviou o comprovante? Aguarde a aprovação — assim que confirmado, o acesso volta automaticamente.</p>
+    <p style="text-align:center; margin-top:18px; font-size:13px;">
+      <a href="#" id="link-sair-trial-expirado" style="color:var(--accent); text-decoration:none;">Sair</a>
+    </p>
+  </div>
+</div>
+
 <!-- ===== DASHBOARD (com sidebar) ===== -->
 <div class="app-layout" id="tela-dashboard">
 
@@ -833,6 +884,8 @@
 
     <div id="secao-dashboard">
       <div class="page-header"><h1>Dashboard</h1></div>
+
+      <div id="bloco-plano-dashboard" style="display:none;"></div>
 
       <div class="kpis">
         <div class="kpi-card" id="kpi-card-total" style="cursor:pointer;">
@@ -1290,6 +1343,44 @@
   </div>
 </div>
 
+<!-- ===== MODAL CONTRATAR/TROCAR DE PLANO ===== -->
+<div class="overlay" id="overlay-modal-contratar-plano">
+  <div class="modal" style="max-width:520px;">
+    <h3>Contratar plano</h3>
+
+    <div id="bloco-escolha-plano">
+      <p style="font-size:13px; color:var(--text-muted); margin-bottom:14px;">Escolha o plano ideal para o tamanho da sua associação:</p>
+      <div class="opcoes-plano" id="opcoes-plano"></div>
+      <button class="btn" style="width:100%;" id="btn-avancar-pagamento-plano">Continuar para pagamento</button>
+    </div>
+
+    <div id="bloco-pagamento-plano" style="display:none;">
+      <p style="font-size:13px; color:var(--text-muted); margin-bottom:14px;">
+        Escaneie o QR Code ou copie o código Pix abaixo para pagar
+        <strong id="texto-valor-plano-escolhido"></strong>:
+      </p>
+      <div id="pix-qrcode-container-plano" style="display:flex; justify-content:center; margin-bottom:14px;"></div>
+      <div class="campo">
+        <label>Pix Copia e Cola</label>
+        <input type="text" id="pix-copia-cola-plano" readonly style="font-size:11px;">
+      </div>
+      <button class="btn btn-ghost" style="width:100%; margin-bottom:18px;" id="btn-copiar-pix-plano">Copiar código</button>
+
+      <p style="font-size:13px; font-weight:600; margin-bottom:8px;">Já pagou? Envie o comprovante:</p>
+      <input type="file" id="input-comprovante-plano" accept="image/*,application/pdf" style="display:none;">
+      <button class="btn btn-ghost" style="width:100%;" id="btn-selecionar-comprovante-plano">Escolher arquivo</button>
+      <p id="nome-arquivo-comprovante-plano" style="font-size:12px; color:var(--text-muted); margin-top:6px;"></p>
+    </div>
+
+    <p id="erro-contratar-plano" style="color:var(--danger); font-size:13px; margin-top:10px; display:none;"></p>
+
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="btn-fechar-modal-contratar-plano">Fechar</button>
+      <button class="btn" id="btn-enviar-comprovante-plano" style="display:none;">Enviar comprovante</button>
+    </div>
+  </div>
+</div>
+
 <!-- ===== MODAL DE CONFIRMAÇÃO (genérico, usado por qualquer ação) ===== -->
 <div class="overlay" id="overlay-modal-confirmacao">
   <div class="modal">
@@ -1307,6 +1398,25 @@
 <script>
   var API_URL = 'https://minha-associacao-backend.onrender.com';
   var estado = { token: null, papel: null, nome: null, email: null };
+
+  // Espelho do backend/utils/precos.js — só pra sugerir/exibir valores antes
+  // de salvar (o cálculo real é sempre feito no servidor).
+  var PRECOS_PLANO = {
+    trial: { base: 0, porAssociado: 0 },
+    basico: { base: 49.90, porAssociado: 2.00 },
+    profissional: { base: 99.90, porAssociado: 1.50 },
+    enterprise: { base: 199.90, porAssociado: 1.00 }
+  };
+  var INFO_PLANO = {
+    basico: { nome: 'Básico', porte: 'Pequeno porte · até 50 associados' },
+    profissional: { nome: 'Profissional', porte: 'Médio porte · 50 a 200 associados' },
+    enterprise: { nome: 'Enterprise', porte: 'Grande porte · 200+ associados' }
+  };
+  var ROTULOS_PLANO = { trial: 'Trial', basico: 'Básico', profissional: 'Profissional', enterprise: 'Enterprise' };
+  var planoAtualDados = null;
+  var planoEscolhidoContratacao = null;
+  var comprovantePlanoSelecionadoBase64 = null;
+  var intervaloContadorTrial = null;
 
   function decodificarEmailDoToken(token) {
     try {
@@ -1400,6 +1510,268 @@
     qr.make();
     document.getElementById(containerId).innerHTML = qr.createSvgTag({ scalable: true });
   }
+
+  // ---------- Plano/Trial (card do Dashboard + tela de bloqueio + contratação) ----------
+  function carregarPlano() {
+    fetch(API_URL + '/plano', { headers: { 'Authorization': 'Bearer ' + estado.token }, cache: 'no-store' })
+    .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
+    .then(function(res) {
+      // diretoria sem acesso (403) ou erro pontual não pode quebrar o resto
+      // do dashboard -- só o admin realmente depende dessa tela.
+      if (!res.ok) return;
+      planoAtualDados = res.data;
+      if (res.data.status === 'trial_expirado') {
+        mostrarTelaTrialExpirado();
+      } else {
+        document.getElementById('tela-trial-expirado').style.display = 'none';
+        document.getElementById('tela-dashboard').style.display = 'flex';
+        renderizarBlocoPlano(res.data);
+      }
+    })
+    .catch(function() {});
+  }
+
+  function renderizarBlocoPlano(d) {
+    var bloco = document.getElementById('bloco-plano-dashboard');
+    bloco.style.display = 'block';
+
+    if (d.plano === 'trial') {
+      bloco.innerHTML =
+        '<div class="card-plano trial">' +
+          '<div>' +
+            '<div class="card-plano-titulo">Você está utilizando o Plano Trial<span class="badge-plano">Trial</span></div>' +
+            '<div class="card-plano-contador" id="contador-trial"></div>' +
+            '<div class="card-plano-info">Data de expiração: <strong>' + new Date(d.trial_expira_em).toLocaleDateString('pt-BR') + '</strong>. Após esse período será necessário contratar um plano para continuar utilizando a plataforma.</div>' +
+          '</div>' +
+          (estado.papel === 'admin' ? '<button class="btn" id="btn-contratar-dashboard">Contratar Plano</button>' : '') +
+        '</div>';
+      if (estado.papel === 'admin') {
+        document.getElementById('btn-contratar-dashboard').onclick = abrirModalContratarPlano;
+      }
+      iniciarContadorTrial(d.trial_expira_em);
+      return;
+    }
+
+    pararContadorTrial();
+    var rotulosStatus = { ativa: 'Plano ativo', vencendo: 'Vencendo em breve', vencida: 'Vencida', bloqueada: 'Bloqueado' };
+    var info = INFO_PLANO[d.plano] || { nome: d.plano, porte: '' };
+    bloco.innerHTML =
+      '<div class="card-plano pago">' +
+        '<div>' +
+          '<div class="card-plano-titulo">Seu Plano Atual<span class="badge-plano">' + info.nome + '</span></div>' +
+          '<div class="card-plano-info">' + info.porte + '<br>' +
+            'Status: <strong>' + (rotulosStatus[d.status] || d.status) + '</strong> · ' +
+            'Próxima renovação: <strong>' + (d.vencimento_assinatura ? new Date(d.vencimento_assinatura).toLocaleDateString('pt-BR') : '—') + '</strong> · ' +
+            'Mensalidade: <strong>' + formatarMoeda(d.valor_mensalidade) + '</strong>' +
+          '</div>' +
+        '</div>' +
+        (estado.papel === 'admin' ? '<button class="btn btn-ghost" id="btn-gerenciar-plano">Gerenciar Plano</button>' : '') +
+      '</div>';
+    if (estado.papel === 'admin') {
+      document.getElementById('btn-gerenciar-plano').onclick = abrirModalContratarPlano;
+    }
+  }
+
+  // Contador ao vivo (dias/horas/minutos) -- atualiza a cada minuto, não
+  // precisa de segundo em segundo pra essa granularidade.
+  function iniciarContadorTrial(trialExpiraEm) {
+    pararContadorTrial();
+    function atualizar() {
+      var el = document.getElementById('contador-trial');
+      if (!el) { pararContadorTrial(); return; }
+      var diffMs = new Date(trialExpiraEm) - new Date();
+      if (diffMs <= 0) {
+        pararContadorTrial();
+        carregarPlano();
+        return;
+      }
+      var dias = Math.floor(diffMs / 86400000);
+      var horas = Math.floor((diffMs % 86400000) / 3600000);
+      var minutos = Math.floor((diffMs % 3600000) / 60000);
+      el.innerHTML =
+        '<div class="unidade"><div class="num">' + dias + '</div><div class="rot">dias</div></div>' +
+        '<div class="unidade"><div class="num">' + horas + '</div><div class="rot">horas</div></div>' +
+        '<div class="unidade"><div class="num">' + minutos + '</div><div class="rot">min</div></div>';
+    }
+    atualizar();
+    intervaloContadorTrial = setInterval(atualizar, 60000);
+  }
+  function pararContadorTrial() {
+    if (intervaloContadorTrial) { clearInterval(intervaloContadorTrial); intervaloContadorTrial = null; }
+  }
+
+  function mostrarTelaTrialExpirado() {
+    pararContadorTrial();
+    document.getElementById('tela-dashboard').style.display = 'none';
+    document.getElementById('tela-trial-expirado').style.display = 'flex';
+  }
+  document.getElementById('btn-contratar-trial-expirado').onclick = abrirModalContratarPlano;
+
+  // ---------- Modal Contratar/Trocar de plano ----------
+  function abrirModalContratarPlano() {
+    if (estado.papel !== 'admin') return;
+    planoEscolhidoContratacao = null;
+    comprovantePlanoSelecionadoBase64 = null;
+    document.getElementById('bloco-escolha-plano').style.display = 'block';
+    document.getElementById('bloco-pagamento-plano').style.display = 'none';
+    document.getElementById('btn-enviar-comprovante-plano').style.display = 'none';
+    document.getElementById('erro-contratar-plano').style.display = 'none';
+    document.getElementById('nome-arquivo-comprovante-plano').textContent = '';
+
+    if (planoAtualDados && planoAtualDados.solicitacao_pendente) {
+      var s = planoAtualDados.solicitacao_pendente;
+      document.getElementById('bloco-escolha-plano').innerHTML =
+        '<p style="font-size:14px; line-height:1.6;">Você já enviou uma solicitação de contratação do plano <strong>' +
+        (ROTULOS_PLANO[s.plano_solicitado] || s.plano_solicitado) + '</strong> em ' +
+        new Date(s.solicitado_em).toLocaleDateString('pt-BR') + '. Aguarde a aprovação do pagamento.</p>';
+    } else {
+      renderizarOpcoesPlano();
+    }
+
+    document.getElementById('overlay-modal-contratar-plano').style.display = 'flex';
+  }
+
+  function renderizarOpcoesPlano() {
+    var totalAssociados = (planoAtualDados && planoAtualDados.total_associados) || 0;
+    var container = document.getElementById('opcoes-plano');
+    var html = '';
+    ['basico', 'profissional', 'enterprise'].forEach(function(chave) {
+      var info = INFO_PLANO[chave];
+      var precos = PRECOS_PLANO[chave];
+      var valorComAtual = precos.base + precos.porAssociado * totalAssociados;
+      html += '<div class="opcao-plano" data-plano="' + chave + '" onclick="selecionarOpcaoPlano(\'' + chave + '\')">' +
+        '<div class="opcao-plano-topo"><span class="opcao-plano-nome">' + info.nome + '</span><span class="opcao-plano-preco">' + formatarMoeda(precos.base) + '/mês</span></div>' +
+        '<div class="opcao-plano-porte">' + info.porte + '</div>' +
+        '<div class="opcao-plano-simulacao">+ ' + formatarMoeda(precos.porAssociado) + ' por associado ativo' +
+        (totalAssociados > 0 ? ' — com ' + totalAssociados + ' associados hoje: ' + formatarMoeda(valorComAtual) + '/mês' : '') +
+        '</div>' +
+        '</div>';
+    });
+    container.innerHTML = html;
+  }
+
+  function selecionarOpcaoPlano(chave) {
+    planoEscolhidoContratacao = chave;
+    document.querySelectorAll('.opcao-plano').forEach(function(el) {
+      el.classList.toggle('selecionada', el.getAttribute('data-plano') === chave);
+    });
+  }
+
+  document.getElementById('btn-avancar-pagamento-plano').onclick = function() {
+    var erroEl = document.getElementById('erro-contratar-plano');
+    erroEl.style.display = 'none';
+    if (!planoEscolhidoContratacao) {
+      erroEl.textContent = 'Escolha um plano para continuar';
+      erroEl.style.display = 'block';
+      return;
+    }
+
+    var totalAssociados = (planoAtualDados && planoAtualDados.total_associados) || 0;
+    var precos = PRECOS_PLANO[planoEscolhidoContratacao];
+    var valor = precos.base + precos.porAssociado * totalAssociados;
+
+    var pix = (planoAtualDados && planoAtualDados.pix_plataforma) || {};
+    if (!pix.chave_pix) {
+      erroEl.textContent = 'A plataforma ainda não configurou uma chave Pix. Fale com o suporte para contratar.';
+      erroEl.style.display = 'block';
+      return;
+    }
+
+    document.getElementById('texto-valor-plano-escolhido').textContent = formatarMoeda(valor);
+    var payload = gerarPayloadPix(pix, valor, 'PLANO' + planoEscolhidoContratacao.toUpperCase());
+    renderizarQrCode('pix-qrcode-container-plano', payload);
+    document.getElementById('pix-copia-cola-plano').value = payload;
+
+    document.getElementById('bloco-escolha-plano').style.display = 'none';
+    document.getElementById('bloco-pagamento-plano').style.display = 'block';
+    document.getElementById('btn-enviar-comprovante-plano').style.display = 'inline-block';
+  };
+
+  document.getElementById('btn-copiar-pix-plano').onclick = function() {
+    var campo = document.getElementById('pix-copia-cola-plano');
+    campo.select();
+    navigator.clipboard.writeText(campo.value).then(function() {
+      mostrarToast('Código Pix copiado!');
+    }).catch(function() {
+      mostrarToast('Não foi possível copiar automaticamente — selecione e copie manualmente.', true);
+    });
+  };
+
+  document.getElementById('btn-selecionar-comprovante-plano').onclick = function() {
+    document.getElementById('input-comprovante-plano').click();
+  };
+
+  document.getElementById('input-comprovante-plano').onchange = function(e) {
+    var arquivo = e.target.files[0];
+    if (!arquivo) return;
+    document.getElementById('nome-arquivo-comprovante-plano').textContent = arquivo.name;
+
+    if (arquivo.type === 'application/pdf') {
+      var leitorPdf = new FileReader();
+      leitorPdf.onload = function(evt) { comprovantePlanoSelecionadoBase64 = evt.target.result; };
+      leitorPdf.readAsDataURL(arquivo);
+      return;
+    }
+
+    var leitor = new FileReader();
+    leitor.onload = function(evt) {
+      var img = new Image();
+      img.onload = function() {
+        var TAMANHO_MAX = 1000;
+        var largura = img.width;
+        var altura = img.height;
+        if (largura > altura && largura > TAMANHO_MAX) {
+          altura = Math.round(altura * (TAMANHO_MAX / largura));
+          largura = TAMANHO_MAX;
+        } else if (altura > TAMANHO_MAX) {
+          largura = Math.round(largura * (TAMANHO_MAX / altura));
+          altura = TAMANHO_MAX;
+        }
+        var canvas = document.createElement('canvas');
+        canvas.width = largura;
+        canvas.height = altura;
+        canvas.getContext('2d').drawImage(img, 0, 0, largura, altura);
+        comprovantePlanoSelecionadoBase64 = canvas.toDataURL('image/jpeg', 0.85);
+      };
+      img.src = evt.target.result;
+    };
+    leitor.readAsDataURL(arquivo);
+  };
+
+  document.getElementById('btn-enviar-comprovante-plano').onclick = function() {
+    var erroEl = document.getElementById('erro-contratar-plano');
+    erroEl.style.display = 'none';
+    if (!comprovantePlanoSelecionadoBase64) {
+      erroEl.textContent = 'Escolha o arquivo do comprovante antes de enviar';
+      erroEl.style.display = 'block';
+      return;
+    }
+
+    fetch(API_URL + '/plano/solicitar-contratacao', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + estado.token },
+      body: JSON.stringify({ plano_solicitado: planoEscolhidoContratacao, comprovante_base64: comprovantePlanoSelecionadoBase64 })
+    })
+    .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
+    .then(function(res) {
+      if (!res.ok) {
+        erroEl.textContent = res.data.erro || 'Erro ao enviar comprovante';
+        erroEl.style.display = 'block';
+        return;
+      }
+      document.getElementById('overlay-modal-contratar-plano').style.display = 'none';
+      mostrarToast('Comprovante enviado! Aguarde a aprovação do pagamento.');
+      carregarPlano();
+    })
+    .catch(function() {
+      erroEl.textContent = 'Erro ao enviar comprovante';
+      erroEl.style.display = 'block';
+    });
+  };
+
+  document.getElementById('btn-fechar-modal-contratar-plano').onclick = function() {
+    document.getElementById('overlay-modal-contratar-plano').style.display = 'none';
+  };
 
   // ---------- Tema ----------
   function aplicarTema(tema) {
@@ -1657,6 +2029,7 @@
     carregarCobrancas();
     carregarComunicados();
     carregarAtividades();
+    carregarPlano();
   }
 
   function salvarSessao() {
@@ -1815,7 +2188,7 @@
     });
   };
 
-  document.getElementById('btn-sair').onclick = function() {
+  function fazerLogout() {
     if (estado.token) {
       fetch(API_URL + '/auth/logout', {
         method: 'POST',
@@ -1825,8 +2198,15 @@
     estado.token = null;
     estado.papel = null;
     limparSessao();
+    pararContadorTrial();
     document.getElementById('tela-dashboard').style.display = 'none';
+    document.getElementById('tela-trial-expirado').style.display = 'none';
     document.getElementById('tela-login').style.display = 'block';
+  }
+  document.getElementById('btn-sair').onclick = fazerLogout;
+  document.getElementById('link-sair-trial-expirado').onclick = function(e) {
+    e.preventDefault();
+    fazerLogout();
   };
 
   // ---------- Carregar associados ----------

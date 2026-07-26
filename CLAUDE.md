@@ -267,6 +267,20 @@ Dashboard (`secao-dashboard`) reestruturado: cards de KPI mais compactos (rótul
 
 Backend: `GET /superadmin/admins` e `GET /superadmin/associacoes` aceitam `?limite=N` (cap 1000) pra listagens curtas tipo essa; `GET /superadmin/logs` aceita `?limite=N` como atalho pra listagem simples sem paginação (se vier junto com `pagina`/`por_pagina`, esses dois têm prioridade).
 
+## Plano Trial com expiração + contratação self-service (26/07/2026)
+
+**`index.html` (painel da associação)**: Dashboard ganhou um bloco novo logo abaixo do `page-header`, `#bloco-plano-dashboard`, renderizado por `carregarPlano()`/`renderizarBlocoPlano()` — card `.card-plano.trial` com contador ao vivo (dias/horas/minutos, `iniciarContadorTrial()`, atualiza a cada 60s via `setInterval`, recalcula do zero a cada chamada porque é baseado em `new Date(trial_expira_em) - new Date()`, não em decremento) quando `plano === 'trial'`, ou `.card-plano.pago` ("Seu Plano Atual") quando já é um plano pago. Só chama `GET /plano` se acabou de logar (dentro de `entrarNoDashboard()`) — se der 403 (diretoria, que não tem acesso a essa rota), falha silenciosamente e o bloco nem aparece, não quebra o resto do Dashboard.
+
+**Tela de bloqueio** (`#tela-trial-expirado`, sibling de `#tela-login`/`.app-layout`): substitui a tela inteira quando `GET /plano` retorna `status: 'trial_expirado'` — a mesma ideia de "Avalia Plus" pedida, com ícone, mensagem de dados preservados, botão "Contratar Plano" e link "Sair". Isso é só uma camada de UX — a segurança de verdade é o middleware `bloquearTrialExpirado` no backend (ver `backend/CLAUDE.md`); mesmo que alguém bypasse esse check no front, toda rota de dado real continua bloqueada.
+
+**Modal "Contratar/Gerenciar Plano"** (`#overlay-modal-contratar-plano`): dois blocos que alternam (`#bloco-escolha-plano` → `#bloco-pagamento-plano`). Escolha mostra as 3 opções pagas com preço base + simulação usando `total_associados` real (vindo de `GET /plano`); ao confirmar, gera o QR Pix com `gerarPayloadPix()` (já existente, reaproveitado) mas usando **`pix_plataforma`** (chave da Carregando Ideias) em vez de `pix_associacao` — são chaves diferentes, não confundir. Upload de comprovante copiado literalmente do fluxo de `portal.html` (compressão de imagem via canvas, máx. 1000px, jpeg 0.85; PDF passa direto). O mesmo modal serve tanto pro botão "Contratar Plano" (trial) quanto "Gerenciar Plano" (plano pago, upgrade) — não existe tela separada pra upgrade ainda, é o mesmo fluxo de solicitação + aprovação do zero.
+
+**`portal.html` (associado)**: tratamento bem mais simples — `tratarTrialExpirado()` verifica `codigo === 'TRIAL_EXPIRADO'` na primeira resposta de erro (`carregarMeusDados()`) e troca a tela inteira por um aviso genérico sem botão de ação (associado não gerencia plano/pagamento da plataforma, só a diretoria/admin). `#tela-trial-expirado` aqui é bem mais enxuta que a de `index.html`.
+
+**`superadmin.html`**: duas seções novas na sidebar — **Contratações** (`aba-contratacoes`, visível pra qualquer papel, com badge de pendentes igual ao padrão de notificação já usado, `atualizarBadgeContratacoesPendentes()`) lista solicitações com filtro pendente/todas, modal de detalhes mostra o comprovante (imagem inline ou link de PDF) e botões Aprovar/Rejeitar reaproveitando `confirmarAcao()`; **Config. Pix** (`aba-config-plataforma`, gated a `papel === 'super_admin'`, mesmo padrão de `aba-administradores`) — formulário pra chave/nome/cidade Pix da plataforma, é isso que aparece no QR que as associações escaneiam. Formulário de criar/editar associação ganhou o campo "Duração do trial (dias)" (`assoc-trial-dias`).
+
+**Bug real cometido e corrigido nesta sessão**: esqueci `overflow-x: auto` em `#tabela-contratacoes-container` (mesmo bug documentado em `feedback` anteriores sobre `#tabela-administradores-container`) — toda tabela nova em `superadmin.html` precisa entrar na lista de seletores dessa regra, é fácil esquecer.
+
 ## Convenções
 
 - Sem framework/bundler — tudo inline (CSS e JS dentro do próprio HTML).
