@@ -830,8 +830,6 @@
   var porPaginaLogs = 50;
   var graficoCrescimento = null;
   var graficoAssociados = null;
-  var graficoReceita = null;
-  var graficoPlanos = null;
   var logoSelecionadaBase64 = null;
 
   // Espelho do backend/utils/precos.js — só pra sugerir o valor da
@@ -1154,33 +1152,13 @@
       document.getElementById('kpi-total-associados').textContent = d.total_associados || 0;
       document.getElementById('kpi-total-atrasadas').textContent = d.total_atrasadas || 0;
       document.getElementById('kpi-mrr').textContent = formatarMoeda(d.receita_mrr);
-      desenharGraficos(d.crescimento_associacoes || [], d.novos_associados || [], d.receita_historico || [], d.distribuicao_planos || []);
+      desenharGraficos(d.crescimento_associacoes || [], d.novos_associados || []);
       renderizarAlertas(d.alertas || []);
       carregarUltimasAssociacoes();
       carregarUltimosAdmins();
       carregarUltimasAtividades();
     })
     .catch(function() { mostrarToast('Erro ao carregar dashboard', true); });
-  }
-
-  function renderizarUltimasAssociacoes(lista) {
-    var container = document.getElementById('tabela-ultimas-associacoes');
-    if (lista.length === 0) {
-      container.innerHTML = '<div class="vazio">Nenhuma associação cadastrada ainda.</div>';
-      return;
-    }
-    var html = '<table><thead><tr><th>Nome</th><th>Cidade</th><th>Plano</th><th>Cadastro</th><th>Status</th></tr></thead><tbody>';
-    lista.forEach(function(a) {
-      html += '<tr>' +
-        '<td><strong>' + escapeHtml(a.nome) + '</strong></td>' +
-        '<td>' + escapeHtml((a.cidade || '—') + (a.estado ? '/' + a.estado : '')) + '</td>' +
-        '<td>' + (ROTULOS_PLANO[a.plano] || a.plano) + '</td>' +
-        '<td>' + new Date(a.criado_em).toLocaleDateString('pt-BR') + '</td>' +
-        '<td><span class="badge ' + (a.ativo ? 'ativo' : 'inativo') + '">' + (a.ativo ? 'ativa' : 'bloqueada') + '</span></td>' +
-        '</tr>';
-    });
-    html += '</tbody></table>';
-    container.innerHTML = html;
   }
 
   function renderizarAlertas(alertas) {
@@ -1198,11 +1176,10 @@
           return '<div class="alerta-item"><span class="alerta-ponto ' + a.nivel + '"></span><span>' + escapeHtml(a.texto) + '</span></div>';
         }).join('');
 
-    document.getElementById('lista-alertas').innerHTML = html;
     document.getElementById('lista-alertas-dropdown').innerHTML = html;
   }
 
-  function desenharGraficos(crescimento, novosAssociados, receitaHistorico, distribuicaoPlanos) {
+  function desenharGraficos(crescimento, novosAssociados) {
     var cores = coresGrafico();
     var labels = crescimento.map(function(l) { return formatarMesLabel(l.mes); });
 
@@ -1245,42 +1222,6 @@
       }
     });
 
-    if (graficoReceita) graficoReceita.destroy();
-    graficoReceita = new Chart(document.getElementById('grafico-receita'), {
-      type: 'line',
-      data: {
-        labels: receitaHistorico.map(function(l) { return formatarMesLabel(l.mes); }),
-        datasets: [{
-          data: receitaHistorico.map(function(l) { return parseFloat(l.total); }),
-          borderColor: cores.linha, backgroundColor: 'rgba(201,168,76,0.15)',
-          fill: true, tension: 0.3, pointRadius: 3
-        }]
-      },
-      options: {
-        plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(ctx) { return formatarMoeda(ctx.parsed.y); } } } },
-        scales: {
-          x: { ticks: { color: cores.texto }, grid: { color: cores.grade } },
-          y: { ticks: { color: cores.texto, callback: function(v) { return formatarMoeda(v); } }, grid: { color: cores.grade }, beginAtZero: true }
-        }
-      }
-    });
-
-    if (graficoPlanos) graficoPlanos.destroy();
-    var coresPlanos = ['#C9A84C', '#6B8FE8', '#2ECC71', '#E8834C'];
-    graficoPlanos = new Chart(document.getElementById('grafico-planos'), {
-      type: 'doughnut',
-      data: {
-        labels: distribuicaoPlanos.map(function(p) { return ROTULOS_PLANO[p.plano] || p.plano; }),
-        datasets: [{
-          data: distribuicaoPlanos.map(function(p) { return parseInt(p.total, 10); }),
-          backgroundColor: coresPlanos,
-          borderWidth: 0
-        }]
-      },
-      options: {
-        plugins: { legend: { position: 'bottom', labels: { color: cores.texto, boxWidth: 12, padding: 12 } } }
-      }
-    });
   }
 
   function carregarAssociacoes() {
