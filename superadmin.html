@@ -947,6 +947,40 @@
     return div.innerHTML;
   }
 
+  // Só aceita data URL base64 com MIME conhecido e alfabeto base64 estrito.
+  // Espelha utils/validacao.js no backend -- as duas camadas existem de
+  // propósito (ver comentário lá).
+  var RE_DATA_URL_SEGURA = /^data:(image\/(png|jpeg|jpg|gif|webp)|application\/pdf);base64,[A-Za-z0-9+/]+={0,2}$/;
+
+  // Renderiza imagem/PDF vindo do banco SEM montar HTML por concatenação.
+  // Concatenar dentro de src="..." permitia que um valor com aspas escapasse
+  // do atributo e virasse XSS armazenado (um comprovante enviado por um
+  // cliente executava script na sessão de quem abrisse a tela). Aqui o valor
+  // nunca é interpretado como HTML: vai direto na propriedade .src/.href.
+  function renderizarArquivoBase64(container, dataUrl, rotulo) {
+    container.textContent = '';
+    if (!dataUrl || !RE_DATA_URL_SEGURA.test(dataUrl)) {
+      container.innerHTML = '<p class="vazio">Arquivo em formato inválido ou não suportado.</p>';
+      return;
+    }
+    if (dataUrl.indexOf('data:application/pdf') === 0) {
+      var link = document.createElement('a');
+      link.className = 'btn btn-ghost';
+      link.href = dataUrl;
+      link.target = '_blank';
+      link.rel = 'noopener';
+      link.textContent = 'Abrir ' + rotulo + ' (PDF)';
+      container.appendChild(link);
+      return;
+    }
+    var img = document.createElement('img');
+    img.src = dataUrl;
+    img.alt = rotulo;
+    img.style.maxWidth = '100%';
+    img.style.borderRadius = '10px';
+    container.appendChild(img);
+  }
+
   // Modal de confirmação genérico — substitui o confirm() nativo do navegador
   // em qualquer ação (excluir, redefinir senha, etc). Uso:
   // confirmarAcao({ mensagem: '...', aoConfirmar: function() { ... } })
@@ -1359,7 +1393,7 @@
     logoSelecionadaBase64 = null;
     var preview = document.getElementById('logo-preview');
     if (logoUrl) {
-      preview.innerHTML = '<img src="' + logoUrl + '" alt="Logo">';
+      renderizarArquivoBase64(preview, logoUrl, 'Logo');
     } else {
       preview.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="24" height="24" style="color:var(--accent);"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/></svg>';
     }
@@ -1396,7 +1430,7 @@
         canvas.width = largura; canvas.height = altura;
         canvas.getContext('2d').drawImage(img, 0, 0, largura, altura);
         logoSelecionadaBase64 = canvas.toDataURL('image/png');
-        document.getElementById('logo-preview').innerHTML = '<img src="' + logoSelecionadaBase64 + '" alt="Logo">';
+        renderizarArquivoBase64(document.getElementById('logo-preview'), logoSelecionadaBase64, 'Logo');
       };
       img.src = evt.target.result;
     };
@@ -2079,12 +2113,7 @@
     .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
     .then(function(res) {
       if (!res.ok) { conteudo.innerHTML = '<p class="vazio">Comprovante não encontrado.</p>'; return; }
-      var arquivo = res.data.comprovante_base64;
-      if (arquivo.startsWith('data:application/pdf')) {
-        conteudo.innerHTML = '<a class="btn btn-ghost" href="' + arquivo + '" target="_blank" rel="noopener">Abrir comprovante (PDF)</a>';
-      } else {
-        conteudo.innerHTML = '<img src="' + arquivo + '" alt="Comprovante" style="max-width:100%; border-radius:10px;">';
-      }
+      renderizarArquivoBase64(conteudo, res.data.comprovante_base64, 'Comprovante');
     })
     .catch(function() { conteudo.innerHTML = '<p class="vazio">Erro ao carregar comprovante.</p>'; });
 

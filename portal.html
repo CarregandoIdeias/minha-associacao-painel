@@ -937,6 +937,20 @@
     return div.innerHTML;
   }
 
+  // Espelha utils/validacao.js no backend -- ver comentário lá. Nunca montar
+  // <img src="..."> por concatenação com valor vindo do banco: aspas no valor
+  // escapam do atributo e viram XSS armazenado.
+  var RE_IMAGEM_SEGURA = /^data:image\/(png|jpeg|jpg|gif|webp);base64,[A-Za-z0-9+/]+={0,2}$/;
+
+  function renderizarFotoBase64(container, dataUrl) {
+    container.textContent = '';
+    if (!dataUrl || !RE_IMAGEM_SEGURA.test(dataUrl)) return;
+    var img = document.createElement('img');
+    img.src = dataUrl;
+    img.alt = 'Foto de perfil';
+    container.appendChild(img);
+  }
+
   function formatarData(iso) {
     if (!iso) return '—';
     var partes = iso.substring(0, 10).split('-');
@@ -1430,7 +1444,7 @@
 
       var avatar = document.getElementById('avatar-associado');
       if (a.foto_base64) {
-        avatar.innerHTML = '<img src="' + a.foto_base64 + '" alt="Foto de perfil">';
+        renderizarFotoBase64(avatar, a.foto_base64);
       }
     })
     .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
@@ -1655,7 +1669,7 @@
         mostrarToast(res.data.erro || 'Erro ao salvar foto', true);
         return;
       }
-      document.getElementById('avatar-associado').innerHTML = '<img src="' + fotoBase64 + '" alt="Foto de perfil">';
+      renderizarFotoBase64(document.getElementById('avatar-associado'), fotoBase64);
       mostrarToast('Foto atualizada!');
     })
     .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });

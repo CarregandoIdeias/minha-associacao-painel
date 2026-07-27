@@ -2925,6 +2925,44 @@
   // ---------- Modal Ver comprovante (admin/diretoria) ----------
   // Converte uma data URI (base64) em um blob: URL, que o navegador
   // consegue exibir/abrir de forma confiável (data: URLs grandes costumam falhar)
+  // Só aceita data URL base64 com MIME conhecido e alfabeto base64 estrito.
+  // Espelha utils/validacao.js no backend (ver comentário lá): concatenar um
+  // valor do banco dentro de src="..." permitia que aspas escapassem do
+  // atributo e virassem XSS armazenado -- um comprovante enviado por um
+  // associado executava script na sessão da diretoria.
+  var RE_DATA_URL_SEGURA = /^data:(image\/(png|jpeg|jpg|gif|webp)|application\/pdf);base64,[A-Za-z0-9+/]+={0,2}$/;
+
+  function renderizarComprovanteBase64(container, dataUrl) {
+    container.textContent = '';
+    if (!dataUrl || !RE_DATA_URL_SEGURA.test(dataUrl)) {
+      container.innerHTML = '<div class="vazio">Comprovante em formato inválido ou não suportado.</div>';
+      return;
+    }
+    if (dataUrl.indexOf('data:application/pdf') === 0) {
+      var blobUrl = dataUrlParaBlobUrl(dataUrl);
+      var iframe = document.createElement('iframe');
+      iframe.src = blobUrl;
+      iframe.style.cssText = 'width:100%; height:480px; border:1px solid var(--border); border-radius:10px;';
+      container.appendChild(iframe);
+      var p = document.createElement('p');
+      p.style.marginTop = '10px';
+      var link = document.createElement('a');
+      link.href = blobUrl;
+      link.target = '_blank';
+      link.rel = 'noopener';
+      link.style.cssText = 'color:var(--accent); font-size:13px;';
+      link.textContent = 'Abrir em nova aba';
+      p.appendChild(link);
+      container.appendChild(p);
+      return;
+    }
+    var img = document.createElement('img');
+    img.src = dataUrl;
+    img.alt = 'Comprovante';
+    img.style.cssText = 'max-width:100%; border-radius:10px;';
+    container.appendChild(img);
+  }
+
   function dataUrlParaBlobUrl(dataUrl) {
     var partes = dataUrl.split(',');
     var mimeMatch = partes[0].match(/:(.*?);/);
@@ -2955,15 +2993,7 @@
         conteudo.innerHTML = '<div class="vazio">' + escapeHtml(res.data.erro || 'Comprovante não encontrado') + '</div>';
         return;
       }
-      var arquivo = res.data.comprovante_base64;
-      if (arquivo.startsWith('data:application/pdf')) {
-        var blobUrl = dataUrlParaBlobUrl(arquivo);
-        conteudo.innerHTML =
-          '<iframe src="' + blobUrl + '" style="width:100%; height:480px; border:1px solid var(--border); border-radius:10px;"></iframe>' +
-          '<p style="margin-top:10px;"><a href="' + blobUrl + '" target="_blank" style="color:var(--accent); font-size:13px;">Abrir em nova aba</a></p>';
-      } else {
-        conteudo.innerHTML = '<img src="' + arquivo + '" style="max-width:100%; border-radius:10px;">';
-      }
+      renderizarComprovanteBase64(conteudo, res.data.comprovante_base64);
     })
     .catch(function() { conteudo.innerHTML = '<div class="vazio">Erro ao carregar comprovante</div>'; });
   }
