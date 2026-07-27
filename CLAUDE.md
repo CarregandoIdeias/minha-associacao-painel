@@ -20,8 +20,8 @@ build dos outros.
 Não é mais um valor fixo apontando pra produção — cada arquivo (`index.html`,
 `portal.html`, `superadmin.html`, `sprint.html`) resolve `API_URL` em tempo
 de execução por `location.hostname`: `localhost`/`127.0.0.1` e qualquer
-domínio contendo `minha-associacao-staging` usam o backend de staging;
-qualquer outro hostname (produção) usa o backend de produção. Isso existe
+domínio contendo a palavra `staging` usam o backend de staging; qualquer
+outro hostname (produção) usa o backend de produção. Isso existe
 de propósito pra eliminar o risco antigo ("trocar pra testar local e
 esquecer de reverter antes de commitar", já tinha acontecido) — o código é
 **idêntico** em `main` e na branch `staging`, não tem nada pra lembrar de
@@ -31,8 +31,10 @@ reverter. Se copiar esse padrão pra um arquivo novo, manter a mesma função
 ## Ambiente de homologação (staging)
 
 Existe uma branch `staging` neste repositório (e no `backend`), publicada
-num projeto Vercel próprio (Production Branch = `staging`, domínio contendo
-`minha-associacao-staging`) apontando pro backend de staging no Render e
+num projeto Vercel próprio (Production Branch = `staging`, domínio
+`minha-associacao-painel-staging.vercel.app` — qualquer domínio contendo
+a palavra "staging" serve, a detecção não depende do nome exato do
+projeto) apontando pro backend de staging no Render e
 pro projeto Supabase de staging — três serviços totalmente isolados dos de
 produção, sem dado nem credencial compartilhada. Fluxo: mudar/testar em
 `staging` primeiro, só mesclar em `main` (produção) depois de validado ali.
