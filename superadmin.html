@@ -874,7 +874,15 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  var API_URL = 'https://minha-associacao-backend.onrender.com';
+  // Detecta o ambiente pelo hostname em vez de valor fixo -- ver
+  // painel/CLAUDE.md, seção "Ambiente de homologação".
+  var API_URL = (function() {
+    var h = location.hostname;
+    if (h === 'localhost' || h === '127.0.0.1' || h.indexOf('minha-associacao-staging') !== -1) {
+      return 'https://minha-associacao-backend-staging.onrender.com';
+    }
+    return 'https://minha-associacao-backend.onrender.com';
+  })();
   var estado = { token: null, nome: null, id: null, papel: null };
   var associacoesCache = [];
   var administradoresCache = [];

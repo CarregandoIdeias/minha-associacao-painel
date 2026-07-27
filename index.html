@@ -1411,7 +1411,19 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  var API_URL = 'https://minha-associacao-backend.onrender.com';
+  // Detecta o ambiente pelo hostname em vez de valor fixo -- ver
+  // painel/CLAUDE.md, seção "Ambiente de homologação": staging.vercel.app
+  // (ou localhost, testes locais) aponta pro backend de staging; qualquer
+  // outro domínio (produção) aponta pro backend de produção. Isso elimina o
+  // risco de esquecer de reverter o API_URL antes de commitar, que já
+  // aconteceu antes.
+  var API_URL = (function() {
+    var h = location.hostname;
+    if (h === 'localhost' || h === '127.0.0.1' || h.indexOf('minha-associacao-staging') !== -1) {
+      return 'https://minha-associacao-backend-staging.onrender.com';
+    }
+    return 'https://minha-associacao-backend.onrender.com';
+  })();
   var estado = { token: null, papel: null, nome: null, email: null };
 
   // Espelho do backend/utils/precos.js — só pra sugerir/exibir valores antes
