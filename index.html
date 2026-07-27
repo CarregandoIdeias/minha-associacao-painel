@@ -395,6 +395,23 @@
   .card-plano-info strong { color: var(--text); }
   .card-plano-info.vencido { color: var(--danger); font-weight: 600; }
 
+  /* ---------- Alerta inteligente de renovação (item de sprint 1.4) ---------- */
+  .card-plano.alerta-atencao { background: rgba(217,164,65,0.10); border: 1px solid var(--warning); }
+  .card-plano.alerta-alerta { background: rgba(217,164,65,0.16); border: 1px solid var(--warning); animation: pulseAlertaAmarelo 2.4s ease-in-out infinite; }
+  .card-plano.alerta-critico { background: rgba(231,76,60,0.14); border: 1px solid var(--danger); animation: pulseAlertaVermelho 1.4s ease-in-out infinite; }
+  .card-plano-titulo .icone-alerta { margin-right: 6px; }
+  .card-plano.alerta-atencao .card-plano-titulo,
+  .card-plano.alerta-alerta .card-plano-titulo { color: var(--warning); }
+  .card-plano.alerta-critico .card-plano-titulo { color: var(--danger); }
+  @keyframes pulseAlertaAmarelo {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(217,164,65,0.25); }
+    50% { box-shadow: 0 0 0 8px rgba(217,164,65,0); }
+  }
+  @keyframes pulseAlertaVermelho {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(231,76,60,0.3); }
+    50% { box-shadow: 0 0 0 10px rgba(231,76,60,0); }
+  }
+
   /* ---------- Tela de bloqueio (trial expirado) ---------- */
   #tela-trial-expirado { display: none; min-height: 100vh; align-items: center; justify-content: center; padding: 24px; }
   .bloqueio-caixa { max-width: 480px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 18px; padding: 40px 36px; text-align: center; box-shadow: var(--shadow); }
@@ -1537,17 +1554,33 @@
     .catch(function() {});
   }
 
+  // Classe de destaque crescente conforme o nível vindo de GET /plano
+  // (d.alerta.nivel: 'atencao'/'alerta'/'critico') -- ver utils/precos.js
+  // (alertaAssinatura) no backend. '' quando não há alerta (fora da janela
+  // configurada, ver item de sprint 1.4).
+  function classeAlertaPlano(alerta) {
+    if (!alerta) return '';
+    return ' alerta-' + alerta.nivel;
+  }
+
   function renderizarBlocoPlano(d) {
     var bloco = document.getElementById('bloco-plano-dashboard');
     bloco.style.display = 'block';
+    var alerta = d.alerta;
 
     if (d.plano === 'trial') {
+      var tituloTrial = 'Você está utilizando o Plano Trial';
+      var infoTrial = 'Data de expiração: <strong>' + new Date(d.trial_expira_em).toLocaleDateString('pt-BR') + '</strong>. Após esse período será necessário contratar um plano para continuar utilizando a plataforma.';
+      if (alerta) {
+        tituloTrial = '⚠️ Sua avaliação termina em ' + alerta.dias_restantes + (alerta.dias_restantes === 1 ? ' dia' : ' dias');
+        infoTrial = 'Evite a suspensão do acesso à plataforma contratando um plano antes do fim do período de avaliação.';
+      }
       bloco.innerHTML =
-        '<div class="card-plano trial">' +
+        '<div class="card-plano trial' + classeAlertaPlano(alerta) + '">' +
           '<div>' +
-            '<div class="card-plano-titulo">Você está utilizando o Plano Trial<span class="badge-plano">Trial</span></div>' +
+            '<div class="card-plano-titulo">' + tituloTrial + '<span class="badge-plano">Trial</span></div>' +
             '<div class="card-plano-contador" id="contador-trial"></div>' +
-            '<div class="card-plano-info">Data de expiração: <strong>' + new Date(d.trial_expira_em).toLocaleDateString('pt-BR') + '</strong>. Após esse período será necessário contratar um plano para continuar utilizando a plataforma.</div>' +
+            '<div class="card-plano-info">' + infoTrial + '</div>' +
           '</div>' +
           (estado.papel === 'admin' ? '<button class="btn" id="btn-contratar-dashboard">Contratar Plano</button>' : '') +
         '</div>';
@@ -1561,17 +1594,25 @@
     pararContadorTrial();
     var rotulosStatus = { ativa: 'Plano ativo', vencendo: 'Vencendo em breve', vencida: 'Vencida', bloqueada: 'Bloqueado' };
     var info = INFO_PLANO[d.plano] || { nome: d.plano, porte: '' };
+
+    var tituloPago = 'Seu Plano Atual';
+    var infoPago = info.porte + '<br>' +
+      'Status: <strong>' + (rotulosStatus[d.status] || d.status) + '</strong> · ' +
+      'Próxima renovação: <strong>' + (d.vencimento_assinatura ? new Date(d.vencimento_assinatura).toLocaleDateString('pt-BR') : '—') + '</strong> · ' +
+      'Mensalidade: <strong>' + formatarMoeda(d.valor_mensalidade) + '</strong>';
+    if (alerta) {
+      tituloPago = alerta.dias_restantes <= 0
+        ? '⚠️ Sua assinatura venceu' + (alerta.dias_restantes < 0 ? ' há ' + Math.abs(alerta.dias_restantes) + (Math.abs(alerta.dias_restantes) === 1 ? ' dia' : ' dias') : ' hoje')
+        : '⚠️ Sua assinatura vence em ' + alerta.dias_restantes + (alerta.dias_restantes === 1 ? ' dia' : ' dias');
+      infoPago = 'Evite a suspensão do acesso à plataforma realizando a renovação antes da data de vencimento.';
+    }
     bloco.innerHTML =
-      '<div class="card-plano pago">' +
+      '<div class="card-plano pago' + classeAlertaPlano(alerta) + '">' +
         '<div>' +
-          '<div class="card-plano-titulo">Seu Plano Atual<span class="badge-plano">' + info.nome + '</span></div>' +
-          '<div class="card-plano-info">' + info.porte + '<br>' +
-            'Status: <strong>' + (rotulosStatus[d.status] || d.status) + '</strong> · ' +
-            'Próxima renovação: <strong>' + (d.vencimento_assinatura ? new Date(d.vencimento_assinatura).toLocaleDateString('pt-BR') : '—') + '</strong> · ' +
-            'Mensalidade: <strong>' + formatarMoeda(d.valor_mensalidade) + '</strong>' +
-          '</div>' +
+          '<div class="card-plano-titulo">' + tituloPago + '<span class="badge-plano">' + info.nome + '</span></div>' +
+          '<div class="card-plano-info">' + infoPago + '</div>' +
         '</div>' +
-        (estado.papel === 'admin' ? '<button class="btn btn-ghost" id="btn-gerenciar-plano">Gerenciar Plano</button>' : '') +
+        (estado.papel === 'admin' ? '<button class="btn' + (alerta ? '' : ' btn-ghost') + '" id="btn-gerenciar-plano">' + (alerta ? 'Renovar Plano' : 'Gerenciar Plano') + '</button>' : '') +
       '</div>';
     if (estado.papel === 'admin') {
       document.getElementById('btn-gerenciar-plano').onclick = abrirModalContratarPlano;

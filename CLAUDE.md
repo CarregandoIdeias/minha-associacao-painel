@@ -375,6 +375,31 @@ reaproveitando os padrões visuais existentes (`.badge`, `.painel`,
 `confirmarAcao()`, `.toast`). Consome `GET/POST/PUT/DELETE /sprint` e
 `PATCH /sprint/:id/status` (ver `backend/CLAUDE.md`).
 
+## Menu de perfil reorganizado + alerta inteligente de renovação (27/07/2026, itens de sprint 1.2 e 1.4)
+
+`index.html`: tema saiu da sidebar (`.sidebar-footer`/`.theme-toggle`
+removidos) e entrou no dropdown do header (`#dropdown-perfil`), que agora
+tem Meu Perfil / Alterar Senha / Preferências (atalho pra
+`ativarAba('configuracoes')`, só visível pra `admin`, mesmo `style.display`
+gating de `#aba-configuracoes`) / Alternar Tema (ícones sol/lua
+alternando, `#icone-tema-claro`/`#icone-tema-escuro`) / Sair. O botão do
+avatar (`#btn-abrir-perfil`) manteve nome/papel visíveis — `.app-header-avatar-btn
+.nome` precisou de `color: var(--text)` explícito porque, por estar dentro
+de um `<button>`, o navegador não herdava a cor do tema (ficava preto
+ilegível no tema escuro até essa correção).
+
+`#bloco-plano-dashboard` (`renderizarBlocoPlano()`) ganhou destaque
+crescente quando `GET /plano` devolve `alerta` (ver `backend/CLAUDE.md`,
+seção "Alerta inteligente de renovação do plano"): classes
+`.card-plano.alerta-atencao`/`.alerta-alerta`/`.alerta-critico`
+(`classeAlertaPlano()`), as duas últimas com animação de pulse
+(`pulseAlertaAmarelo`/`pulseAlertaVermelho`, cor combina com o nível).
+Título e texto do card mudam pra mensagem de alerta ("⚠️ Sua assinatura
+vence em N dias" / "venceu há N dias", ou a versão de trial "Sua avaliação
+termina em N dias") e o botão vira "Renovar Plano" (mesmo modal de
+contratação de sempre, só texto/estilo mudam). Sem alerta, o card continua
+exatamente como antes (informativo, sem urgência).
+
 ## Convenções
 
 - Sem framework/bundler — tudo inline (CSS e JS dentro do próprio HTML).

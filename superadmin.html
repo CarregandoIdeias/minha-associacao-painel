@@ -751,6 +751,18 @@
       <div class="campo" style="flex:1;"><label>Vencimento da assinatura</label><input type="date" id="assoc-vencimento-assinatura"></div>
     </div>
     <div class="campo">
+      <label>Alertar vencimento da assinatura com quantos dias de antecedência?</label>
+      <select id="assoc-dias-alerta-assinatura">
+        <option value="30">30 dias</option>
+        <option value="20">20 dias</option>
+        <option value="15">15 dias</option>
+        <option value="10">10 dias</option>
+        <option value="7">7 dias</option>
+        <option value="3">3 dias</option>
+      </select>
+      <p style="font-size:12.5px; color:var(--text-muted); margin-top:6px;">Define quando o card de alerta de renovação começa a aparecer no Dashboard da associação.</p>
+    </div>
+    <div class="campo">
       <label>Forma de cobrança</label>
       <select id="assoc-forma-cobranca">
         <option value="">—</option>
@@ -1456,6 +1468,7 @@
     document.getElementById('assoc-tipo').value = 'outra';
     document.getElementById('assoc-plano').value = 'trial';
     document.getElementById('assoc-trial-dias').value = '15';
+    document.getElementById('assoc-dias-alerta-assinatura').value = '30';
     document.getElementById('assoc-forma-cobranca').value = '';
     resetarLogoPreview(null);
     atualizarPlaceholderMensalidade(0);
@@ -1488,6 +1501,7 @@
       document.getElementById('assoc-cpf-responsavel').value = (a.admin && a.admin.cpf) || '';
       document.getElementById('assoc-plano').value = a.plano || 'trial';
       document.getElementById('assoc-trial-dias').value = a.trial_dias || 15;
+      document.getElementById('assoc-dias-alerta-assinatura').value = a.dias_alerta_assinatura || 30;
       document.getElementById('assoc-valor-mensalidade').value = a.valor_mensalidade_manual != null ? a.valor_mensalidade_manual : '';
       document.getElementById('assoc-vencimento-assinatura').value = a.vencimento_assinatura ? a.vencimento_assinatura.substring(0, 10) : '';
       document.getElementById('assoc-forma-cobranca').value = a.forma_cobranca || '';
@@ -1540,6 +1554,7 @@
     var vencimentoAssinatura = document.getElementById('assoc-vencimento-assinatura').value;
     var formaCobranca = document.getElementById('assoc-forma-cobranca').value;
     var trialDias = document.getElementById('assoc-trial-dias').value;
+    var diasAlertaAssinatura = document.getElementById('assoc-dias-alerta-assinatura').value;
 
     if (!nome) { mostrarToast('Informe o nome da associação', true); return; }
     if (!idEdicao && !email) { mostrarToast('Informe o e-mail da associação (será o login do admin)', true); return; }
@@ -1548,7 +1563,8 @@
       cep: cep, site: site, logo_base64: logoSelecionadaBase64,
       plano: plano, valor_mensalidade_manual: valorMensalidadeManual ? parseFloat(valorMensalidadeManual) : null,
       vencimento_assinatura: vencimentoAssinatura || null, forma_cobranca: formaCobranca || null,
-      cpf: cpf || null, trial_dias: trialDias ? parseInt(trialDias, 10) : null
+      cpf: cpf || null, trial_dias: trialDias ? parseInt(trialDias, 10) : null,
+      dias_alerta_assinatura: diasAlertaAssinatura ? parseInt(diasAlertaAssinatura, 10) : null
     };
 
     if (idEdicao) {
