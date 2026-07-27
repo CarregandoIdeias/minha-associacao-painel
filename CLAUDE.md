@@ -297,6 +297,20 @@ Corrigido nos 3 arquivos, sempre com o mesmo padrão — validar com regex estri
 
 Também: `painel/vercel.json` (novo) adiciona cabeçalhos de segurança via headers da Vercel, incluindo uma CSP. Ela mantém `'unsafe-inline'` em `script-src` porque todo o JS é inline nos HTML (tirar isso exigiria mover pra arquivo externo, mudança maior, não feita); o que a CSP resolve de verdade é restringir `connect-src`/`img-src`/`frame-ancestors`, cortando exfiltração de dado pra domínio externo caso algum XSS novo apareça no futuro.
 
+## Sprint (backlog de melhorias/bugs) — novo (27/07/2026)
+
+Arquivo novo `sprint.html`, autocontido, mesmo padrão dos outros
+(`superadmin.html`/`portal.html`): login e sessão próprios
+(`sessao_sprint`, isolada das demais). Login reaproveita
+`POST /superadmin/login` (mesma conta de super-admin) — não é rota nova
+de autenticação, só um novo consumidor da existente. Card novo em
+`intranet.html` linkando pra cá. Sem sidebar (página única, não precisou
+do padrão de navegação das outras) — header simples + KPIs + tabela
+filtrável + modal de criar/editar + modal de detalhe/mudança de status,
+reaproveitando os padrões visuais existentes (`.badge`, `.painel`,
+`confirmarAcao()`, `.toast`). Consome `GET/POST/PUT/DELETE /sprint` e
+`PATCH /sprint/:id/status` (ver `backend/CLAUDE.md`).
+
 ## Convenções
 
 - Sem framework/bundler — tudo inline (CSS e JS dentro do próprio HTML).
