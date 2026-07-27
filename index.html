@@ -143,30 +143,6 @@
   }
   .sidebar-overlay.aberto { display: block; }
 
-  .sidebar-footer {
-    margin-top: auto;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding-top: 16px;
-    border-top: 1px solid var(--border);
-  }
-
-  .theme-toggle {
-    background: var(--accent-soft);
-    border: none;
-    border-radius: 10px;
-    width: 38px;
-    height: 38px;
-    font-size: 16px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--accent);
-    flex-shrink: 0;
-  }
-
   .content-area {
     flex: 1;
     min-width: 0;
@@ -216,7 +192,7 @@
     border-radius: 12px;
   }
   .app-header-avatar-btn:hover { background: var(--accent-soft); }
-  .app-header-avatar-btn .nome { font-size: 14px; font-weight: 600; text-align: left; }
+  .app-header-avatar-btn .nome { font-size: 14px; font-weight: 600; text-align: left; color: var(--text); }
   .app-header-avatar-btn .papel { font-size: 12px; color: var(--text-muted); text-align: left; }
   .app-header-avatar-btn .icone-caret { width: 14px; height: 14px; color: var(--text-muted); flex-shrink: 0; }
 
@@ -650,7 +626,6 @@
     .campo input, .campo select, .campo textarea { font-size: 16px; }
     .app-header { flex-wrap: wrap; row-gap: 12px; padding-bottom: 16px; margin-bottom: 18px; }
     .app-header-saudacao { font-size: 17px; }
-    .app-header-avatar-btn .nome, .app-header-avatar-btn .papel { max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   }
 
   @media (max-width: 640px) {
@@ -698,8 +673,6 @@
     .campo input, .campo select, .campo textarea { padding: 9px 11px; font-size: 14px; border-radius: 8px; }
     .btn { padding: 8px 14px; font-size: 12px; border-radius: 8px; }
     .app-header-email { display: none; }
-    .app-header-avatar-btn .papel { display: none; }
-    .app-header-avatar-btn .nome { max-width: 100px; }
     .dashboard-cards-apoio { grid-template-columns: 1fr; }
   }
 
@@ -855,9 +828,6 @@
       Configurações
     </button>
 
-    <div class="sidebar-footer">
-      <button class="theme-toggle" id="btn-tema" title="Alternar tema">☀</button>
-    </div>
   </nav>
 
   <div class="content-area">
@@ -871,7 +841,7 @@
         </div>
       </div>
       <div class="app-header-perfil">
-        <button class="app-header-avatar-btn" id="btn-abrir-perfil">
+        <button class="app-header-avatar-btn" id="btn-abrir-perfil" title="Menu do perfil">
           <div class="avatar-iniciais" id="app-header-avatar">--</div>
           <div>
             <div class="nome" id="app-header-nome">Usuário</div>
@@ -887,6 +857,15 @@
           <button id="btn-menu-alterar-senha">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
             Alterar Senha
+          </button>
+          <button id="btn-menu-preferencias">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            Preferências
+          </button>
+          <button id="btn-menu-tema">
+            <svg id="icone-tema-claro" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            <svg id="icone-tema-escuro" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            <span id="texto-menu-tema">Tema Escuro</span>
           </button>
           <hr>
           <button class="perigo" id="btn-sair">
@@ -1803,13 +1782,15 @@
   // ---------- Tema ----------
   function aplicarTema(tema) {
     document.documentElement.setAttribute('data-theme', tema);
-    document.getElementById('btn-tema').textContent = tema === 'dark' ? '☾' : '☀';
+    document.getElementById('icone-tema-claro').style.display = tema === 'dark' ? 'none' : '';
+    document.getElementById('icone-tema-escuro').style.display = tema === 'dark' ? '' : 'none';
+    document.getElementById('texto-menu-tema').textContent = tema === 'dark' ? 'Tema Claro' : 'Tema Escuro';
     localStorage.setItem('tema-preferido', tema);
   }
   var temaSalvo = localStorage.getItem('tema-preferido') || 'light';
   aplicarTema(temaSalvo);
 
-  document.getElementById('btn-tema').onclick = function() {
+  document.getElementById('btn-menu-tema').onclick = function() {
     var atual = document.documentElement.getAttribute('data-theme');
     aplicarTema(atual === 'dark' ? 'light' : 'dark');
     if (associadosCache.length) atualizarGraficosAssociados(associadosCache);
@@ -2074,6 +2055,10 @@
     ativarAba('meu-perfil');
     carregarMeuPerfil();
   };
+  document.getElementById('btn-menu-preferencias').onclick = function() {
+    document.getElementById('dropdown-perfil').classList.remove('aberto');
+    ativarAba('configuracoes');
+  };
   document.getElementById('btn-menu-alterar-senha').onclick = function() {
     document.getElementById('dropdown-perfil').classList.remove('aberto');
     abrirModalAlterarSenha();
@@ -2089,6 +2074,9 @@
     if (estado.papel === 'admin') {
       document.getElementById('aba-usuarios').style.display = 'flex';
       document.getElementById('aba-configuracoes').style.display = 'flex';
+      document.getElementById('btn-menu-preferencias').style.display = 'flex';
+    } else {
+      document.getElementById('btn-menu-preferencias').style.display = 'none';
     }
     ativarAba('dashboard');
     carregarIdentidadeAssociacao();
