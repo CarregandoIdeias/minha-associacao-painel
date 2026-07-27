@@ -15,12 +15,29 @@ Admin), sem build step, publicados direto no Vercel. Cada um tem login,
 sessão (`localStorage`) e layout próprios — nenhum depende de import ou
 build dos outros.
 
-## Cuidado ao testar localmente
+## API_URL detecta o ambiente pelo hostname (27/07/2026)
 
-`API_URL` (topo do `<script>` de cada arquivo) aponta para produção por
-padrão. Se trocar para testar contra um backend local
-(`http://localhost:3000`), **reverter antes de commitar** — é fácil
-esquecer e dar push com a produção apontando para localhost.
+Não é mais um valor fixo apontando pra produção — cada arquivo (`index.html`,
+`portal.html`, `superadmin.html`, `sprint.html`) resolve `API_URL` em tempo
+de execução por `location.hostname`: `localhost`/`127.0.0.1` e qualquer
+domínio contendo `minha-associacao-staging` usam o backend de staging;
+qualquer outro hostname (produção) usa o backend de produção. Isso existe
+de propósito pra eliminar o risco antigo ("trocar pra testar local e
+esquecer de reverter antes de commitar", já tinha acontecido) — o código é
+**idêntico** em `main` e na branch `staging`, não tem nada pra lembrar de
+reverter. Se copiar esse padrão pra um arquivo novo, manter a mesma função
+— nunca voltar a um valor fixo.
+
+## Ambiente de homologação (staging)
+
+Existe uma branch `staging` neste repositório (e no `backend`), publicada
+num projeto Vercel próprio (Production Branch = `staging`, domínio contendo
+`minha-associacao-staging`) apontando pro backend de staging no Render e
+pro projeto Supabase de staging — três serviços totalmente isolados dos de
+produção, sem dado nem credencial compartilhada. Fluxo: mudar/testar em
+`staging` primeiro, só mesclar em `main` (produção) depois de validado ali.
+Detalhe completo (como recriar o schema de staging do zero) em
+`backend/supabase/README.md` e `backend/CLAUDE.md`.
 
 ## Contrato com o backend
 
