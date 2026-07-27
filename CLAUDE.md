@@ -41,6 +41,29 @@ produção, sem dado nem credencial compartilhada. Fluxo: mudar/testar em
 Detalhe completo (como recriar o schema de staging do zero) em
 `backend/supabase/README.md` e `backend/CLAUDE.md`.
 
+**`vercel.json` precisa liberar os dois backends na CSP** — `connect-src`
+lista tanto `https://minha-associacao-backend.onrender.com` quanto
+`https://minha-associacao-backend-staging.onrender.com`. Sem isso, o login
+em staging falha com "Não foi possível conectar ao servidor" **sem erro
+nenhum de CORS** — é a CSP do próprio navegador bloqueando a chamada antes
+mesmo de chegar ao backend (bug real encontrado ao montar o staging: a
+mensagem de erro engana, parece problema de rede/CORS, mas o Console do
+navegador mostra claramente "violates the following Content Security
+Policy directive: connect-src"). Se criar um domínio de staging novo no
+futuro (ex. terceiro ambiente), lembrar de adicionar aqui também.
+
+**Runbook resumido pra recriar o painel de staging no Vercel:**
+1. Novo projeto Vercel, mesmo repositório, nome contendo "staging" (o
+   domínio gerado precisa ter essa palavra, não precisa ser exato).
+2. Settings → Environments → Production → trocar "Branch Tracking" de
+   `main` para `staging` (esse campo **não fica** em Settings → Git nem em
+   Build and Deployment, mudou de lugar na Vercel — fica em
+   "Environments"). Salvar.
+3. Isso não promove sozinho o deploy já existente — ir em Deployments,
+   achar o deploy da branch `staging` (badge "Preview") e usar "Promote to
+   Production" nos "...". Deploys seguintes da branch `staging` já vão
+   direto como Production automaticamente.
+
 ## Contrato com o backend
 
 - Login é só e-mail + senha (sem código de associação). Resposta de
