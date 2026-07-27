@@ -281,6 +281,22 @@ Backend: `GET /superadmin/admins` e `GET /superadmin/associacoes` aceitam `?limi
 
 **Bug real cometido e corrigido nesta sessão**: esqueci `overflow-x: auto` em `#tabela-contratacoes-container` (mesmo bug documentado em `feedback` anteriores sobre `#tabela-administradores-container`) — toda tabela nova em `superadmin.html` precisa entrar na lista de seletores dessa regra, é fácil esquecer.
 
+**Bug real, achado pelo usuário depois do deploy**: o QR Code do modal de contratação estourava a largura da tela. A regra de tamanho do SVG (`#pix-qrcode-container svg { width: 220px; height: 220px; }`) só cobria o container antigo de cobrança do associado — o container novo do plano (`#pix-qrcode-container-plano`) ficou de fora, e o `qrcode-generator` sem essa regra renderiza no tamanho natural do SVG. Corrigido cobrindo os dois seletores, com `width/height: min(220px, 60vw)` pra também não estourar em tela estreita. **Lição**: qualquer novo container de QR Code (ou qualquer elemento que reaproveita uma função de render existente) precisa entrar explicitamente nos seletores CSS que a função original dependia — copiar a chamada da função não copia o CSS de suporte.
+
+## XSS armazenado corrigido — parar de montar HTML por concatenação com dado do banco (27/07/2026)
+
+Achado numa auditoria de segurança pedida pelo usuário (confirmado com PoC antes de corrigir — detalhe completo em `backend/CLAUDE.md`). Os pontos abaixo montavam `<img src="...">`/`<a href="...">` por concatenação de string com um valor vindo direto do banco (comprovante, foto, logo). Como o backend só validava o prefixo (`startsWith('data:image/')`), um valor com aspas escapava do atributo e executava script na sessão de quem abrisse a tela — ex.: um comprovante enviado por um admin de associação rodava script na sessão do **Super Admin** ao ele abrir a tela de aprovação.
+
+Corrigido nos 3 arquivos, sempre com o mesmo padrão — validar com regex estrita (`RE_DATA_URL_SEGURA`/`RE_IMAGEM_SEGURA`, espelha `utils/validacao.js` do backend) e atribuir via `createElement` + `.src`/`.href`, nunca `innerHTML` com o valor interpolado:
+
+- `superadmin.html`: `renderizarArquivoBase64()` (comprovante de contratação de plano, logo da associação — antes tinha 3 pontos diferentes de `<img src="...">`, unificados nessa função).
+- `index.html`: `renderizarComprovanteBase64()` (comprovante de cobrança do associado, cobre imagem e PDF via iframe/blob).
+- `portal.html`: `renderizarFotoBase64()` (foto de perfil do associado).
+
+**Se for adicionar um novo lugar que renderiza imagem/PDF vindo do banco**: reaproveitar uma dessas funções (ou copiar o padrão), nunca voltar a escrever `'<img src="' + valor + '">'`. A validação de formato no backend é a primeira camada, mas o front não pode confiar cegamente nela — as duas existem de propósito.
+
+Também: `painel/vercel.json` (novo) adiciona cabeçalhos de segurança via headers da Vercel, incluindo uma CSP. Ela mantém `'unsafe-inline'` em `script-src` porque todo o JS é inline nos HTML (tirar isso exigiria mover pra arquivo externo, mudança maior, não feita); o que a CSP resolve de verdade é restringir `connect-src`/`img-src`/`frame-ancestors`, cortando exfiltração de dado pra domínio externo caso algum XSS novo apareça no futuro.
+
 ## Convenções
 
 - Sem framework/bundler — tudo inline (CSS e JS dentro do próprio HTML).
