@@ -466,7 +466,17 @@
   .badge.aguardando_confirmacao { background: rgba(52,152,219,0.14); color: #3498DB; }
   .badge.vencendo_em_breve { background: rgba(217,164,65,0.16); color: var(--warning); }
 
-  #pix-qrcode-container svg { width: 220px; height: 220px; }
+  /* O qrcode-generator devolve um SVG sem tamanho fixo -- sem esta regra ele
+     é renderizado no tamanho natural e estoura a largura do modal. Vale para
+     os dois QRs (cobrança do associado e contratação de plano); o
+     min() garante que também caiba em tela estreita. */
+  #pix-qrcode-container svg,
+  #pix-qrcode-container-plano svg {
+    width: min(220px, 60vw);
+    height: min(220px, 60vw);
+    max-width: 100%;
+    display: block;
+  }
 
   select {
     width: 100%;
