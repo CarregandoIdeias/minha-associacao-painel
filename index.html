@@ -561,6 +561,31 @@
   .modal h3 { margin-bottom: 18px; font-size: 17px; }
   .modal-actions { display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end; }
 
+  /* ---------- Ficha do associado (modal maior, com abas e seções) ---------- */
+  .modal-ficha { max-width: 620px; max-height: 88vh; overflow-y: auto; }
+  .abas-ficha { display: flex; gap: 6px; border-bottom: 1px solid var(--border); margin-bottom: 18px; }
+  .aba-ficha {
+    background: none; border: none; padding: 10px 4px; margin-right: 14px;
+    font-family: inherit; font-size: 13.5px; font-weight: 600; color: var(--text-muted);
+    cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px;
+  }
+  .aba-ficha:hover { color: var(--text); }
+  .aba-ficha.ativa { color: var(--accent); border-bottom-color: var(--accent); }
+  .secao-ficha { margin-bottom: 22px; }
+  .secao-ficha:last-child { margin-bottom: 0; }
+  .secao-ficha-titulo {
+    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em;
+    color: var(--accent); margin-bottom: 12px; padding-bottom: 6px; border-bottom: 1px solid var(--border);
+  }
+  .filtros-ficha { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+  .btn-pequeno.ativo { background: var(--accent); color: #0A0A0A; }
+  .item-ficha {
+    display: flex; justify-content: space-between; align-items: center; gap: 10px;
+    padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; margin-bottom: 8px;
+  }
+  .item-ficha-titulo { font-size: 13.5px; font-weight: 600; }
+  .item-ficha-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
   .toast {
     position: fixed;
     bottom: 24px;
@@ -1163,44 +1188,113 @@
   </div>
 </div>
 
-<!-- ===== MODAL NOVO/EDITAR ASSOCIADO ===== -->
+<!-- ===== MODAL FICHA DO ASSOCIADO (NOVO/EDITAR) ===== -->
 <div class="overlay" id="overlay-modal">
-  <div class="modal">
+  <div class="modal modal-ficha">
     <h3 id="titulo-modal-associado">Novo associado</h3>
     <input type="hidden" id="editar-associado-id" value="">
-    <div class="campo">
-      <label>Nome completo</label>
-      <input type="text" id="novo-nome">
+
+    <div class="abas-ficha" id="abas-ficha-associado" style="display:none;">
+      <button type="button" class="aba-ficha ativa" id="btn-aba-ficha-dados">Dados</button>
+      <button type="button" class="aba-ficha" id="btn-aba-ficha-financeiro">Financeiro</button>
+      <button type="button" class="aba-ficha" id="btn-aba-ficha-comunicados">Comunicados</button>
     </div>
-    <div class="campo" id="campo-novo-email">
-      <label>E-mail (login do associado)</label>
-      <input type="email" id="novo-email" placeholder="associado@exemplo.com">
+
+    <div id="conteudo-aba-ficha-dados">
+      <div class="secao-ficha">
+        <h4 class="secao-ficha-titulo">Dados pessoais</h4>
+        <div class="campo">
+          <label>Nome completo</label>
+          <input type="text" id="novo-nome">
+        </div>
+        <div class="campo" id="campo-novo-email">
+          <label>E-mail (login do associado)</label>
+          <input type="email" id="novo-email" placeholder="associado@exemplo.com">
+        </div>
+        <div class="campo-linha">
+          <div class="campo"><label>CPF</label><input type="text" id="novo-cpf" placeholder="000.000.000-00"></div>
+          <div class="campo"><label>RG</label><input type="text" id="novo-rg" placeholder="00.000.000-0"></div>
+        </div>
+        <div class="campo">
+          <label>Telefone</label>
+          <input type="text" id="novo-telefone" placeholder="(00) 00000-0000">
+        </div>
+      </div>
+
+      <div class="secao-ficha">
+        <h4 class="secao-ficha-titulo">Endereço</h4>
+        <div class="campo-linha">
+          <div class="campo"><label>CEP</label><input type="text" id="novo-endereco-cep" placeholder="00000-000"></div>
+          <div class="campo"><label>Cidade</label><input type="text" id="novo-endereco-cidade"></div>
+          <div class="campo" style="flex:0 0 70px; min-width:70px;"><label>UF</label><input type="text" id="novo-endereco-estado" maxlength="2" style="text-transform:uppercase;"></div>
+        </div>
+        <div class="campo">
+          <label>Logradouro</label>
+          <input type="text" id="novo-endereco-logradouro">
+        </div>
+        <div class="campo-linha">
+          <div class="campo"><label>Número</label><input type="text" id="novo-endereco-numero"></div>
+          <div class="campo"><label>Complemento</label><input type="text" id="novo-endereco-complemento"></div>
+        </div>
+        <div class="campo">
+          <label>Bairro</label>
+          <input type="text" id="novo-endereco-bairro">
+        </div>
+      </div>
+
+      <div class="secao-ficha">
+        <h4 class="secao-ficha-titulo">Plano e situação</h4>
+        <div class="campo">
+          <label>Plano/Categoria contratado (opcional)</label>
+          <input type="text" id="novo-categoria" placeholder="ex: sócio patrimonial">
+        </div>
+        <div class="campo" id="campo-status-associado" style="display:none;">
+          <label>Situação</label>
+          <select id="novo-status">
+            <option value="ativo">Ativo</option>
+            <option value="inadimplente">Inadimplente</option>
+            <option value="suspenso">Suspenso</option>
+            <option value="desligado">Desligado</option>
+          </select>
+        </div>
+        <div class="campo" id="campo-data-cadastro-associado" style="display:none;">
+          <label>Data de cadastro</label>
+          <input type="text" id="novo-data-cadastro" readonly>
+        </div>
+      </div>
+
+      <div class="secao-ficha">
+        <h4 class="secao-ficha-titulo">Observações</h4>
+        <div class="campo">
+          <textarea id="novo-observacao" placeholder="anotações internas sobre esse associado"></textarea>
+        </div>
+      </div>
     </div>
-    <div class="campo">
-      <label>CPF</label>
-      <input type="text" id="novo-cpf" placeholder="000.000.000-00">
+
+    <div id="conteudo-aba-ficha-financeiro" style="display:none;">
+      <div class="filtros-ficha">
+        <select id="filtro-ficha-financeiro-status">
+          <option value="">Todos os status</option>
+          <option value="pendente">Pendente</option>
+          <option value="pago">Pago</option>
+          <option value="cancelado">Cancelado</option>
+        </select>
+        <select id="filtro-ficha-financeiro-ano">
+          <option value="">Todos os anos</option>
+        </select>
+      </div>
+      <div id="lista-ficha-financeiro"></div>
     </div>
-    <div class="campo">
-      <label>Telefone</label>
-      <input type="text" id="novo-telefone" placeholder="(00) 00000-0000">
+
+    <div id="conteudo-aba-ficha-comunicados" style="display:none;">
+      <div class="filtros-ficha">
+        <button type="button" class="btn-pequeno ativo" id="btn-filtro-comunicados-todos">Todos</button>
+        <button type="button" class="btn-pequeno" id="btn-filtro-comunicados-lidos">Lidos</button>
+        <button type="button" class="btn-pequeno" id="btn-filtro-comunicados-nao-lidos">Não lidos</button>
+      </div>
+      <div id="lista-ficha-comunicados"></div>
     </div>
-    <div class="campo">
-      <label>Categoria (opcional)</label>
-      <input type="text" id="novo-categoria" placeholder="ex: sócio patrimonial">
-    </div>
-    <div class="campo">
-      <label>Observação (opcional)</label>
-      <textarea id="novo-observacao" placeholder="anotações internas sobre esse associado"></textarea>
-    </div>
-    <div class="campo" id="campo-status-associado" style="display:none;">
-      <label>Status</label>
-      <select id="novo-status">
-        <option value="ativo">Ativo</option>
-        <option value="inadimplente">Inadimplente</option>
-        <option value="suspenso">Suspenso</option>
-        <option value="desligado">Desligado</option>
-      </select>
-    </div>
+
     <div class="modal-actions">
       <button class="btn btn-ghost" id="btn-cancelar-modal">Cancelar</button>
       <button class="btn" id="btn-salvar-associado">Salvar</button>
@@ -2529,14 +2623,144 @@
     document.getElementById('editar-associado-id').value = associado.id;
     document.getElementById('novo-nome').value = associado.nome_completo;
     document.getElementById('novo-cpf').value = associado.cpf || '';
+    document.getElementById('novo-rg').value = associado.rg || '';
     document.getElementById('novo-telefone').value = associado.telefone || '';
+    document.getElementById('novo-endereco-cep').value = associado.endereco_cep || '';
+    document.getElementById('novo-endereco-logradouro').value = associado.endereco_logradouro || '';
+    document.getElementById('novo-endereco-numero').value = associado.endereco_numero || '';
+    document.getElementById('novo-endereco-complemento').value = associado.endereco_complemento || '';
+    document.getElementById('novo-endereco-bairro').value = associado.endereco_bairro || '';
+    document.getElementById('novo-endereco-cidade').value = associado.endereco_cidade || '';
+    document.getElementById('novo-endereco-estado').value = associado.endereco_estado || '';
     document.getElementById('novo-categoria').value = associado.categoria || '';
     document.getElementById('novo-observacao').value = associado.observacao || '';
     document.getElementById('novo-status').value = associado.status;
     document.getElementById('campo-status-associado').style.display = 'block';
     document.getElementById('campo-novo-email').style.display = 'none';
+    document.getElementById('novo-data-cadastro').value = formatarData(associado.data_ingresso);
+    document.getElementById('campo-data-cadastro-associado').style.display = 'block';
+
+    document.getElementById('abas-ficha-associado').style.display = 'flex';
+    ativarAbaFicha('dados');
+    fichaAssociadoAtual = associado;
     document.getElementById('overlay-modal').style.display = 'flex';
   }
+
+  // ---------- Abas da ficha (Dados / Financeiro / Comunicados) ----------
+  var fichaAssociadoAtual = null;
+  function ativarAbaFicha(aba) {
+    ['dados', 'financeiro', 'comunicados'].forEach(function(nome) {
+      document.getElementById('conteudo-aba-ficha-' + nome).style.display = nome === aba ? 'block' : 'none';
+      document.getElementById('btn-aba-ficha-' + nome).classList.toggle('ativa', nome === aba);
+    });
+    if (aba === 'financeiro' && fichaAssociadoAtual) carregarFichaFinanceiro(fichaAssociadoAtual.id);
+    if (aba === 'comunicados' && fichaAssociadoAtual) carregarFichaComunicados(fichaAssociadoAtual.id, filtroFichaComunicadosAtivo);
+  }
+  document.getElementById('btn-aba-ficha-dados').onclick = function() { ativarAbaFicha('dados'); };
+  document.getElementById('btn-aba-ficha-financeiro').onclick = function() { ativarAbaFicha('financeiro'); };
+  document.getElementById('btn-aba-ficha-comunicados').onclick = function() { ativarAbaFicha('comunicados'); };
+
+  // ---------- Aba Financeiro (item de sprint 2.2) ----------
+  var fichaFinanceiroCache = [];
+  function carregarFichaFinanceiro(associadoId) {
+    var container = document.getElementById('lista-ficha-financeiro');
+    container.innerHTML = '<div class="vazio">Carregando...</div>';
+    fetch(API_URL + '/cobrancas?associado_id=' + associadoId, {
+      headers: { 'Authorization': 'Bearer ' + estado.token }
+    })
+    .then(function(resp) { return resp.json(); })
+    .then(function(lista) {
+      fichaFinanceiroCache = lista;
+      var seletorAno = document.getElementById('filtro-ficha-financeiro-ano');
+      var anoSelecionado = seletorAno.value;
+      var anos = Array.from(new Set(lista.map(function(c) { return c.vencimento.substring(0, 4); }))).sort().reverse();
+      seletorAno.innerHTML = '<option value="">Todos os anos</option>' +
+        anos.map(function(a) { return '<option value="' + a + '">' + a + '</option>'; }).join('');
+      seletorAno.value = anos.indexOf(anoSelecionado) >= 0 ? anoSelecionado : '';
+      aplicarFiltroFichaFinanceiro();
+    })
+    .catch(function() { container.innerHTML = '<div class="vazio">Erro ao carregar histórico financeiro.</div>'; });
+  }
+  function aplicarFiltroFichaFinanceiro() {
+    var status = document.getElementById('filtro-ficha-financeiro-status').value;
+    var ano = document.getElementById('filtro-ficha-financeiro-ano').value;
+    var filtrada = fichaFinanceiroCache.filter(function(c) {
+      if (status && c.status !== status) return false;
+      if (ano && c.vencimento.substring(0, 4) !== ano) return false;
+      return true;
+    });
+    var container = document.getElementById('lista-ficha-financeiro');
+    if (filtrada.length === 0) {
+      container.innerHTML = '<div class="vazio">Nenhuma cobrança encontrada.</div>';
+      return;
+    }
+    var rotulosStatusCobranca = { pendente: 'Pendente', pago: 'Pago', cancelado: 'Cancelado', atrasado: 'Vencido', vencendo_em_breve: 'Vencendo em breve' };
+    container.innerHTML = filtrada.map(function(c) {
+      var statusExibicao = c.status_exibicao || c.status;
+      var sub = 'Vencimento: ' + formatarData(c.vencimento) +
+        (c.pago_em ? ' · Pago em: ' + formatarData(c.pago_em) : '') +
+        (c.metodo ? ' · ' + c.metodo : '');
+      return '<div class="item-ficha">' +
+        '<div>' +
+          '<div class="item-ficha-titulo">' + escapeHtml(c.descricao) + ' — R$ ' + parseFloat(c.valor).toFixed(2).replace('.', ',') + '</div>' +
+          '<div class="item-ficha-sub">' + sub + '</div>' +
+        '</div>' +
+        '<div style="display:flex; align-items:center; gap:8px;">' +
+          '<span class="badge ' + statusExibicao + '">' + (rotulosStatusCobranca[statusExibicao] || statusExibicao) + '</span>' +
+          (c.tem_comprovante ? '<button class="btn-pequeno" onclick="abrirComprovante(\'' + c.id + '\')">Comprovante</button>' : '') +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+  document.getElementById('filtro-ficha-financeiro-status').onchange = aplicarFiltroFichaFinanceiro;
+  document.getElementById('filtro-ficha-financeiro-ano').onchange = aplicarFiltroFichaFinanceiro;
+
+  // ---------- Aba Comunicados (item de sprint 2.3) ----------
+  var filtroFichaComunicadosAtivo = '';
+  function carregarFichaComunicados(associadoId, filtro) {
+    var container = document.getElementById('lista-ficha-comunicados');
+    container.innerHTML = '<div class="vazio">Carregando...</div>';
+    var query = filtro === 'lidos' ? '?lido=lidos' : filtro === 'nao_lidos' ? '?lido=nao_lidos' : '';
+    fetch(API_URL + '/associados/' + associadoId + '/comunicados' + query, {
+      headers: { 'Authorization': 'Bearer ' + estado.token }
+    })
+    .then(function(resp) { return resp.json(); })
+    .then(function(lista) {
+      if (lista.length === 0) {
+        container.innerHTML = '<div class="vazio">Nenhum comunicado encontrado.</div>';
+        return;
+      }
+      container.innerHTML = lista.map(function(c) {
+        var sub = 'Enviado em ' + formatarData(c.publicado_em);
+        if (c.lido) {
+          sub += ' · Lido em ' + formatarData(c.lido_em);
+          var horas = Math.round((new Date(c.lido_em) - new Date(c.publicado_em)) / 3600000);
+          if (horas >= 0) {
+            sub += ' · levou ' + (horas < 24 ? horas + 'h' : Math.round(horas / 24) + 'd') + ' para visualizar';
+          }
+        }
+        return '<div class="item-ficha">' +
+          '<div>' +
+            '<div class="item-ficha-titulo">' + escapeHtml(c.titulo) + '</div>' +
+            '<div class="item-ficha-sub">' + sub + '</div>' +
+          '</div>' +
+          '<span class="badge ' + (c.lido ? 'pago' : 'pendente') + '">' + (c.lido ? '✅ Lido' : '⏳ Não lido') + '</span>' +
+        '</div>';
+      }).join('');
+    })
+    .catch(function() { container.innerHTML = '<div class="vazio">Erro ao carregar comunicados.</div>'; });
+  }
+  function selecionarFiltroFichaComunicados(filtro, botaoId) {
+    filtroFichaComunicadosAtivo = filtro;
+    ['todos', 'lidos', 'nao-lidos'].forEach(function(nome) {
+      document.getElementById('btn-filtro-comunicados-' + nome).classList.remove('ativo');
+    });
+    document.getElementById(botaoId).classList.add('ativo');
+    if (fichaAssociadoAtual) carregarFichaComunicados(fichaAssociadoAtual.id, filtro);
+  }
+  document.getElementById('btn-filtro-comunicados-todos').onclick = function() { selecionarFiltroFichaComunicados('', 'btn-filtro-comunicados-todos'); };
+  document.getElementById('btn-filtro-comunicados-lidos').onclick = function() { selecionarFiltroFichaComunicados('lidos', 'btn-filtro-comunicados-lidos'); };
+  document.getElementById('btn-filtro-comunicados-nao-lidos').onclick = function() { selecionarFiltroFichaComunicados('nao_lidos', 'btn-filtro-comunicados-nao-lidos'); };
 
   function excluirAssociado(id) {
     confirmarAcao({
@@ -2599,11 +2823,23 @@
     document.getElementById('novo-nome').value = '';
     document.getElementById('novo-email').value = '';
     document.getElementById('novo-cpf').value = '';
+    document.getElementById('novo-rg').value = '';
     document.getElementById('novo-telefone').value = '';
+    document.getElementById('novo-endereco-cep').value = '';
+    document.getElementById('novo-endereco-logradouro').value = '';
+    document.getElementById('novo-endereco-numero').value = '';
+    document.getElementById('novo-endereco-complemento').value = '';
+    document.getElementById('novo-endereco-bairro').value = '';
+    document.getElementById('novo-endereco-cidade').value = '';
+    document.getElementById('novo-endereco-estado').value = '';
     document.getElementById('novo-categoria').value = '';
     document.getElementById('novo-observacao').value = '';
     document.getElementById('campo-status-associado').style.display = 'none';
     document.getElementById('campo-novo-email').style.display = 'block';
+    document.getElementById('campo-data-cadastro-associado').style.display = 'none';
+    document.getElementById('abas-ficha-associado').style.display = 'none';
+    fichaAssociadoAtual = null;
+    ativarAbaFicha('dados');
     document.getElementById('overlay-modal').style.display = 'flex';
   };
   document.getElementById('btn-cancelar-modal').onclick = function() {
@@ -2615,7 +2851,15 @@
     var nome = document.getElementById('novo-nome').value.trim();
     var email = document.getElementById('novo-email').value.trim();
     var cpf = document.getElementById('novo-cpf').value.trim();
+    var rg = document.getElementById('novo-rg').value.trim();
     var telefone = document.getElementById('novo-telefone').value.trim();
+    var enderecoCep = document.getElementById('novo-endereco-cep').value.trim();
+    var enderecoLogradouro = document.getElementById('novo-endereco-logradouro').value.trim();
+    var enderecoNumero = document.getElementById('novo-endereco-numero').value.trim();
+    var enderecoComplemento = document.getElementById('novo-endereco-complemento').value.trim();
+    var enderecoBairro = document.getElementById('novo-endereco-bairro').value.trim();
+    var enderecoCidade = document.getElementById('novo-endereco-cidade').value.trim();
+    var enderecoEstado = document.getElementById('novo-endereco-estado').value.trim().toUpperCase();
     var categoria = document.getElementById('novo-categoria').value.trim();
     var observacao = document.getElementById('novo-observacao').value.trim();
     var status = document.getElementById('novo-status').value;
@@ -2629,11 +2873,16 @@
       return;
     }
 
+    var dadosEndereco = {
+      rg: rg, endereco_cep: enderecoCep, endereco_logradouro: enderecoLogradouro, endereco_numero: enderecoNumero,
+      endereco_complemento: enderecoComplemento, endereco_bairro: enderecoBairro, endereco_cidade: enderecoCidade,
+      endereco_estado: enderecoEstado
+    };
     var url = API_URL + '/associados' + (idEdicao ? '/' + idEdicao : '');
     var metodo = idEdicao ? 'PUT' : 'POST';
-    var corpo = idEdicao
+    var corpo = Object.assign(idEdicao
       ? { nome_completo: nome, cpf: cpf, telefone: telefone, categoria: categoria, status: status, observacao: observacao }
-      : { nome_completo: nome, email: email, cpf: cpf, telefone: telefone, categoria: categoria, observacao: observacao };
+      : { nome_completo: nome, email: email, cpf: cpf, telefone: telefone, categoria: categoria, observacao: observacao }, dadosEndereco);
 
     fetch(url, {
       method: metodo,

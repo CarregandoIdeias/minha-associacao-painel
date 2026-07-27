@@ -375,6 +375,30 @@ reaproveitando os padrões visuais existentes (`.badge`, `.painel`,
 `confirmarAcao()`, `.toast`). Consome `GET/POST/PUT/DELETE /sprint` e
 `PATCH /sprint/:id/status` (ver `backend/CLAUDE.md`).
 
+## Ficha do associado com abas (27/07/2026, itens de sprint 2.1-2.3)
+
+O modal de Novo/Editar Associado (`#overlay-modal`) virou `.modal-ficha`
+(mais largo, `max-height:88vh` com scroll próprio) e, só no modo edição,
+ganhou 3 abas (`#abas-ficha-associado`, escondidas em "Novo associado" —
+não fazem sentido antes do registro existir): **Dados** (reorganizado em
+seções com `.secao-ficha`/`.secao-ficha-titulo` — Dados pessoais,
+Endereço, Plano e situação, Observações — mais RG e os 7 campos de
+endereço novos, e "Data de cadastro" agora exibida, só leitura),
+**Financeiro** (`carregarFichaFinanceiro()`, consome `GET
+/cobrancas?associado_id=X` já existente, filtro de status/ano client-side
+sobre o array já buscado, reaproveita `abrirComprovante()` já existente
+pro botão de comprovante) e **Comunicados** (`carregarFichaComunicados()`,
+consome a rota nova `GET /associados/:id/comunicados`, filtro
+todos/lidos/não lidos refaz o fetch com `?lido=`, mostra quanto tempo
+levou pra ler quando aplicável). `ativarAbaFicha(nome)` controla qual
+conteúdo aparece; trocar de aba pra Financeiro/Comunicados dispara o
+fetch na hora (não pré-carrega as 3 abas de uma vez).
+
+Padrão novo reutilizável: `.item-ficha` (linha de card com título/sub à
+esquerda, badge/ação à direita) — usado nas duas abas de histórico, dá
+pra reaproveitar em qualquer lista dentro de modal que não precise de
+tabela de verdade.
+
 ## Menu de perfil reorganizado + alerta inteligente de renovação (27/07/2026, itens de sprint 1.2 e 1.4)
 
 `index.html`: tema saiu da sidebar (`.sidebar-footer`/`.theme-toggle`
