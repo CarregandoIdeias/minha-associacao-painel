@@ -297,6 +297,28 @@ Corrigido nos 3 arquivos, sempre com o mesmo padrão — validar com regex estri
 
 Também: `painel/vercel.json` (novo) adiciona cabeçalhos de segurança via headers da Vercel, incluindo uma CSP. Ela mantém `'unsafe-inline'` em `script-src` porque todo o JS é inline nos HTML (tirar isso exigiria mover pra arquivo externo, mudança maior, não feita); o que a CSP resolve de verdade é restringir `connect-src`/`img-src`/`frame-ancestors`, cortando exfiltração de dado pra domínio externo caso algum XSS novo apareça no futuro.
 
+## Dashboard — identidade da associação no cabeçalho (27/07/2026, item de sprint)
+
+`.app-header` ganhou `.app-header-identidade` (wrapper novo em torno do bloco
+saudação/e-mail, com `#app-header-logo-associacao`, `<img>` escondida por
+padrão). Só na aba Dashboard o cabeçalho muda pro modo "identidade da
+associação": logo (se existir) + `Você está no painel da associação "Nome"`,
+escondendo `#app-header-email` — nas outras abas continua igual (saudação
+por horário + nome/e-mail do administrador). Alternância feita em
+`atualizarHeaderDashboard(exibir)`, chamada de dentro de `ativarAba()` a
+cada troca de aba — **não** duplicar a lógica de decidir "é dashboard ou
+não" em outro lugar, sempre passar por `ativarAba`.
+
+Dados vêm de `GET /configuracoes/identidade` (novo, `backend/routes/configuracoes.js`,
+retorna `nome`/`logo_url` da própria associação — `logo_url` é o nome real
+da coluna no banco mesmo guardando um data URL base64, não confundir com
+`logo_base64`, que é só o nome do campo usado nos formulários do Super
+Admin). Buscado uma vez em `carregarIdentidadeAssociacao()`, chamada de
+`entrarNoDashboard()`, cache em `estado.nomeAssociacao`/`estado.logoAssociacao`.
+Logo é validada com o mesmo `RE_DATA_URL_SEGURA` já usado em
+`renderizarComprovanteBase64` antes de ir pro `.src` — defesa em profundidade,
+mesmo já validado na gravação (Super Admin).
+
 ## Sprint (backlog de melhorias/bugs) — novo (27/07/2026)
 
 Arquivo novo `sprint.html`, autocontido, mesmo padrão dos outros

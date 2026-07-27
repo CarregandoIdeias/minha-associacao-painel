@@ -183,6 +183,8 @@
     margin-bottom: 26px;
     border-bottom: 1px solid var(--border);
   }
+  .app-header-identidade { display: flex; align-items: center; gap: 14px; min-width: 0; }
+  .app-header-logo { width: 44px; height: 44px; border-radius: 10px; object-fit: cover; flex-shrink: 0; }
   .app-header-saudacao { font-size: 20px; font-weight: 700; }
   .app-header-saudacao span { color: var(--accent); }
   .app-header-email { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
@@ -861,9 +863,12 @@
   <div class="content-area">
 
     <div class="app-header">
-      <div>
-        <div class="app-header-saudacao" id="app-header-saudacao">Olá<span>!</span></div>
-        <div class="app-header-email" id="app-header-email"></div>
+      <div class="app-header-identidade">
+        <img id="app-header-logo-associacao" class="app-header-logo" alt="Logo da associação" style="display:none;">
+        <div>
+          <div class="app-header-saudacao" id="app-header-saudacao">Olá<span>!</span></div>
+          <div class="app-header-email" id="app-header-email"></div>
+        </div>
       </div>
       <div class="app-header-perfil">
         <button class="app-header-avatar-btn" id="btn-abrir-perfil">
@@ -1938,6 +1943,45 @@
     document.getElementById('app-header-avatar').textContent = iniciaisNome(estado.nome);
   }
 
+  // Identidade da própria associação (nome + logo), usada só no cabeçalho do
+  // Dashboard -- ali a saudação com nome/e-mail do administrador dá lugar a
+  // "Você está no painel da associação X", já que nome/e-mail do
+  // administrador já aparecem em Meu Perfil (sem precisar repetir aqui).
+  function carregarIdentidadeAssociacao() {
+    fetch(API_URL + '/configuracoes/identidade', { headers: { 'Authorization': 'Bearer ' + estado.token } })
+    .then(function(resp) { return resp.json(); })
+    .then(function(dados) {
+      estado.nomeAssociacao = dados.nome || '';
+      estado.logoAssociacao = dados.logo_url || '';
+      if (document.getElementById('aba-dashboard').classList.contains('ativa')) {
+        atualizarHeaderDashboard(true);
+      }
+    })
+    .catch(function() {});
+  }
+
+  // Alterna o cabeçalho entre o modo "Dashboard" (logo + nome da associação)
+  // e o modo normal (saudação + nome/e-mail do administrador, usado em
+  // qualquer outra aba).
+  function atualizarHeaderDashboard(exibir) {
+    var logoEl = document.getElementById('app-header-logo-associacao');
+    if (exibir) {
+      if (estado.logoAssociacao && RE_DATA_URL_SEGURA.test(estado.logoAssociacao)) {
+        logoEl.src = estado.logoAssociacao;
+        logoEl.style.display = 'block';
+      } else {
+        logoEl.style.display = 'none';
+      }
+      document.getElementById('app-header-saudacao').textContent =
+        'Você está no painel da associação "' + (estado.nomeAssociacao || '') + '".';
+      document.getElementById('app-header-email').style.display = 'none';
+    } else {
+      logoEl.style.display = 'none';
+      document.getElementById('app-header-email').style.display = '';
+      renderizarHeader();
+    }
+  }
+
   document.getElementById('btn-abrir-perfil').onclick = function(e) {
     e.stopPropagation();
     document.getElementById('dropdown-perfil').classList.toggle('aberto');
@@ -2035,6 +2079,7 @@
       document.getElementById('aba-configuracoes').style.display = 'flex';
     }
     ativarAba('dashboard');
+    carregarIdentidadeAssociacao();
     carregarAssociados();
     carregarCobrancas();
     carregarComunicados();
@@ -2599,6 +2644,7 @@
       if (secao) secao.style.display = (nome === idAtiva) ? 'block' : 'none';
     });
 
+    atualizarHeaderDashboard(idAtiva === 'dashboard');
     fecharSidebarMobile();
   }
 
