@@ -176,6 +176,65 @@
   .theme-toggle:hover {
     box-shadow: var(--shadow-lg);
   }
+
+  .ambiente-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 40px;
+  }
+  .ambiente-tab {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 22px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .ambiente-tab:hover { color: var(--text); border-color: var(--accent); }
+  .ambiente-tab.ativa { background: var(--accent); border-color: var(--accent); color: #0A0A0A; }
+
+  .secao-titulo {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: var(--text-muted);
+    margin: 44px 0 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .grid-pequeno {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+  }
+  .card-pequeno {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 18px;
+    box-shadow: var(--shadow);
+    transition: all 0.2s;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .card-pequeno:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--accent);
+  }
+  .card-pequeno .card-pequeno-icon { font-size: 22px; flex-shrink: 0; }
+  .card-pequeno .card-pequeno-titulo { font-size: 13.5px; font-weight: 700; }
+  .card-pequeno .card-pequeno-sub { font-size: 11.5px; color: var(--text-muted); margin-top: 1px; }
 </style>
 </head>
 <body>
@@ -188,48 +247,141 @@
     <p>Acesso rápido a todas as áreas da plataforma</p>
   </div>
 
-  <div class="grid">
-    <a href="superadmin.html" class="card">
-      <div class="card-icon">⚙️</div>
-      <h3>Super Admin</h3>
-      <p>Gerenciar associações, planos, KPIs globais e alertas da plataforma.</p>
-      <span class="card-link">Acessar →</span>
-    </a>
+  <div class="ambiente-tabs">
+    <button class="ambiente-tab ativa" id="btn-tab-producao">🟢 Produção</button>
+    <button class="ambiente-tab" id="btn-tab-homologacao">🧪 Homologação</button>
+  </div>
 
-    <a href="index.html" class="card">
-      <div class="card-icon">📊</div>
-      <h3>Painel da Associação</h3>
-      <p>Dashboard, associados, financeiro, comunicados e configurações da sua associação.</p>
-      <span class="card-link">Acessar →</span>
-    </a>
+  <!-- ===== PRODUÇÃO ===== -->
+  <div id="tab-producao" class="tab-conteudo">
+    <div class="grid">
+      <a href="https://minha-associacao-painel.vercel.app/superadmin.html" class="card">
+        <div class="card-icon">⚙️</div>
+        <h3>Super Admin</h3>
+        <p>Gerenciar associações, planos, KPIs globais e alertas da plataforma.</p>
+        <span class="card-link">Acessar →</span>
+      </a>
+      <a href="https://minha-associacao-painel.vercel.app/index.html" class="card">
+        <div class="card-icon">📊</div>
+        <h3>Painel da Associação</h3>
+        <p>Dashboard, associados, financeiro, comunicados e configurações da sua associação.</p>
+        <span class="card-link">Acessar →</span>
+      </a>
+      <a href="https://minha-associacao-painel.vercel.app/portal.html" class="card">
+        <div class="card-icon">👤</div>
+        <h3>Portal do Associado</h3>
+        <p>Consulte seus dados, cobranças, comprovantes de pagamento e comunicados.</p>
+        <span class="card-link">Acessar →</span>
+      </a>
+      <a href="https://minha-associacao-painel.vercel.app/landing.html" class="card">
+        <div class="card-icon">🚀</div>
+        <h3>Landing Page</h3>
+        <p>Página de vendas do ASSOCIA PLUS — conheça os planos e funcionalidades.</p>
+        <span class="card-link">Acessar →</span>
+      </a>
+      <a href="https://minha-associacao-painel.vercel.app/manual.html" class="card">
+        <div class="card-icon">📖</div>
+        <h3>Manual da Plataforma</h3>
+        <p>Guia passo a passo de como usar o Super Admin, o Painel da Associação e o Portal do Associado.</p>
+        <span class="card-link">Acessar →</span>
+      </a>
+      <a href="https://minha-associacao-painel.vercel.app/sprint.html" class="card">
+        <div class="card-icon">🗂️</div>
+        <h3>Sprint — Melhorias & Bugs</h3>
+        <p>Registre melhorias e bugs para leitura e aplicação, e acompanhe o status de cada item.</p>
+        <span class="card-link">Acessar →</span>
+      </a>
+    </div>
 
-    <a href="portal.html" class="card">
-      <div class="card-icon">👤</div>
-      <h3>Portal do Associado</h3>
-      <p>Consulte seus dados, cobranças, comprovantes de pagamento e comunicados.</p>
-      <span class="card-link">Acessar →</span>
-    </a>
+    <div class="secao-titulo">Acesso rápido — infraestrutura (produção)</div>
+    <div class="grid-pequeno">
+      <a href="https://github.com/CarregandoIdeias/minha-associacao-backend/tree/main" target="_blank" rel="noopener" class="card-pequeno">
+        <div class="card-pequeno-icon">🐙</div>
+        <div><div class="card-pequeno-titulo">GitHub — Backend</div><div class="card-pequeno-sub">branch main</div></div>
+      </a>
+      <a href="https://github.com/CarregandoIdeias/minha-associacao-painel/tree/main" target="_blank" rel="noopener" class="card-pequeno">
+        <div class="card-pequeno-icon">🐙</div>
+        <div><div class="card-pequeno-titulo">GitHub — Painel</div><div class="card-pequeno-sub">branch main</div></div>
+      </a>
+      <a href="https://vercel.com/carregandoideias-projects/minha-associacao-painel" target="_blank" rel="noopener" class="card-pequeno">
+        <div class="card-pequeno-icon">▲</div>
+        <div><div class="card-pequeno-titulo">Vercel</div><div class="card-pequeno-sub">deploy do painel</div></div>
+      </a>
+      <a href="https://supabase.com/dashboard/project/gahrgdpjuqfjkznqtszd" target="_blank" rel="noopener" class="card-pequeno">
+        <div class="card-pequeno-icon">🐘</div>
+        <div><div class="card-pequeno-titulo">Supabase</div><div class="card-pequeno-sub">banco de produção</div></div>
+      </a>
+      <a href="https://dashboard.render.com/web/srv-d9e0p3mrnols73dbl2pg/env" target="_blank" rel="noopener" class="card-pequeno">
+        <div class="card-pequeno-icon">🚂</div>
+        <div><div class="card-pequeno-titulo">Render</div><div class="card-pequeno-sub">backend de produção</div></div>
+      </a>
+    </div>
+  </div>
 
-    <a href="landing.html" class="card">
-      <div class="card-icon">🚀</div>
-      <h3>Landing Page</h3>
-      <p>Página de vendas do ASSOCIA PLUS — conheça os planos e funcionalidades.</p>
-      <span class="card-link">Acessar →</span>
-    </a>
+  <!-- ===== HOMOLOGAÇÃO ===== -->
+  <div id="tab-homologacao" class="tab-conteudo" style="display:none;">
+    <div class="grid">
+      <a href="https://minha-associacao-painel-staging.vercel.app/superadmin.html" class="card">
+        <div class="card-icon">⚙️</div>
+        <h3>Super Admin</h3>
+        <p>Gerenciar associações, planos, KPIs globais e alertas da plataforma.</p>
+        <span class="card-link">Acessar →</span>
+      </a>
+      <a href="https://minha-associacao-painel-staging.vercel.app/index.html" class="card">
+        <div class="card-icon">📊</div>
+        <h3>Painel da Associação</h3>
+        <p>Dashboard, associados, financeiro, comunicados e configurações da sua associação.</p>
+        <span class="card-link">Acessar →</span>
+      </a>
+      <a href="https://minha-associacao-painel-staging.vercel.app/portal.html" class="card">
+        <div class="card-icon">👤</div>
+        <h3>Portal do Associado</h3>
+        <p>Consulte seus dados, cobranças, comprovantes de pagamento e comunicados.</p>
+        <span class="card-link">Acessar →</span>
+      </a>
+      <a href="https://minha-associacao-painel-staging.vercel.app/landing.html" class="card">
+        <div class="card-icon">🚀</div>
+        <h3>Landing Page</h3>
+        <p>Página de vendas do ASSOCIA PLUS — conheça os planos e funcionalidades.</p>
+        <span class="card-link">Acessar →</span>
+      </a>
+      <a href="https://minha-associacao-painel-staging.vercel.app/manual.html" class="card">
+        <div class="card-icon">📖</div>
+        <h3>Manual da Plataforma</h3>
+        <p>Guia passo a passo de como usar o Super Admin, o Painel da Associação e o Portal do Associado.</p>
+        <span class="card-link">Acessar →</span>
+      </a>
+      <a href="https://minha-associacao-painel-staging.vercel.app/sprint.html" class="card">
+        <div class="card-icon">🗂️</div>
+        <h3>Sprint — Melhorias & Bugs</h3>
+        <p>Registre melhorias e bugs para leitura e aplicação, e acompanhe o status de cada item.</p>
+        <span class="card-link">Acessar →</span>
+      </a>
+    </div>
 
-    <a href="manual.html" class="card">
-      <div class="card-icon">📖</div>
-      <h3>Manual da Plataforma</h3>
-      <p>Guia passo a passo de como usar o Super Admin, o Painel da Associação e o Portal do Associado.</p>
-      <span class="card-link">Acessar →</span>
-    </a>
-
-    <a href="sprint.html" class="card">
-      <div class="card-icon">🗂️</div>
-      <h3>Sprint — Melhorias & Bugs</h3>
-      <p>Registre melhorias e bugs para leitura e aplicação, e acompanhe o status de cada item.</p>
-      <span class="card-link">Acessar →</span>
-    </a>
+    <div class="secao-titulo">Acesso rápido — infraestrutura (homologação)</div>
+    <div class="grid-pequeno">
+      <a href="https://github.com/CarregandoIdeias/minha-associacao-backend/tree/staging" target="_blank" rel="noopener" class="card-pequeno">
+        <div class="card-pequeno-icon">🐙</div>
+        <div><div class="card-pequeno-titulo">GitHub — Backend</div><div class="card-pequeno-sub">branch staging</div></div>
+      </a>
+      <a href="https://github.com/CarregandoIdeias/minha-associacao-painel/tree/staging" target="_blank" rel="noopener" class="card-pequeno">
+        <div class="card-pequeno-icon">🐙</div>
+        <div><div class="card-pequeno-titulo">GitHub — Painel</div><div class="card-pequeno-sub">branch staging</div></div>
+      </a>
+      <a href="https://vercel.com/carregandoideias-projects/minha-associacao-painel-staging" target="_blank" rel="noopener" class="card-pequeno">
+        <div class="card-pequeno-icon">▲</div>
+        <div><div class="card-pequeno-titulo">Vercel</div><div class="card-pequeno-sub">deploy de staging</div></div>
+      </a>
+      <a href="https://supabase.com/dashboard/project/dlthgkvvzyssmkzehksz" target="_blank" rel="noopener" class="card-pequeno">
+        <div class="card-pequeno-icon">🐘</div>
+        <div><div class="card-pequeno-titulo">Supabase</div><div class="card-pequeno-sub">banco de staging</div></div>
+      </a>
+      <a href="https://dashboard.render.com/web/srv-d9jksehl565s7380852g/env" target="_blank" rel="noopener" class="card-pequeno">
+        <div class="card-pequeno-icon">🚂</div>
+        <div><div class="card-pequeno-titulo">Render</div><div class="card-pequeno-sub">backend de staging</div></div>
+      </a>
+    </div>
   </div>
 
   <div class="footer">
@@ -255,6 +407,19 @@
   });
 
   aplicarTema(temaSalvo);
+
+  var btnProducao = document.getElementById('btn-tab-producao');
+  var btnHomologacao = document.getElementById('btn-tab-homologacao');
+  function ativarAmbiente(nome) {
+    document.getElementById('tab-producao').style.display = nome === 'producao' ? 'block' : 'none';
+    document.getElementById('tab-homologacao').style.display = nome === 'homologacao' ? 'block' : 'none';
+    btnProducao.classList.toggle('ativa', nome === 'producao');
+    btnHomologacao.classList.toggle('ativa', nome === 'homologacao');
+    localStorage.setItem('intranet-ambiente', nome);
+  }
+  btnProducao.addEventListener('click', function() { ativarAmbiente('producao'); });
+  btnHomologacao.addEventListener('click', function() { ativarAmbiente('homologacao'); });
+  ativarAmbiente(localStorage.getItem('intranet-ambiente') || 'producao');
 })();
 </script>
 
