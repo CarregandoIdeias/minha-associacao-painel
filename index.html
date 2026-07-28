@@ -584,6 +584,18 @@
     color: var(--accent); margin-bottom: 12px; padding-bottom: 6px; border-bottom: 1px solid var(--border);
   }
   .filtros-ficha { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+
+  /* ---------- Auditoria (item de sprint 4, etapa 2 -- mesmo padrão de superadmin.html) ---------- */
+  .filtros-associacoes { display: flex; gap: 10px; padding: 16px 22px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .filtros-associacoes input, .filtros-associacoes select {
+    padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); font-family: inherit; font-size: 13px;
+  }
+  .filtros-associacoes input { flex: 1; min-width: 160px; }
+  .btn-pequeno:disabled, .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .topo-acoes { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .info-linha { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+  .info-linha:last-child { border-bottom: none; }
+  .info-linha span:first-child { color: var(--text-muted); }
   .btn-pequeno.ativo { background: var(--accent); color: #0A0A0A; }
   .item-ficha {
     display: flex; justify-content: space-between; align-items: center; gap: 10px;
@@ -867,9 +879,9 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
       Comunicados
     </button>
-    <button class="nav-item" id="aba-configuracoes" style="display:none;">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-      Configurações
+    <button class="nav-item" id="aba-acessos" style="display:none;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      Acessos
     </button>
 
   </nav>
@@ -1082,15 +1094,15 @@
       </div>
     </div>
 
-    <div id="secao-configuracoes" style="display:none;">
-      <div class="page-header"><h1>Configurações</h1></div>
+    <div id="secao-acessos" style="display:none;">
+      <div class="page-header"><h1>Acessos</h1></div>
 
       <div class="abas-ficha">
-        <button type="button" class="aba-ficha ativa" id="btn-aba-config-usuarios">Acessos e Usuários</button>
-        <button type="button" class="aba-ficha" id="btn-aba-config-parametrizacao">Parametrização</button>
+        <button type="button" class="aba-ficha ativa" id="btn-aba-acessos-usuarios">Usuários</button>
+        <button type="button" class="aba-ficha" id="btn-aba-acessos-auditoria">Auditoria</button>
       </div>
 
-      <div id="conteudo-aba-config-usuarios">
+      <div id="conteudo-aba-acessos-usuarios">
         <div class="painel">
           <div class="painel-header">
             <h3>Pessoas com acesso ao sistema</h3>
@@ -1102,46 +1114,99 @@
         </div>
       </div>
 
-      <div id="conteudo-aba-config-parametrizacao" style="display:none;">
+      <div id="conteudo-aba-acessos-auditoria" style="display:none;">
         <div class="painel">
-          <div class="painel-header"><h3>Chave Pix da associação</h3></div>
-          <div style="padding:22px;">
-            <p class="texto-ajuda">
-              Essa chave é usada para gerar o QR code Pix nas cobranças. Depois que o associado paga, ele envia o comprovante e a diretoria confirma manualmente.
-            </p>
-            <div class="campo">
-              <label>Chave Pix (CPF, CNPJ, e-mail, telefone ou chave aleatória)</label>
-              <input type="text" id="config-chave-pix" placeholder="ex: 00000000000">
+          <div class="painel-header">
+            <h3>Logs de auditoria</h3>
+            <div class="topo-acoes">
+              <button class="btn btn-ghost" id="btn-exportar-auditoria-excel">Exportar Excel</button>
+              <button class="btn btn-ghost" id="btn-exportar-auditoria-pdf">Exportar PDF</button>
             </div>
-            <div class="campo-linha">
-              <div class="campo">
-                <label>Nome do recebedor (máx. 25 caracteres)</label>
-                <input type="text" id="config-nome-pix" maxlength="25" placeholder="ex: ASSOCIACAO TESTE">
-              </div>
-              <div class="campo">
-                <label>Cidade (máx. 15 caracteres, sem acento)</label>
-                <input type="text" id="config-cidade-pix" maxlength="15" placeholder="ex: SAO PAULO">
-              </div>
-            </div>
-            <div class="form-footer">
-              <button class="btn" id="btn-salvar-config-pix">Salvar</button>
+          </div>
+          <div class="filtros-associacoes">
+            <input type="text" id="filtro-auditoria-usuario" placeholder="Usuário (nome ou e-mail)...">
+            <select id="filtro-auditoria-modulo">
+              <option value="">Todos os módulos</option>
+              <option value="associados">Associados</option>
+              <option value="cobrancas">Cobranças</option>
+              <option value="comunicados">Comunicados</option>
+              <option value="usuarios">Usuários</option>
+              <option value="configuracoes">Configurações</option>
+              <option value="autenticacao">Autenticação</option>
+              <option value="auditoria">Auditoria</option>
+              <option value="planos">Plano da associação</option>
+            </select>
+            <select id="filtro-auditoria-tipo-acao">
+              <option value="">Todas as ações</option>
+              <option value="login">Login</option>
+              <option value="logout">Logout</option>
+              <option value="criacao">Criação</option>
+              <option value="edicao">Edição</option>
+              <option value="exclusao">Exclusão</option>
+              <option value="alteracao_senha">Alteração de senha</option>
+              <option value="alteracao_permissoes">Alteração de permissões</option>
+              <option value="exportacao">Exportação de dados</option>
+            </select>
+            <input type="date" id="filtro-auditoria-data-inicio" style="max-width:150px;">
+            <input type="date" id="filtro-auditoria-data-fim" style="max-width:150px;">
+            <select id="filtro-auditoria-ordenar" style="max-width:150px;">
+              <option value="desc">Mais recentes</option>
+              <option value="asc">Mais antigos</option>
+            </select>
+          </div>
+          <div id="tabela-auditoria-container"><div class="vazio">Carregando...</div></div>
+          <div class="painel-header" style="border-top:1px solid var(--border); border-bottom:none;">
+            <span id="texto-paginacao-auditoria" style="font-size:13px; color:var(--text-muted);"></span>
+            <div class="topo-acoes">
+              <button class="btn-pequeno" id="btn-pagina-anterior-auditoria">← Anterior</button>
+              <button class="btn-pequeno" id="btn-pagina-proxima-auditoria">Próxima →</button>
             </div>
           </div>
         </div>
+      </div>
+    </div>
 
-        <div class="painel" style="margin-top:24px;">
-          <div class="painel-header"><h3>Alertas de vencimento</h3></div>
-          <div style="padding:22px;">
-            <p class="texto-ajuda">
-              Cobranças pendentes dentro desse prazo aparecem destacadas como "vencendo em breve" — tanto para a diretoria quanto para o associado.
-            </p>
-            <div class="campo" style="max-width:280px;">
-              <label>Avisar com quantos dias de antecedência?</label>
-              <input type="number" id="config-dias-alerta" min="0" max="30" placeholder="ex: 3">
+    <div id="secao-parametrizacao" style="display:none;">
+      <div class="page-header"><h1>Parametrização</h1></div>
+
+      <div class="painel">
+        <div class="painel-header"><h3>Chave Pix da associação</h3></div>
+        <div style="padding:22px;">
+          <p class="texto-ajuda">
+            Essa chave é usada para gerar o QR code Pix nas cobranças. Depois que o associado paga, ele envia o comprovante e a diretoria confirma manualmente.
+          </p>
+          <div class="campo">
+            <label>Chave Pix (CPF, CNPJ, e-mail, telefone ou chave aleatória)</label>
+            <input type="text" id="config-chave-pix" placeholder="ex: 00000000000">
+          </div>
+          <div class="campo-linha">
+            <div class="campo">
+              <label>Nome do recebedor (máx. 25 caracteres)</label>
+              <input type="text" id="config-nome-pix" maxlength="25" placeholder="ex: ASSOCIACAO TESTE">
             </div>
-            <div class="form-footer">
-              <button class="btn" id="btn-salvar-config-alertas">Salvar</button>
+            <div class="campo">
+              <label>Cidade (máx. 15 caracteres, sem acento)</label>
+              <input type="text" id="config-cidade-pix" maxlength="15" placeholder="ex: SAO PAULO">
             </div>
+          </div>
+          <div class="form-footer">
+            <button class="btn" id="btn-salvar-config-pix">Salvar</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="painel" style="margin-top:24px;">
+        <div class="painel-header"><h3>Alertas de vencimento</h3></div>
+        <div style="padding:22px;">
+          <p class="texto-ajuda">
+            Cobranças pendentes dentro desse prazo aparecem destacadas como "vencendo em breve" — tanto para a diretoria quanto para o associado.
+          </p>
+          <div class="campo" style="max-width:280px;">
+            <label>Avisar com quantos dias de antecedência?</label>
+            <input type="number" id="config-dias-alerta" min="0" max="30" placeholder="ex: 3">
+          </div>
+          <div class="form-footer">
+            <button class="btn" id="btn-salvar-config-alertas">Salvar</button>
           </div>
         </div>
       </div>
@@ -1444,6 +1509,18 @@
         <button class="btn btn-ghost" id="btn-fechar-resultado-usuario">Fechar</button>
         <button class="btn" id="btn-copiar-senha-usuario">Copiar senha</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL DETALHES DO LOG DE AUDITORIA ===== -->
+<div class="overlay" id="overlay-modal-log-auditoria">
+  <div class="modal" style="max-width:640px;">
+    <h3>Detalhes do registro</h3>
+    <div id="lista-detalhes-log-auditoria" style="margin-bottom:16px;"></div>
+    <div id="bloco-diff-log-auditoria"></div>
+    <div class="modal-actions">
+      <button class="btn" id="btn-fechar-modal-log-auditoria">Fechar</button>
     </div>
   </div>
 </div>
@@ -2226,8 +2303,9 @@
   };
   document.getElementById('btn-menu-preferencias').onclick = function() {
     document.getElementById('dropdown-perfil').classList.remove('aberto');
-    ativarAba('configuracoes');
-    ativarAbaConfig('usuarios');
+    ativarAba('parametrizacao');
+    carregarConfigPix();
+    carregarConfigAlertas();
   };
   document.getElementById('btn-menu-alterar-senha').onclick = function() {
     document.getElementById('dropdown-perfil').classList.remove('aberto');
@@ -2242,7 +2320,7 @@
     renderizarHeader();
 
     if (estado.papel === 'admin') {
-      document.getElementById('aba-configuracoes').style.display = 'flex';
+      document.getElementById('aba-acessos').style.display = 'flex';
       document.getElementById('btn-menu-preferencias').style.display = 'flex';
     } else {
       document.getElementById('btn-menu-preferencias').style.display = 'none';
@@ -2980,7 +3058,7 @@
 
   // ---------- Navegação (sidebar) ----------
   function ativarAba(idAtiva) {
-    ['dashboard', 'associados', 'financeiro', 'comunicados', 'configuracoes', 'meu-perfil'].forEach(function(nome) {
+    ['dashboard', 'associados', 'financeiro', 'comunicados', 'acessos', 'parametrizacao', 'meu-perfil'].forEach(function(nome) {
       var item = document.getElementById('aba-' + nome);
       if (item) item.classList.toggle('ativa', nome === idAtiva);
       var secao = document.getElementById('secao-' + nome);
@@ -2991,27 +3069,27 @@
     fecharSidebarMobile();
   }
 
-  // Configurações agora tem 2 sub-abas internas (item de sprint 4, etapa 1 --
-  // só reorganização de navegação, Usuários virou "Acessos e Usuários" aqui
-  // dentro em vez de item próprio na sidebar).
-  function ativarAbaConfig(nome) {
-    ['usuarios', 'parametrizacao'].forEach(function(aba) {
-      document.getElementById('conteudo-aba-config-' + aba).style.display = aba === nome ? 'block' : 'none';
-      document.getElementById('btn-aba-config-' + aba).classList.toggle('ativa', aba === nome);
+  // "Acessos" tem 2 sub-abas internas: Usuários e Auditoria (item de sprint
+  // 4, etapa 2 -- "Parametrização" saiu daqui, agora só é alcançável pelo
+  // "Preferências" do header, não tem item próprio na sidebar).
+  function ativarAbaAcessos(nome) {
+    ['usuarios', 'auditoria'].forEach(function(aba) {
+      document.getElementById('conteudo-aba-acessos-' + aba).style.display = aba === nome ? 'block' : 'none';
+      document.getElementById('btn-aba-acessos-' + aba).classList.toggle('ativa', aba === nome);
     });
     if (nome === 'usuarios') carregarUsuarios();
-    if (nome === 'parametrizacao') { carregarConfigPix(); carregarConfigAlertas(); }
+    if (nome === 'auditoria') { paginaAtualAuditoria = 1; carregarAuditoria(); }
   }
-  document.getElementById('btn-aba-config-usuarios').onclick = function() { ativarAbaConfig('usuarios'); };
-  document.getElementById('btn-aba-config-parametrizacao').onclick = function() { ativarAbaConfig('parametrizacao'); };
+  document.getElementById('btn-aba-acessos-usuarios').onclick = function() { ativarAbaAcessos('usuarios'); };
+  document.getElementById('btn-aba-acessos-auditoria').onclick = function() { ativarAbaAcessos('auditoria'); };
 
   document.getElementById('aba-dashboard').onclick = function() { ativarAba('dashboard'); };
   document.getElementById('aba-associados').onclick = function() { ativarAba('associados'); };
   document.getElementById('aba-financeiro').onclick = function() { ativarAba('financeiro'); carregarCobrancas(); };
   document.getElementById('aba-comunicados').onclick = function() { ativarAba('comunicados'); carregarComunicados(); };
-  document.getElementById('aba-configuracoes').onclick = function() {
-    ativarAba('configuracoes');
-    ativarAbaConfig('usuarios');
+  document.getElementById('aba-acessos').onclick = function() {
+    ativarAba('acessos');
+    ativarAbaAcessos('usuarios');
   };
 
   // ---------- Menu hambúrguer (mobile) ----------
@@ -3969,6 +4047,161 @@
       }
     });
   }
+
+  // ---------- Auditoria (item de sprint 4, etapa 2 -- mesma ideia da tela do Super Admin, escopo tenant) ----------
+  var ROTULOS_MODULO_AUDITORIA = {
+    associados: 'Associados', cobrancas: 'Cobranças', comunicados: 'Comunicados', usuarios: 'Usuários',
+    configuracoes: 'Configurações', autenticacao: 'Autenticação', auditoria: 'Auditoria', planos: 'Plano da associação'
+  };
+  var ROTULOS_TIPO_ACAO_AUDITORIA = {
+    login: 'Login', logout: 'Logout', criacao: 'Criação', edicao: 'Edição', exclusao: 'Exclusão',
+    alteracao_senha: 'Alteração de senha', alteracao_permissoes: 'Alteração de permissões', exportacao: 'Exportação de dados'
+  };
+  var auditoriaCache = [];
+  var paginaAtualAuditoria = 1;
+  var totalAuditoria = 0;
+  var porPaginaAuditoria = 50;
+
+  function filtrosAuditoriaQueryString() {
+    var params = [];
+    var usuario = document.getElementById('filtro-auditoria-usuario').value.trim();
+    var modulo = document.getElementById('filtro-auditoria-modulo').value;
+    var tipoAcao = document.getElementById('filtro-auditoria-tipo-acao').value;
+    var dataInicio = document.getElementById('filtro-auditoria-data-inicio').value;
+    var dataFim = document.getElementById('filtro-auditoria-data-fim').value;
+    var ordenar = document.getElementById('filtro-auditoria-ordenar').value;
+    if (usuario) params.push('usuario=' + encodeURIComponent(usuario));
+    if (modulo) params.push('modulo=' + encodeURIComponent(modulo));
+    if (tipoAcao) params.push('tipo_acao=' + encodeURIComponent(tipoAcao));
+    if (dataInicio) params.push('data_inicio=' + encodeURIComponent(dataInicio));
+    if (dataFim) params.push('data_fim=' + encodeURIComponent(dataFim));
+    if (ordenar) params.push('ordenar=' + encodeURIComponent(ordenar));
+    return params;
+  }
+
+  function carregarAuditoria() {
+    var params = filtrosAuditoriaQueryString();
+    params.push('pagina=' + paginaAtualAuditoria);
+    params.push('por_pagina=' + porPaginaAuditoria);
+    var container = document.getElementById('tabela-auditoria-container');
+    container.innerHTML = '<div class="vazio">Carregando...</div>';
+
+    fetch(API_URL + '/auditoria?' + params.join('&'), { headers: { 'Authorization': 'Bearer ' + estado.token }, cache: 'no-store' })
+    .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
+    .then(function(res) {
+      if (!res.ok) { mostrarToast(res.data.erro || 'Erro ao carregar auditoria', true); return; }
+      auditoriaCache = res.data.registros;
+      totalAuditoria = res.data.total;
+      renderizarAuditoria(auditoriaCache);
+      atualizarPaginacaoAuditoria();
+    })
+    .catch(function() { mostrarToast('Erro ao carregar auditoria', true); });
+  }
+
+  document.getElementById('filtro-auditoria-usuario').oninput = function() { paginaAtualAuditoria = 1; carregarAuditoria(); };
+  ['filtro-auditoria-modulo', 'filtro-auditoria-tipo-acao', 'filtro-auditoria-data-inicio', 'filtro-auditoria-data-fim', 'filtro-auditoria-ordenar'].forEach(function(id) {
+    document.getElementById(id).onchange = function() { paginaAtualAuditoria = 1; carregarAuditoria(); };
+  });
+
+  function renderizarAuditoria(lista) {
+    var container = document.getElementById('tabela-auditoria-container');
+    if (lista.length === 0) {
+      container.innerHTML = '<div class="vazio">Nenhum registro encontrado.</div>';
+      return;
+    }
+    var html = '<table><thead><tr><th>Data/Hora</th><th>Usuário</th><th>Módulo</th><th>Ação</th><th>Descrição</th><th></th></tr></thead><tbody>';
+    lista.forEach(function(l) {
+      var nomeAtor = l.usuario_nome || l.super_admin_nome || l.usuario_email || l.super_admin_email || '—';
+      html += '<tr>' +
+        '<td style="white-space:nowrap;">' + new Date(l.criado_em).toLocaleString('pt-BR') + '</td>' +
+        '<td>' + escapeHtml(nomeAtor) + (l.super_admin_nome ? ' <span style="color:var(--text-muted); font-size:11px;">(Super Admin)</span>' : '') + '</td>' +
+        '<td>' + (ROTULOS_MODULO_AUDITORIA[l.modulo] || l.modulo) + '</td>' +
+        '<td>' + (ROTULOS_TIPO_ACAO_AUDITORIA[l.tipo_acao] || l.tipo_acao) + '</td>' +
+        '<td>' + escapeHtml(l.descricao) + '</td>' +
+        '<td><button class="btn-pequeno" onclick="abrirDetalhesLogAuditoria(\'' + l.id + '\')">Detalhes</button></td>' +
+        '</tr>';
+    });
+    html += '</tbody></table>';
+    container.innerHTML = html;
+  }
+
+  function atualizarPaginacaoAuditoria() {
+    var inicio = totalAuditoria === 0 ? 0 : (paginaAtualAuditoria - 1) * porPaginaAuditoria + 1;
+    var fim = Math.min(paginaAtualAuditoria * porPaginaAuditoria, totalAuditoria);
+    document.getElementById('texto-paginacao-auditoria').textContent = totalAuditoria === 0
+      ? 'Nenhum registro'
+      : ('Mostrando ' + inicio + '–' + fim + ' de ' + totalAuditoria);
+    document.getElementById('btn-pagina-anterior-auditoria').disabled = paginaAtualAuditoria <= 1;
+    document.getElementById('btn-pagina-proxima-auditoria').disabled = (paginaAtualAuditoria * porPaginaAuditoria) >= totalAuditoria;
+  }
+  document.getElementById('btn-pagina-anterior-auditoria').onclick = function() {
+    if (paginaAtualAuditoria > 1) { paginaAtualAuditoria--; carregarAuditoria(); }
+  };
+  document.getElementById('btn-pagina-proxima-auditoria').onclick = function() {
+    if ((paginaAtualAuditoria * porPaginaAuditoria) < totalAuditoria) { paginaAtualAuditoria++; carregarAuditoria(); }
+  };
+
+  function linhaInfo(rotulo, valor) {
+    return '<div class="info-linha"><span>' + rotulo + '</span><span>' + escapeHtml(valor || '—') + '</span></div>';
+  }
+
+  function abrirDetalhesLogAuditoria(id) {
+    var log = auditoriaCache.find(function(l) { return l.id === id; });
+    if (!log) return;
+    var nomeAtor = log.usuario_nome || log.super_admin_nome || log.usuario_email || log.super_admin_email || '—';
+    var emailAtor = log.usuario_email || log.super_admin_email || '—';
+
+    document.getElementById('lista-detalhes-log-auditoria').innerHTML =
+      linhaInfo('Data/Hora', new Date(log.criado_em).toLocaleString('pt-BR')) +
+      linhaInfo('Usuário', nomeAtor) +
+      linhaInfo('E-mail', emailAtor) +
+      linhaInfo('Módulo', ROTULOS_MODULO_AUDITORIA[log.modulo] || log.modulo) +
+      linhaInfo('Tipo de ação', ROTULOS_TIPO_ACAO_AUDITORIA[log.tipo_acao] || log.tipo_acao) +
+      linhaInfo('Descrição', log.descricao) +
+      linhaInfo('IP', log.ip) +
+      linhaInfo('Dispositivo/Navegador', log.user_agent);
+
+    var blocoDiff = document.getElementById('bloco-diff-log-auditoria');
+    if (log.dados_anteriores || log.dados_novos) {
+      blocoDiff.innerHTML =
+        '<p style="font-size:13px; font-weight:600; margin-bottom:8px;">Valor anterior / novo</p>' +
+        '<div style="display:flex; gap:10px; flex-wrap:wrap;">' +
+          '<pre style="flex:1; min-width:220px; background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:10px; font-size:12px; overflow-x:auto;">' + escapeHtml(log.dados_anteriores ? JSON.stringify(log.dados_anteriores, null, 2) : '—') + '</pre>' +
+          '<pre style="flex:1; min-width:220px; background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:10px; font-size:12px; overflow-x:auto;">' + escapeHtml(log.dados_novos ? JSON.stringify(log.dados_novos, null, 2) : '—') + '</pre>' +
+        '</div>';
+    } else {
+      blocoDiff.innerHTML = '';
+    }
+
+    document.getElementById('overlay-modal-log-auditoria').style.display = 'flex';
+  }
+  document.getElementById('btn-fechar-modal-log-auditoria').onclick = function() {
+    document.getElementById('overlay-modal-log-auditoria').style.display = 'none';
+  };
+
+  function exportarAuditoria(formato) {
+    var params = filtrosAuditoriaQueryString();
+    fetch(API_URL + '/auditoria/exportar/' + formato + '?' + params.join('&'), {
+      headers: { 'Authorization': 'Bearer ' + estado.token }
+    })
+    .then(function(resp) {
+      if (!resp.ok) { return resp.json().then(function(d) { throw new Error(d.erro || 'Erro ao exportar'); }); }
+      return resp.blob();
+    })
+    .then(function(blob) {
+      var url = URL.createObjectURL(blob);
+      var link = document.createElement('a');
+      link.href = url;
+      link.download = 'auditoria.' + (formato === 'excel' ? 'xlsx' : 'pdf');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    })
+    .catch(function(err) { mostrarToast(err.message || 'Erro ao exportar auditoria', true); });
+  }
+  document.getElementById('btn-exportar-auditoria-excel').onclick = function() { exportarAuditoria('excel'); };
+  document.getElementById('btn-exportar-auditoria-pdf').onclick = function() { exportarAuditoria('pdf'); };
 
   function atualizarCampoVinculoAssociado() {
     var papel = document.getElementById('usuario-papel').value;

@@ -375,6 +375,34 @@ reaproveitando os padrões visuais existentes (`.badge`, `.painel`,
 `confirmarAcao()`, `.toast`). Consome `GET/POST/PUT/DELETE /sprint` e
 `PATCH /sprint/:id/status` (ver `backend/CLAUDE.md`).
 
+## Navegação final: "Acessos" na sidebar (Usuários + Auditoria), "Parametrização" só via Preferências (item de sprint 4, etapa 2, 27/07/2026)
+
+Ajuste em cima da etapa 1 (seção seguinte) — a estrutura combinada não
+ficou "Configurações" com 2 sub-abas. Ficou assim:
+
+- **Sidebar**: `#aba-configuracoes` renomeado para `#aba-acessos`
+  ("Acessos", ícone de cadeado). `#secao-configuracoes` virou
+  `#secao-acessos`, com 2 abas internas (`ativarAbaAcessos('usuarios'|
+  'auditoria')`, mesmo padrão `.abas-ficha`): **Usuários** (o que já
+  existia) e **Auditoria** (nova, ver abaixo).
+- **Preferências** (dropdown do header): não abre mais Usuários — abre
+  direto `#secao-parametrizacao`, seção nova e independente (Pix +
+  Alertas de vencimento, conteúdo idêntico ao que já existia, só
+  realocado) que **não tem item próprio na sidebar** — só é alcançável
+  pelo atalho do header.
+- `ativarAba()` trocou `'configuracoes'` por `'acessos'` e `'parametrizacao'`
+  na lista de seções que gerencia.
+
+**Aba Auditoria** (nova): mesma UX da tela "Auditoria" do
+`superadmin.html` (filtros de usuário/módulo/tipo de ação/período/
+ordenação, tabela paginada, modal de detalhes com diff antes/depois,
+exportar Excel/PDF) — copiada e adaptada para consumir `GET /auditoria`
+(`backend/routes/auditoria.js`, novo) em vez de `GET /superadmin/logs`,
+sem os filtros que não fazem sentido pra uma associação só (associação,
+módulo "administradores"). CSS novo copiado de `superadmin.html` porque
+`index.html` não tinha: `.filtros-associacoes`, `.info-linha`,
+`.btn:disabled`/`.btn-pequeno:disabled`, `.topo-acoes`.
+
 ## Reestruturação da sidebar — "Acessos e Usuários" dentro de Configurações (item de sprint 4, etapa 1, 27/07/2026)
 
 Sidebar perdeu o item `Usuários` — a tela virou uma sub-aba de dentro de
