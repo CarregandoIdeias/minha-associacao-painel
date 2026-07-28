@@ -2584,7 +2584,8 @@
         '<td><span class="badge ' + a.status + '">' + a.status + '</span></td>' +
         '<td>' + formatarData(a.data_ingresso) + '</td>' +
         '<td style="white-space:nowrap;">' +
-          '<button class="btn-pequeno" onclick="abrirEdicaoAssociado(\'' + a.id + '\')">Editar</button> ' +
+          '<button class="btn-pequeno" onclick="abrirFichaAssociado(\'' + a.id + '\', \'ver\')">Ver ficha</button> ' +
+          '<button class="btn-pequeno" onclick="abrirFichaAssociado(\'' + a.id + '\', \'editar\')">Editar</button> ' +
           '<button class="btn-pequeno" onclick="excluirAssociado(\'' + a.id + '\')">Excluir</button>' +
         '</td>' +
         '</tr>';
@@ -2615,11 +2616,27 @@
   document.getElementById('kpi-card-vencidas').onclick = function() { ativarAba('financeiro'); carregarCobrancas(); };
   document.getElementById('kpi-card-a-vencer').onclick = function() { ativarAba('financeiro'); carregarCobrancas(); };
 
-  function abrirEdicaoAssociado(id) {
+  var CAMPOS_TEXTO_FICHA = [
+    'novo-nome', 'novo-cpf', 'novo-rg', 'novo-telefone', 'novo-endereco-cep', 'novo-endereco-logradouro',
+    'novo-endereco-numero', 'novo-endereco-complemento', 'novo-endereco-bairro', 'novo-endereco-cidade',
+    'novo-endereco-estado', 'novo-categoria', 'novo-observacao'
+  ];
+  // Modo "ver" deixa os campos com readonly (dá pra selecionar/copiar o texto,
+  // diferente de disabled) e desabilita o select -- sem esconder nada, só
+  // impede edição. Reaproveita o mesmo formulário do modo "editar".
+  function definirFichaSomenteLeitura(somenteLeitura) {
+    CAMPOS_TEXTO_FICHA.forEach(function(id) { document.getElementById(id).readOnly = somenteLeitura; });
+    document.getElementById('novo-status').disabled = somenteLeitura;
+    document.getElementById('btn-salvar-associado').style.display = somenteLeitura ? 'none' : '';
+    document.getElementById('btn-cancelar-modal').textContent = somenteLeitura ? 'Fechar' : 'Cancelar';
+  }
+
+  function abrirFichaAssociado(id, modo) {
     var associado = associadosCache.find(function(a) { return a.id === id; });
     if (!associado) return;
+    var somenteLeitura = modo === 'ver';
 
-    document.getElementById('titulo-modal-associado').textContent = 'Editar associado';
+    document.getElementById('titulo-modal-associado').textContent = somenteLeitura ? 'Ficha do associado' : 'Editar associado';
     document.getElementById('editar-associado-id').value = associado.id;
     document.getElementById('novo-nome').value = associado.nome_completo;
     document.getElementById('novo-cpf').value = associado.cpf || '';
@@ -2640,6 +2657,7 @@
     document.getElementById('novo-data-cadastro').value = formatarData(associado.data_ingresso);
     document.getElementById('campo-data-cadastro-associado').style.display = 'block';
 
+    definirFichaSomenteLeitura(somenteLeitura);
     document.getElementById('abas-ficha-associado').style.display = 'flex';
     ativarAbaFicha('dados');
     fichaAssociadoAtual = associado;
@@ -2838,6 +2856,7 @@
     document.getElementById('campo-novo-email').style.display = 'block';
     document.getElementById('campo-data-cadastro-associado').style.display = 'none';
     document.getElementById('abas-ficha-associado').style.display = 'none';
+    definirFichaSomenteLeitura(false);
     fichaAssociadoAtual = null;
     ativarAbaFicha('dados');
     document.getElementById('overlay-modal').style.display = 'flex';

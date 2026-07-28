@@ -375,6 +375,25 @@ reaproveitando os padrões visuais existentes (`.badge`, `.painel`,
 `confirmarAcao()`, `.toast`). Consome `GET/POST/PUT/DELETE /sprint` e
 `PATCH /sprint/:id/status` (ver `backend/CLAUDE.md`).
 
+## Botão "Ver ficha" somente-leitura, separado de "Editar" (27/07/2026, ajuste pedido depois do 2.1-2.3)
+
+A listagem de associados ganhou um terceiro botão por linha, `Ver ficha`
+(além de `Editar`/`Excluir`), chamando `abrirFichaAssociado(id, 'ver')` —
+`abrirEdicaoAssociado` foi renomeada para `abrirFichaAssociado(id, modo)`,
+`modo` é `'ver'` ou `'editar'`, ambos reaproveitam o mesmo formulário e as
+mesmas 3 abas. `definirFichaSomenteLeitura(bool)` é o que diferencia os
+dois modos: aplica `readOnly` nos inputs/textarea (`CAMPOS_TEXTO_FICHA`,
+lista de ids) e `disabled` no `<select>` de Situação (select não respeita
+`readOnly`, só `disabled`), esconde `#btn-salvar-associado` e troca o
+texto de `#btn-cancelar-modal` para "Fechar". As abas Financeiro/
+Comunicados já eram só-leitura por natureza, não precisaram de mudança.
+`readOnly` foi escolhido em vez de `disabled` nos campos de texto de
+propósito — mantém o texto selecionável/copiável, mais adequado pra "só
+ver" do que campo acinzentado. O botão "+ Novo associado" chama
+`definirFichaSomenteLeitura(false)` ao abrir, pra garantir que o
+formulário nunca abre preso no estado somente-leitura de uma visualização
+anterior (os campos são compartilhados entre os 3 fluxos).
+
 ## Ficha do associado com abas (27/07/2026, itens de sprint 2.1-2.3)
 
 O modal de Novo/Editar Associado (`#overlay-modal`) virou `.modal-ficha`
