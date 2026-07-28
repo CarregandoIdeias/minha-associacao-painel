@@ -867,10 +867,6 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
       Comunicados
     </button>
-    <button class="nav-item" id="aba-usuarios" style="display:none;">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/><circle cx="19" cy="8" r="2"/><circle cx="5" cy="8" r="2"/></svg>
-      Usuários
-    </button>
     <button class="nav-item" id="aba-configuracoes" style="display:none;">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       Configurações
@@ -1086,60 +1082,66 @@
       </div>
     </div>
 
-    <div id="secao-usuarios" style="display:none;">
-      <div class="page-header"><h1>Usuários</h1></div>
-      <div class="painel">
-        <div class="painel-header">
-          <h3>Pessoas com acesso ao sistema</h3>
-          <button class="btn" id="btn-novo-usuario">+ Convidar usuário</button>
-        </div>
-        <div id="tabela-usuarios-container">
-          <div class="vazio">Carregando...</div>
-        </div>
-      </div>
-    </div>
-
     <div id="secao-configuracoes" style="display:none;">
       <div class="page-header"><h1>Configurações</h1></div>
 
-      <div class="painel">
-        <div class="painel-header"><h3>Chave Pix da associação</h3></div>
-        <div style="padding:22px;">
-          <p class="texto-ajuda">
-            Essa chave é usada para gerar o QR code Pix nas cobranças. Depois que o associado paga, ele envia o comprovante e a diretoria confirma manualmente.
-          </p>
-          <div class="campo">
-            <label>Chave Pix (CPF, CNPJ, e-mail, telefone ou chave aleatória)</label>
-            <input type="text" id="config-chave-pix" placeholder="ex: 00000000000">
+      <div class="abas-ficha">
+        <button type="button" class="aba-ficha ativa" id="btn-aba-config-usuarios">Acessos e Usuários</button>
+        <button type="button" class="aba-ficha" id="btn-aba-config-parametrizacao">Parametrização</button>
+      </div>
+
+      <div id="conteudo-aba-config-usuarios">
+        <div class="painel">
+          <div class="painel-header">
+            <h3>Pessoas com acesso ao sistema</h3>
+            <button class="btn" id="btn-novo-usuario">+ Convidar usuário</button>
           </div>
-          <div class="campo-linha">
-            <div class="campo">
-              <label>Nome do recebedor (máx. 25 caracteres)</label>
-              <input type="text" id="config-nome-pix" maxlength="25" placeholder="ex: ASSOCIACAO TESTE">
-            </div>
-            <div class="campo">
-              <label>Cidade (máx. 15 caracteres, sem acento)</label>
-              <input type="text" id="config-cidade-pix" maxlength="15" placeholder="ex: SAO PAULO">
-            </div>
-          </div>
-          <div class="form-footer">
-            <button class="btn" id="btn-salvar-config-pix">Salvar</button>
+          <div id="tabela-usuarios-container">
+            <div class="vazio">Carregando...</div>
           </div>
         </div>
       </div>
 
-      <div class="painel" style="margin-top:24px;">
-        <div class="painel-header"><h3>Alertas de vencimento</h3></div>
-        <div style="padding:22px;">
-          <p class="texto-ajuda">
-            Cobranças pendentes dentro desse prazo aparecem destacadas como "vencendo em breve" — tanto para a diretoria quanto para o associado.
-          </p>
-          <div class="campo" style="max-width:280px;">
-            <label>Avisar com quantos dias de antecedência?</label>
-            <input type="number" id="config-dias-alerta" min="0" max="30" placeholder="ex: 3">
+      <div id="conteudo-aba-config-parametrizacao" style="display:none;">
+        <div class="painel">
+          <div class="painel-header"><h3>Chave Pix da associação</h3></div>
+          <div style="padding:22px;">
+            <p class="texto-ajuda">
+              Essa chave é usada para gerar o QR code Pix nas cobranças. Depois que o associado paga, ele envia o comprovante e a diretoria confirma manualmente.
+            </p>
+            <div class="campo">
+              <label>Chave Pix (CPF, CNPJ, e-mail, telefone ou chave aleatória)</label>
+              <input type="text" id="config-chave-pix" placeholder="ex: 00000000000">
+            </div>
+            <div class="campo-linha">
+              <div class="campo">
+                <label>Nome do recebedor (máx. 25 caracteres)</label>
+                <input type="text" id="config-nome-pix" maxlength="25" placeholder="ex: ASSOCIACAO TESTE">
+              </div>
+              <div class="campo">
+                <label>Cidade (máx. 15 caracteres, sem acento)</label>
+                <input type="text" id="config-cidade-pix" maxlength="15" placeholder="ex: SAO PAULO">
+              </div>
+            </div>
+            <div class="form-footer">
+              <button class="btn" id="btn-salvar-config-pix">Salvar</button>
+            </div>
           </div>
-          <div class="form-footer">
-            <button class="btn" id="btn-salvar-config-alertas">Salvar</button>
+        </div>
+
+        <div class="painel" style="margin-top:24px;">
+          <div class="painel-header"><h3>Alertas de vencimento</h3></div>
+          <div style="padding:22px;">
+            <p class="texto-ajuda">
+              Cobranças pendentes dentro desse prazo aparecem destacadas como "vencendo em breve" — tanto para a diretoria quanto para o associado.
+            </p>
+            <div class="campo" style="max-width:280px;">
+              <label>Avisar com quantos dias de antecedência?</label>
+              <input type="number" id="config-dias-alerta" min="0" max="30" placeholder="ex: 3">
+            </div>
+            <div class="form-footer">
+              <button class="btn" id="btn-salvar-config-alertas">Salvar</button>
+            </div>
           </div>
         </div>
       </div>
@@ -1433,7 +1435,7 @@
     </div>
 
     <div id="resultado-usuario" style="display:none;">
-      <p style="font-size:13px; color:var(--text-muted); margin-bottom:16px;">
+      <p id="texto-resultado-usuario" style="font-size:13px; color:var(--text-muted); margin-bottom:16px;">
         Usuário criado! Essa senha só aparece agora — copie e envie para a pessoa. No primeiro login, ela vai definir uma senha nova.
       </p>
       <div class="campo"><label>E-mail de login</label><input type="text" id="resultado-usuario-email" readonly></div>
@@ -2225,6 +2227,7 @@
   document.getElementById('btn-menu-preferencias').onclick = function() {
     document.getElementById('dropdown-perfil').classList.remove('aberto');
     ativarAba('configuracoes');
+    ativarAbaConfig('usuarios');
   };
   document.getElementById('btn-menu-alterar-senha').onclick = function() {
     document.getElementById('dropdown-perfil').classList.remove('aberto');
@@ -2239,7 +2242,6 @@
     renderizarHeader();
 
     if (estado.papel === 'admin') {
-      document.getElementById('aba-usuarios').style.display = 'flex';
       document.getElementById('aba-configuracoes').style.display = 'flex';
       document.getElementById('btn-menu-preferencias').style.display = 'flex';
     } else {
@@ -2978,7 +2980,7 @@
 
   // ---------- Navegação (sidebar) ----------
   function ativarAba(idAtiva) {
-    ['dashboard', 'associados', 'financeiro', 'comunicados', 'usuarios', 'configuracoes', 'meu-perfil'].forEach(function(nome) {
+    ['dashboard', 'associados', 'financeiro', 'comunicados', 'configuracoes', 'meu-perfil'].forEach(function(nome) {
       var item = document.getElementById('aba-' + nome);
       if (item) item.classList.toggle('ativa', nome === idAtiva);
       var secao = document.getElementById('secao-' + nome);
@@ -2989,15 +2991,27 @@
     fecharSidebarMobile();
   }
 
+  // Configurações agora tem 2 sub-abas internas (item de sprint 4, etapa 1 --
+  // só reorganização de navegação, Usuários virou "Acessos e Usuários" aqui
+  // dentro em vez de item próprio na sidebar).
+  function ativarAbaConfig(nome) {
+    ['usuarios', 'parametrizacao'].forEach(function(aba) {
+      document.getElementById('conteudo-aba-config-' + aba).style.display = aba === nome ? 'block' : 'none';
+      document.getElementById('btn-aba-config-' + aba).classList.toggle('ativa', aba === nome);
+    });
+    if (nome === 'usuarios') carregarUsuarios();
+    if (nome === 'parametrizacao') { carregarConfigPix(); carregarConfigAlertas(); }
+  }
+  document.getElementById('btn-aba-config-usuarios').onclick = function() { ativarAbaConfig('usuarios'); };
+  document.getElementById('btn-aba-config-parametrizacao').onclick = function() { ativarAbaConfig('parametrizacao'); };
+
   document.getElementById('aba-dashboard').onclick = function() { ativarAba('dashboard'); };
   document.getElementById('aba-associados').onclick = function() { ativarAba('associados'); };
   document.getElementById('aba-financeiro').onclick = function() { ativarAba('financeiro'); carregarCobrancas(); };
   document.getElementById('aba-comunicados').onclick = function() { ativarAba('comunicados'); carregarComunicados(); };
-  document.getElementById('aba-usuarios').onclick = function() { ativarAba('usuarios'); carregarUsuarios(); };
   document.getElementById('aba-configuracoes').onclick = function() {
     ativarAba('configuracoes');
-    carregarConfigPix();
-    carregarConfigAlertas();
+    ativarAbaConfig('usuarios');
   };
 
   // ---------- Menu hambúrguer (mobile) ----------
@@ -3824,13 +3838,16 @@
       return;
     }
 
-    var html = '<table><thead><tr><th>Nome</th><th>E-mail</th><th>Papel</th><th>Status</th><th></th></tr></thead><tbody>';
+    var html = '<table><thead><tr><th>Nome</th><th>E-mail</th><th>Papel</th><th>Status</th><th>Criado em</th><th>Último acesso</th><th></th></tr></thead><tbody>';
     lista.forEach(function(u) {
       var acoes = '';
       if (u.papel !== 'admin') {
         acoes += '<button class="btn-pequeno" onclick="abrirEdicaoUsuario(\'' + u.id + '\')">Editar</button> ';
+        acoes += '<button class="btn-pequeno" onclick="redefinirSenhaUsuario(\'' + u.id + '\')">Redefinir senha</button> ';
         if (u.ativo) {
           acoes += '<button class="btn-pequeno" onclick="desativarUsuario(\'' + u.id + '\')">Desativar</button> ';
+        } else {
+          acoes += '<button class="btn-pequeno" onclick="reativarUsuario(\'' + u.id + '\')">Reativar</button> ';
         }
         acoes += '<button class="btn-pequeno" onclick="excluirUsuario(\'' + u.id + '\')">Excluir</button>';
       }
@@ -3839,6 +3856,8 @@
         '<td>' + escapeHtml(u.email) + '</td>' +
         '<td><span class="comunicado-categoria">' + (rotuloPapel[u.papel] || u.papel) + '</span></td>' +
         '<td><span class="badge ' + (u.ativo ? 'ativo' : 'desligado') + '">' + (u.ativo ? 'ativo' : 'inativo') + '</span></td>' +
+        '<td>' + formatarData(u.criado_em) + '</td>' +
+        '<td>' + (u.ultimo_acesso ? formatarDataHora(u.ultimo_acesso) : 'nunca acessou') + '</td>' +
         '<td style="white-space:nowrap;">' + acoes + '</td>' +
         '</tr>';
     });
@@ -3861,6 +3880,53 @@
       carregarUsuarios();
     })
     .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
+  }
+
+  function reativarUsuario(id) {
+    fetch(API_URL + '/usuarios/' + id + '/reativar', {
+      method: 'PATCH',
+      headers: { 'Authorization': 'Bearer ' + estado.token }
+    })
+    .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
+    .then(function(res) {
+      if (!res.ok) {
+        mostrarToast(res.data.erro || 'Erro ao reativar', true);
+        return;
+      }
+      mostrarToast('Usuário reativado.');
+      carregarUsuarios();
+    })
+    .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
+  }
+
+  function redefinirSenhaUsuario(id) {
+    confirmarAcao({
+      titulo: 'Redefinir senha',
+      mensagem: 'Isso gera uma senha provisória nova. A pessoa vai precisar trocar no próximo login.',
+      textoConfirmar: 'Gerar nova senha',
+      aoConfirmar: function() {
+        fetch(API_URL + '/usuarios/' + id + '/redefinir-senha', {
+          method: 'PATCH',
+          headers: { 'Authorization': 'Bearer ' + estado.token }
+        })
+        .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
+        .then(function(res) {
+          if (!res.ok) {
+            mostrarToast(res.data.erro || 'Erro ao redefinir senha', true);
+            return;
+          }
+          document.getElementById('titulo-modal-usuario').textContent = 'Senha redefinida';
+          document.getElementById('texto-resultado-usuario').textContent =
+            'Essa senha só aparece agora — copie e envie para ' + res.data.nome + '. No próximo login, a senha nova vai precisar ser trocada.';
+          document.getElementById('resultado-usuario-email').value = res.data.email;
+          document.getElementById('resultado-usuario-senha').value = res.data.senha_provisoria;
+          document.getElementById('form-usuario').style.display = 'none';
+          document.getElementById('resultado-usuario').style.display = 'block';
+          document.getElementById('overlay-modal-usuario').style.display = 'flex';
+        })
+        .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
+      }
+    });
   }
 
   function abrirEdicaoUsuario(id) {

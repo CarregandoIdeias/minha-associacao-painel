@@ -375,6 +375,36 @@ reaproveitando os padrões visuais existentes (`.badge`, `.painel`,
 `confirmarAcao()`, `.toast`). Consome `GET/POST/PUT/DELETE /sprint` e
 `PATCH /sprint/:id/status` (ver `backend/CLAUDE.md`).
 
+## Reestruturação da sidebar — "Acessos e Usuários" dentro de Configurações (item de sprint 4, etapa 1, 27/07/2026)
+
+Sidebar perdeu o item `Usuários` — a tela virou uma sub-aba de dentro de
+`Configurações` (que agora tem 2 abas internas próprias,
+`ativarAbaConfig('usuarios'|'parametrizacao')`, mesmo padrão visual
+`.abas-ficha` já usado na ficha do associado e no modal de leituras de
+comunicado). "Parametrização" é literalmente o conteúdo antigo de
+Configurações (Pix + Alertas), só realocado, sem mudar nada dentro.
+`secao-usuarios` como section própria da sidebar deixou de existir —
+virou `#conteudo-aba-config-usuarios` dentro de `#secao-configuracoes`.
+`ativarAba()` perdeu `'usuarios'` da lista de seções que gerencia.
+
+O botão "Preferências" do dropdown do header e o item "Configurações" da
+sidebar levam pro mesmo lugar de sempre, e agora ambos abrem direto na
+aba "Acessos e Usuários" (`ativarAbaConfig('usuarios')` chamado nos dois
+pontos de entrada).
+
+Tabela de usuários ganhou colunas **Criado em** e **Último acesso**
+("nunca acessou" quando null) e um botão novo **Redefinir senha**
+(`redefinirSenhaUsuario()`, reaproveita o mesmo modal/bloco
+`#resultado-usuario` que já existia pra mostrar a senha provisória de um
+usuário recém-criado — só troca o texto e o título dinamicamente) e
+**Reativar** (`reativarUsuario()`, aparece no lugar de "Desativar" quando
+`ativo === false` — antes não tinha como reverter pela UI).
+
+**Adiado de propósito**: seletor de "perfil de acesso" novo
+(Financeiro/Atendimento/Operador/Somente Consulta) — ver
+`backend/CLAUDE.md` pra o motivo (precisa mudar enum + toda checagem de
+`autorizar()`, não é seguro fazer de brinde nessa etapa).
+
 ## Confirmação de leitura dos comunicados (item de sprint 3, 27/07/2026)
 
 Cada card em `#lista-comunicados-container` (`renderizarComunicados()`)
