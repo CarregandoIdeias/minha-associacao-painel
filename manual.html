@@ -344,13 +344,14 @@
             <p>KPIs de associados (total, ativos, novos no mês, inadimplentes), receita do mês, mensalidades vencidas/a vencer, gráficos de crescimento e receita, e cards de apoio com atividades recentes, próximos vencimentos, últimos associados e comunicados recentes.</p>
             <span class="quem">Plano e trial</span>
             <p>No topo do Dashboard aparece um card com o plano atual: se está no <strong>Trial</strong>, mostra a contagem regressiva (dias/horas/minutos) até expirar e um botão <strong>Contratar Plano</strong>; se já é um plano pago, mostra status, próxima renovação, valor da mensalidade e um botão <strong>Gerenciar Plano</strong> pra pedir upgrade. Ao clicar em contratar, escolha o plano, pague via Pix (QR Code ou copia-e-cola) e envie o comprovante — a solicitação fica aguardando aprovação do Super Admin.</p>
+            <p>Conforme o vencimento da assinatura (ou o fim do trial) se aproxima, esse card muda de cor e passa a pulsar — um aviso amarelo discreto vira vermelho e mais chamativo perto da data, e continua avisando mesmo depois de vencido, sem esconder o acesso aos próprios dados.</p>
           </div>
         </div>
         <div class="ap-step">
           <div class="ap-step-num">3</div>
           <div class="ap-step-body">
             <h4>Associados — cadastro da base</h4>
-            <p>Cadastre um associado novo com nome, CPF, telefone, categoria e e-mail — isso já cria o login dele pro Portal do Associado, com senha provisória gerada na hora. Edite dados, mude o status (ativo, inadimplente, desligado, suspenso) ou exclua quando necessário.</p>
+            <p>Cadastre um associado novo com nome, CPF, telefone, categoria e e-mail — isso já cria o login dele pro Portal do Associado, com senha provisória gerada na hora. Cada associado tem dois botões separados na lista: <strong>Ver ficha</strong> (mostra tudo — dados pessoais, RG, endereço completo, plano/categoria, situação, data de cadastro, mais duas abas com o histórico financeiro e o histórico de leitura de comunicados dele — só pra consulta, nada editável ali) e <strong>Editar</strong> (o mesmo formulário, mas liberado pra alterar).</p>
           </div>
         </div>
         <div class="ap-step">
@@ -369,30 +370,23 @@
           <div class="ap-step-num">5</div>
           <div class="ap-step-body">
             <h4>Comunicados — avisos com confirmação de leitura</h4>
-            <p>Publique um comunicado (com destaque opcional e agendamento de publicação) e acompanhe quantos associados já leram. Cada associado vê o mural dele no Portal, com o que ainda não leu em destaque.</p>
+            <p>Publique um comunicado (com destaque opcional e agendamento de publicação). Cada card mostra, na hora, pra quantos associados foi enviado, quantos já leram, quantos faltam e a taxa de leitura. Clique em <strong>Ver leituras</strong> pra abrir a lista completa, dividida em "quem leu" (com data e hora) e "quem ainda não leu", com busca por nome e exportação em Excel ou PDF. Cada associado vê o mural dele no Portal, com o que ainda não leu em destaque.</p>
           </div>
         </div>
         <div class="ap-step">
           <div class="ap-step-num">6</div>
           <div class="ap-step-body">
-            <h4>Usuários — quem mais acessa o painel</h4>
-            <p>Convide outra pessoa da diretoria (papel <strong>diretoria</strong> — acesso amplo, sem gerenciar usuários/configurações) ou vincule o login de um associado já cadastrado. Dá pra editar nome/papel, desativar ou excluir — exceto a própria conta.</p>
+            <h4>Acessos — usuários e auditoria</h4>
+            <p>Reúne em duas abas tudo relacionado a quem entra no painel. Na aba <strong>Usuários</strong>: convide outra pessoa da diretoria (papel <strong>diretoria</strong> — acesso amplo, sem gerenciar usuários) ou vincule o login de um associado já cadastrado; edite nome/papel, desative/reative o acesso, gere uma senha provisória nova pra alguém que esqueceu a dela, ou exclua — exceto a própria conta. A tabela mostra desde quando cada pessoa tem conta e quando foi o último acesso dela. Na aba <strong>Auditoria</strong>: um histórico de tudo que aconteceu nessa associação (quem cadastrou o quê, quem editou, quem excluiu, logins), com filtros por pessoa/módulo/tipo de ação/período e exportação em Excel ou PDF — a mesma ideia da tela de Auditoria do Super Admin, só que só com o que é dessa associação.</p>
             <span class="quem">Só visível pra quem é admin</span>
           </div>
         </div>
         <div class="ap-step">
           <div class="ap-step-num">7</div>
           <div class="ap-step-body">
-            <h4>Configurações</h4>
-            <p>Cadastre a chave Pix da própria associação (usada nas cobranças aos associados) e defina com quantos dias de antecedência o sistema deve alertar sobre uma mensalidade perto de vencer.</p>
-            <span class="quem">Só visível pra quem é admin</span>
-          </div>
-        </div>
-        <div class="ap-step">
-          <div class="ap-step-num">8</div>
-          <div class="ap-step-body">
-            <h4>Meu Perfil / Alterar Senha</h4>
-            <p>No menu do avatar, no canto superior direito: veja seus dados ou troque sua senha a qualquer momento.</p>
+            <h4>Meu Perfil, Alterar Senha e Preferências</h4>
+            <p>Tudo isso fica no menu do avatar, no canto superior direito — não é mais item da barra lateral. Além de ver seus dados e trocar a senha, dá pra alternar entre tema claro e escuro por ali, e o item <strong>Preferências</strong> abre a chave Pix da própria associação (usada nas cobranças aos associados) e o número de dias de antecedência pra alertar sobre uma mensalidade perto de vencer.</p>
+            <span class="quem">Preferências só visível pra quem é admin</span>
           </div>
         </div>
       </div>
