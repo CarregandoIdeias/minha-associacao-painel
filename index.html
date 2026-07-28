@@ -1170,6 +1170,23 @@
       <div class="page-header"><h1>Parametrização</h1></div>
 
       <div class="painel">
+        <div class="painel-header"><h3>Logo da associação</h3></div>
+        <div style="padding:22px;">
+          <p class="texto-ajuda">
+            Aparece no cabeçalho do Dashboard, ao lado do nome da associação. Recomendado: imagem quadrada, PNG ou JPG.
+          </p>
+          <div class="perfil-topo">
+            <img id="config-logo-preview" alt="Logo da associação" style="display:none; width:64px; height:64px; border-radius:10px; object-fit:cover; flex-shrink:0;">
+            <div class="avatar-iniciais" id="config-logo-placeholder" style="width:64px; height:64px; font-size:22px;">?</div>
+            <div>
+              <button type="button" class="btn btn-ghost" id="btn-trocar-logo-associacao">Trocar logo</button>
+              <input type="file" id="input-logo-associacao" accept="image/*" style="display:none;">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="painel" style="margin-top:24px;">
         <div class="painel-header"><h3>Chave Pix da associação</h3></div>
         <div style="padding:22px;">
           <p class="texto-ajuda">
@@ -2304,6 +2321,7 @@
   document.getElementById('btn-menu-preferencias').onclick = function() {
     document.getElementById('dropdown-perfil').classList.remove('aberto');
     ativarAba('parametrizacao');
+    carregarConfigLogo();
     carregarConfigPix();
     carregarConfigAlertas();
   };
@@ -3103,6 +3121,87 @@
   }
   document.getElementById('btn-hamburguer').onclick = abrirSidebarMobile;
   document.getElementById('sidebar-overlay').onclick = fecharSidebarMobile;
+
+  // ---------- Logo da associação ----------
+  function carregarConfigLogo() {
+    var preview = document.getElementById('config-logo-preview');
+    var placeholder = document.getElementById('config-logo-placeholder');
+    if (estado.logoAssociacao && RE_DATA_URL_SEGURA.test(estado.logoAssociacao)) {
+      preview.src = estado.logoAssociacao;
+      preview.style.display = 'block';
+      placeholder.style.display = 'none';
+    } else {
+      preview.style.display = 'none';
+      placeholder.style.display = 'flex';
+      placeholder.textContent = iniciaisNome(estado.nomeAssociacao || '');
+    }
+  }
+
+  document.getElementById('btn-trocar-logo-associacao').onclick = function() {
+    document.getElementById('input-logo-associacao').click();
+  };
+
+  document.getElementById('input-logo-associacao').onchange = function(e) {
+    var arquivo = e.target.files[0];
+    e.target.value = '';
+    if (!arquivo) return;
+
+    if (!arquivo.type.startsWith('image/')) {
+      mostrarToast('Selecione um arquivo de imagem (JPG ou PNG)', true);
+      return;
+    }
+
+    var leitor = new FileReader();
+    leitor.onload = function(evt) {
+      var img = new Image();
+      img.onload = function() {
+        var TAMANHO_MAX = 300;
+        var largura = img.width;
+        var altura = img.height;
+
+        if (largura > altura && largura > TAMANHO_MAX) {
+          altura = Math.round(altura * (TAMANHO_MAX / largura));
+          largura = TAMANHO_MAX;
+        } else if (altura > TAMANHO_MAX) {
+          largura = Math.round(largura * (TAMANHO_MAX / altura));
+          altura = TAMANHO_MAX;
+        }
+
+        var canvas = document.createElement('canvas');
+        canvas.width = largura;
+        canvas.height = altura;
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, largura, altura);
+
+        var logoRedimensionada = canvas.toDataURL('image/jpeg', 0.85);
+        salvarLogoAssociacao(logoRedimensionada);
+      };
+      img.src = evt.target.result;
+    };
+    leitor.readAsDataURL(arquivo);
+  };
+
+  function salvarLogoAssociacao(logoBase64) {
+    fetch(API_URL + '/configuracoes/logo', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + estado.token
+      },
+      body: JSON.stringify({ logo_base64: logoBase64 })
+    })
+    .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
+    .then(function(res) {
+      if (!res.ok) {
+        mostrarToast(res.data.erro || 'Erro ao salvar logo', true);
+        return;
+      }
+      estado.logoAssociacao = logoBase64;
+      carregarConfigLogo();
+      mostrarToast('Logo atualizada!');
+    })
+    .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
+  }
 
   function carregarConfigAlertas() {
     fetch(API_URL + '/configuracoes/alertas', {
