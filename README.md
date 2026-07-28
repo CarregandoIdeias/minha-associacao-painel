@@ -11,15 +11,17 @@ de dados, segurança). Este README cobre só o front-end.
 ## Arquivos
 
 - `index.html` — painel da associação (admin/diretoria). Login, dashboard,
-  associados, financeiro, comunicados, usuários, configurações, meu
-  perfil. Header fixo no topo (saudação, e-mail, avatar, menu de perfil)
+  associados, financeiro, comunicados, acessos (usuários + auditoria),
+  meu perfil. Header fixo no topo (saudação, avatar, dropdown de perfil)
   acima do conteúdo de cada seção — ver "Header e Meu Perfil" abaixo. Menu
-  lateral, sem submenus: Dashboard (tela inicial, ver seção própria
-  abaixo) → Associados → Financeiro → Comunicados → Usuários →
-  Configurações. Em tablet/celular a sidebar vira um menu off-canvas com
-  botão hambúrguer (☰), ver seção "Layout e responsividade". Login
-  rejeita contas com papel `associado` (mensagem aponta para
-  `portal.html`) — ver seção "Separação do Portal do Associado" abaixo.
+  lateral: Dashboard (tela inicial) → Associados → Financeiro →
+  Comunicados → **Acessos** (reestruturado 27/07/2026 — antes eram dois
+  itens separados, "Usuários" e "Configurações"; ver seção própria
+  "Acessos: Usuários + Auditoria" abaixo). Em tablet/celular a sidebar
+  vira um menu off-canvas com botão hambúrguer (☰), ver seção "Layout e
+  responsividade". Login rejeita contas com papel `associado` (mensagem
+  aponta para `portal.html`) — ver seção "Separação do Portal do
+  Associado" abaixo.
 - `portal.html` — Portal do Associado, arquivo próprio desde 25/07/2026
   (ver seção "Separação do Portal do Associado" abaixo). Login separado
   (rejeita papéis que não sejam `associado`), sessão própria
@@ -31,17 +33,26 @@ de dados, segurança). Este README cobre só o front-end.
   específico do painel administrativo (KPIs, gráficos, tabela de
   associados etc.) — não tem Chart.js, só o gerador de QR Pix.
 - `superadmin.html` — painel do Super Admin (dono da plataforma). Login
-  separado dos outros dois arquivos. Layout com sidebar navegável
-  (Dashboard + Associações). Dashboard agregado com 7 KPIs, 4 gráficos
-  (crescimento, novos associados, receita, distribuição por plano),
-  últimas associações e alertas em tempo real (vencimentos, mensalidades
-  atrasadas). Tela de Associações com CRUD completo, filtros (nome,
-  cidade, UF, plano, status) e formulário estendido (plano contratado,
-  vencimento, forma de cobrança, logo/CEP/site, CPF responsável).
+  separado dos outros arquivos. Sidebar navegável: Dashboard, Associações,
+  Administradores (gated por papel), Auditoria, Contratações, Config. Pix,
+  Meu Perfil. Dashboard compacto com KPIs, gráficos de crescimento/novos
+  associados e grade de "últimas" (associações/admins/atividades). Tela de
+  Associações com CRUD completo, filtros e formulário estendido (plano
+  contratado, trial, vencimento, forma de cobrança, logo/CEP/site, CPF
+  responsável, dias de alerta de renovação).
 - `landing.html` — página de vendas pública (marca **ASSOCIA PLUS**, novo
   posicionamento comercial, 25/07/2026). Sem login, sem chamada à API —
   só HTML/CSS/JS estático. Ver seção própria "Landing page (ASSOCIA
   PLUS)" abaixo.
+- `manual.html` — guia passo a passo de como usar o Super Admin, o Painel
+  da Associação e o Portal do Associado. Estático, sem login.
+- `sprint.html` — backlog interno de melhorias/bugs da plataforma (não é
+  voltado a clientes). Login reaproveita `POST /superadmin/login`. Sem
+  sidebar, página única com KPIs + tabela filtrável + modal de
+  criar/editar/detalhe.
+- `intranet.html` — "Painel Central", hub de acesso rápido a todos os
+  arquivos acima + cards de infraestrutura (GitHub/Vercel/Supabase/Render).
+  Abas Produção/Homologação — ver "Intranet" abaixo.
 
 ## Separação do Portal do Associado (25/07/2026)
 
@@ -76,28 +87,45 @@ completo (QR + copia-e-cola + upload de comprovante) vive só em
 
 ## Hospedagem
 
-Vercel, mesmo domínio para os quatro arquivos:
+Vercel, mesmo domínio para todos os arquivos deste repositório:
 - `https://minha-associacao-painel.vercel.app/` → `index.html`
 - `https://minha-associacao-painel.vercel.app/portal.html`
 - `https://minha-associacao-painel.vercel.app/superadmin.html`
 - `https://minha-associacao-painel.vercel.app/landing.html`
+- `https://minha-associacao-painel.vercel.app/manual.html`
+- `https://minha-associacao-painel.vercel.app/sprint.html`
+- `https://minha-associacao-painel.vercel.app/intranet.html`
 
 Deploy automático a cada push no GitHub (branch `main`). A raiz do
 domínio continua sendo o login do painel administrativo (`index.html`) —
 `landing.html` foi adicionada como página nova, sem virar a home do
 domínio (decisão consciente, ver seção "Landing page" abaixo).
 
+**Ambiente de homologação (staging, desde 27/07/2026)**: mesmo conjunto de
+arquivos, projeto Vercel próprio, branch `staging` —
+`https://minha-associacao-painel-staging.vercel.app/...`. Ver
+`backend/README.md` para o quadro completo do ambiente de staging
+(banco/backend próprios também).
+
 ## Configuração
 
-Cada um dos três arquivos tem, no topo do `<script>`, uma constante:
+Nenhum arquivo tem mais `API_URL` fixo — desde 27/07/2026, cada um resolve
+o valor em tempo de execução pelo hostname (`localhost`/domínio contendo
+"staging" → backend de staging; qualquer outro → produção):
 
 ```js
-var API_URL = 'https://minha-associacao-backend.onrender.com';
+var API_URL = (function() {
+  var h = location.hostname;
+  if (h === 'localhost' || h === '127.0.0.1' || h.indexOf('staging') !== -1) {
+    return 'https://minha-associacao-backend-staging.onrender.com';
+  }
+  return 'https://minha-associacao-backend.onrender.com';
+})();
 ```
 
-Ao testar contra um backend local, trocar para `http://localhost:3000` —
-**e lembrar de reverter antes de commitar/dar push**, senão a produção
-fica apontando para localhost.
+Isso existe de propósito pra eliminar o risco antigo de "trocar pra
+testar local e esquecer de reverter antes de commitar" — o código é
+idêntico em `main` e `staging`, não tem nada pra lembrar de reverter.
 
 ## Login
 
@@ -136,9 +164,11 @@ Header fixo (`.app-header`) acima do conteúdo de cada seção, presente em
 todas as telas: saudação por horário (Bom dia/Boa tarde/Boa noite,
 `saudacaoPorHorario()`) + primeiro nome, e-mail, avatar de iniciais
 (`.avatar-iniciais`, `iniciaisNome()`). Clicar no avatar abre um dropdown
-(`.dropdown-perfil`) com **Meu Perfil**, **Alterar Senha** e **Sair**
-(fecha ao clicar fora, mesmo princípio do `#sidebar-overlay` da sidebar
-mobile).
+(`.dropdown-perfil`) com **Meu Perfil**, **Alterar Senha**,
+**Preferências** (atalho pra "Parametrização", só admin — ver seção
+"Acessos: Usuários + Auditoria" abaixo), **Alternar Tema** (27/07/2026 —
+saiu da sidebar, centralizado só aqui) e **Sair** (fecha ao clicar fora,
+mesmo princípio do `#sidebar-overlay` da sidebar mobile).
 
 `nome` vem do login (`res.data.usuario.nome`) e é persistido em
 `sessao_painel` no `localStorage` junto com token/papel. `email` **não**
@@ -196,36 +226,140 @@ largas o canvas do Chart.js estica verticalmente também (a proporção
 padrão é largura/altura, e a largura do card cresce muito quando não há
 mais `max-width` no `.content-area`).
 
+## Alerta inteligente de renovação do plano (27/07/2026)
+
+`#bloco-plano-dashboard` no Dashboard mostra o card de plano/trial de
+sempre, mas agora com destaque visual crescente (`renderizarBlocoPlano()`)
+quando `GET /plano` devolve um campo `alerta`: classes
+`.card-plano.alerta-atencao`/`.alerta-alerta`/`.alerta-critico` (as duas
+últimas com animação de pulse), título e mensagem viram um aviso ("⚠️ Sua
+assinatura vence em N dias" / "venceu há N dias", ou a versão de trial
+"Sua avaliação termina em N dias"), botão vira "Renovar Plano" (mesmo
+modal de contratação de sempre). Nível calculado no backend
+(`utils/precos.js`, `alertaAssinatura`), janela configurável pelo Super
+Admin por associação (`dias_alerta_assinatura`, select fechado
+30/20/15/10/7/3 dias no formulário de associação do `superadmin.html`).
+Sem alerta, o card continua exatamente como antes (informativo).
+
+## Ficha completa do associado (27/07/2026)
+
+O modal de Novo/Editar Associado (`#overlay-modal`) virou `.modal-ficha`
+(mais largo, com scroll próprio), reorganizado em seções (Dados pessoais,
+Endereço, Plano e situação, Observações — mais RG e endereço estruturado,
+campos novos no backend) e, no modo edição, ganha 3 abas:
+
+- **Dados**: o formulário acima, mais "Data de cadastro" (só leitura)
+- **Financeiro**: histórico de cobranças desse associado
+  (`GET /cobrancas?associado_id=X`, já existia), com filtro por
+  status/ano e acesso ao comprovante
+- **Comunicados**: quais comunicados esse associado leu/não leu, com data
+  e tempo até a leitura (`GET /associados/:id/comunicados`, novo)
+
+A listagem de associados tem dois botões separados por linha: **"Ver
+ficha"** (mesmo modal, mas todos os campos em `readOnly`/`disabled`, sem
+botão Salvar — só visualização) e **"Editar"** (formulário editável
+normal). `abrirFichaAssociado(id, modo)` (`modo: 'ver'|'editar'`)
+substitui a antiga `abrirEdicaoAssociado`.
+
+## Confirmação de leitura dos comunicados (27/07/2026)
+
+Cada card de comunicado mostra estatísticas de leitura — Enviado para /
+Lido por / Pendente / Taxa de leitura (cor muda conforme a taxa) — e um
+botão **"Ver leituras"**, que abre um modal com 2 abas: "Associados que
+leram" (nome, data, hora) e "Associados que não leram" (nome/e-mail),
+busca por nome, exportação Excel/PDF. Consome `GET
+/comunicados/:id/leituras` e `/leituras/exportar/:formato`, novos no
+backend.
+
+## Acessos: Usuários + Auditoria (27/07/2026)
+
+Sidebar perdeu os itens separados "Usuários" e "Configurações" — viraram
+**"Acessos"**, com 2 sub-abas internas (mesmo padrão visual `.abas-ficha`
+da ficha do associado):
+
+- **Usuários**: o CRUD de sempre (convidar, editar, desativar, excluir),
+  mais colunas **Criado em**/**Último acesso** (derivado de `auth_logs`,
+  sem coluna nova) e botões **Redefinir senha** (gera provisória nova,
+  reaproveita o modal de credenciais que já existia pra usuário novo) e
+  **Reativar** (antes, uma vez desativado não tinha como reverter pela
+  UI)
+- **Auditoria**: mesma experiência da tela "Auditoria" do
+  `superadmin.html` (filtros de usuário/módulo/tipo de ação/período,
+  paginação, modal de detalhes com diff antes/depois, exportar
+  Excel/PDF), só que já filtrada pra essa associação — consome `GET
+  /auditoria`, novo no backend, sem filtro de "associação" nem módulo
+  "administradores" (não fazem sentido num tenant só)
+
+**"Parametrização"** (chave Pix + alertas de vencimento de cobrança —
+mesmo conteúdo que já existia) saiu da sidebar por completo: só é
+alcançável pelo item **"Preferências"** do dropdown do header. Isso é a
+etapa 1-2 de um pedido maior de reorganização (unificar tudo relacionado
+a configuração administrativa) — as demais seções (financeiro avançado,
+alertas mais ricos, comunicação, cadastro de associados, sistema,
+segurança, integrações) ficam pra sprints futuras, uma de cada vez.
+
+## Intranet — "Painel Central" (27/07/2026)
+
+`intranet.html` ganhou duas abas (`ativarAmbiente('producao'|
+'homologacao')`, preferência salva em `localStorage`): os 6 cards de
+sempre (Super Admin/Painel/Portal/Landing/Manual/Sprint), cada aba usando
+URL absoluta do domínio certo (produção ou staging) em vez de link
+relativo — como a página é servida nos dois ambientes, um link relativo
+sempre apontaria pro ambiente atual, não necessariamente o desejado. Cada
+aba também tem uma seção "Acesso rápido — infraestrutura": cards menores
+linkando pros dashboards reais de GitHub (branch certa por ambiente),
+Vercel, Supabase e Render.
+
 ## Super Admin — funcionalidades específicas
 
-**Dashboard**: KPIs de associações totais, associados agregados, MRR
-(receita mensal recorrente calculada pelo plano), mensalidades vencendo,
-ativas e bloqueadas. Gráficos Chart.js de crescimento (12 meses),
-associados novos, receita recebida (histórico real, não projeção) e
-distribuição de clientes por plano. Alertas gerados automaticamente no
-backend: assinaturas vencidas/vencendo (customizável por associação via
-`dias_alerta_vencimento`), clientes novos (últimos 7 dias), mensalidades
-atrasadas agregadas.
+**Dashboard** (compactado 26/07/2026): KPIs de associações totais,
+associados agregados, MRR, mensalidades vencendo/ativas/bloqueadas.
+Gráficos Chart.js de crescimento (12 meses) e novos associados — os
+gráficos de "receita recebida por mês" e "distribuição por plano" foram
+removidos nessa reforma. Grade de 3 cards de "últimas" (associações,
+admins, atividades — a última via `logs_auditoria`, ver seção de
+Auditoria abaixo). Alertas automáticos: assinaturas vencidas/vencendo
+(customizável por associação via `dias_alerta_assinatura`), clientes
+novos (últimos 7 dias), mensalidades atrasadas agregadas, solicitações de
+plano pendentes.
+
+**Administradores** (26/07/2026, gated por papel `super_admin`): CRUD de
+quem tem acesso ao Super Admin, com papel (super_admin/administrador/
+suporte), ativar/desativar, redefinir senha.
+
+**Auditoria** (26/07/2026): tela cross-tenant sobre `logs_auditoria` —
+filtros (usuário, associação, módulo, tipo de ação, período, ordenação),
+tabela paginada, modal de detalhes com diff `dados_anteriores`/
+`dados_novos` lado a lado, exportação Excel/PDF. Mesma UX foi replicada
+pra dentro de cada associação (só os próprios logs) em 27/07/2026 — ver
+"Acessos: Usuários + Auditoria" acima.
+
+**Contratações** (26/07/2026): fila de aprovação de solicitações de
+contratação de plano pago (Pix da própria plataforma + comprovante
+enviado pela associação). Visualização de comprovante (27/07/2026,
+`renderizarArquivoBase64()`) alinhada com o padrão que `index.html` já
+usava: PDF vira Blob local exibido inline num iframe (com link de apoio
+pra abrir em nova aba), em vez de um link direto pro `data:` URI (que
+falhava com arquivo grande em alguns navegadores).
 
 **Associações**: Tabela com filtros (nome, cidade/UF, plano, status da
-assinatura). Colunas: Nome, Cidade/UF, Responsável (nome do admin da
-associação), Plano, Qtd. Associados, Valor Mensalidade, Status
-(bloqueada/trial/vencida/vencendo/ativa — calculado, não gravado),
-Data de Cadastro, Próximo Vencimento, Ações (Ver/Editar/Excluir).
+assinatura). Colunas: Nome, Cidade/UF, Responsável, Plano, Qtd.
+Associados, Valor Mensalidade, Status (bloqueada/trial/vencida/vencendo/
+ativa — calculado, não gravado), Data de Cadastro, Próximo Vencimento,
+Ações (Ver/Editar/Excluir).
 
-**Formulário de Associação**: Dados básicos (nome, tipo, email, telefone,
-endereço) + Dados de Cadastro (CEP, site, logo em base64). Plano
-Contratado (select de plano, campo numérico de valor da mensalidade com
-sugestão automática da fórmula, data de vencimento, forma de cobrança).
-CPF do Responsável (admin da associação). Confirmação de ações destrutivas
-via modal próprio (não `confirm()` nativo) — padrão visual consistente com
-o painel da associação.
+**Formulário de Associação**: Dados básicos + Dados de Cadastro
+(CEP/site/logo). Plano Contratado (select, valor com sugestão automática,
+vencimento, forma de cobrança, duração do trial em dias, e — 27/07/2026 —
+select de "Alertar vencimento da assinatura com quantos dias de
+antecedência?", fechado em 30/20/15/10/7/3). CPF do Responsável.
+Confirmação de ações destrutivas via modal próprio, não `confirm()`
+nativo.
 
 **Cálculo de MRR**: Centralizado em `backend/utils/precos.js`. Cada plano
-tem preço-base + preço por associado ativo; fórmula aplicada no backend
-(GET `/superadmin/dashboard`, GET `/superadmin/associacoes`,
-POST/PUT `/superadmin/associacoes/:id`). Campo `valor_mensalidade_manual`
-na associação permite sobrescrever — útil para negociações customizadas.
+tem preço-base + preço por associado ativo; fórmula aplicada no backend.
+Campo `valor_mensalidade_manual` na associação permite sobrescrever —
+útil para negociações customizadas.
 
 ## Landing page (ASSOCIA PLUS) — 25/07/2026
 
