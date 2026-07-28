@@ -375,6 +375,19 @@ reaproveitando os padrões visuais existentes (`.badge`, `.painel`,
 `confirmarAcao()`, `.toast`). Consome `GET/POST/PUT/DELETE /sprint` e
 `PATCH /sprint/:id/status` (ver `backend/CLAUDE.md`).
 
+## Visualização de comprovante do Super Admin alinhada com a da associação (27/07/2026)
+
+`superadmin.html`: `renderizarArquivoBase64()` renderizava PDF como um
+link direto pro `data:` URI (`link.href = dataUrl`) — funciona, mas trava/
+falha em alguns navegadores com arquivo grande, e não mostra nada até
+clicar. Trocado pelo mesmo padrão que `painel/index.html`
+(`renderizarComprovanteBase64`) já usava: converte pra Blob local
+(`dataUrlParaBlobUrl()`, copiada pra cá) e exibe inline num `<iframe>`
+(altura fixa 480px), com um link "Abrir ... em nova aba" logo abaixo.
+Afeta os 3 usos existentes da função (comprovante de contratação de
+plano, preview de logo ao trocar e ao salvar) — nenhum precisou mudar a
+chamada, só a função interna.
+
 ## Botão "Ver ficha" somente-leitura, separado de "Editar" (27/07/2026, ajuste pedido depois do 2.1-2.3)
 
 A listagem de associados ganhou um terceiro botão por linha, `Ver ficha`

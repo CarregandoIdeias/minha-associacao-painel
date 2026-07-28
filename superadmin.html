@@ -983,14 +983,26 @@
       container.innerHTML = '<p class="vazio">Arquivo em formato inválido ou não suportado.</p>';
       return;
     }
+    // Mesma ideia de painel/index.html (renderizarComprovanteBase64): PDF
+    // vira Blob local (não link direto pro data: URI, que trava/erra em
+    // arquivo grande em alguns navegadores) exibido inline num iframe, com
+    // link de apoio pra abrir em nova aba.
     if (dataUrl.indexOf('data:application/pdf') === 0) {
+      var blobUrl = dataUrlParaBlobUrl(dataUrl);
+      var iframe = document.createElement('iframe');
+      iframe.src = blobUrl;
+      iframe.style.cssText = 'width:100%; height:480px; border:1px solid var(--border); border-radius:10px;';
+      container.appendChild(iframe);
+      var p = document.createElement('p');
+      p.style.marginTop = '10px';
       var link = document.createElement('a');
-      link.className = 'btn btn-ghost';
-      link.href = dataUrl;
+      link.href = blobUrl;
       link.target = '_blank';
       link.rel = 'noopener';
-      link.textContent = 'Abrir ' + rotulo + ' (PDF)';
-      container.appendChild(link);
+      link.style.cssText = 'color:var(--accent); font-size:13px;';
+      link.textContent = 'Abrir ' + rotulo + ' em nova aba';
+      p.appendChild(link);
+      container.appendChild(p);
       return;
     }
     var img = document.createElement('img');
@@ -999,6 +1011,20 @@
     img.style.maxWidth = '100%';
     img.style.borderRadius = '10px';
     container.appendChild(img);
+  }
+
+  function dataUrlParaBlobUrl(dataUrl) {
+    var partes = dataUrl.split(',');
+    var mimeMatch = partes[0].match(/:(.*?);/);
+    var mime = mimeMatch ? mimeMatch[1] : 'application/octet-stream';
+    var binario = atob(partes[1]);
+    var tamanho = binario.length;
+    var bytes = new Uint8Array(tamanho);
+    for (var i = 0; i < tamanho; i++) {
+      bytes[i] = binario.charCodeAt(i);
+    }
+    var blob = new Blob([bytes], { type: mime });
+    return URL.createObjectURL(blob);
   }
 
   // Modal de confirmação genérico — substitui o confirm() nativo do navegador
