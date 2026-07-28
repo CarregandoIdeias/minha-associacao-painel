@@ -520,6 +520,12 @@
     background: var(--accent-soft);
     color: var(--accent);
   }
+  .comunicado-stats { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin-top: 10px; font-size: 12.5px; color: var(--text-muted); }
+  .comunicado-stats strong { color: var(--text); }
+  .comunicado-taxa { font-weight: 700; }
+  .comunicado-taxa.taxa-alta { color: var(--success); }
+  .comunicado-taxa.taxa-media { color: var(--warning); }
+  .comunicado-taxa.taxa-baixa { color: var(--danger); }
   textarea {
     width: 100%;
     padding: 11px 14px;
@@ -1364,6 +1370,32 @@
     <div class="modal-actions">
       <button class="btn btn-ghost" id="btn-cancelar-modal-comunicado">Cancelar</button>
       <button class="btn" id="btn-salvar-comunicado">Publicar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL LEITURAS DO COMUNICADO ===== -->
+<div class="overlay" id="overlay-modal-leituras">
+  <div class="modal modal-ficha">
+    <h3 id="titulo-modal-leituras">Leituras do comunicado</h3>
+
+    <div class="comunicado-stats" id="resumo-leituras-comunicado" style="margin-top:0; margin-bottom:16px;"></div>
+
+    <div class="abas-ficha">
+      <button type="button" class="aba-ficha ativa" id="btn-aba-leituras-lidos">Associados que leram</button>
+      <button type="button" class="aba-ficha" id="btn-aba-leituras-nao-lidos">Associados que não leram</button>
+    </div>
+
+    <div class="filtros-ficha">
+      <input type="text" id="busca-leituras-comunicado" placeholder="Pesquisar por nome..." style="flex:1; min-width:180px; padding:9px 12px; border:1px solid var(--border); border-radius:8px; background:var(--bg); color:var(--text); font-family:inherit; font-size:13px;">
+      <button type="button" class="btn-pequeno" id="btn-exportar-leituras-excel">Exportar Excel</button>
+      <button type="button" class="btn-pequeno" id="btn-exportar-leituras-pdf">Exportar PDF</button>
+    </div>
+
+    <div id="lista-leituras-comunicado"></div>
+
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="btn-fechar-modal-leituras">Fechar</button>
     </div>
   </div>
 </div>
@@ -3535,6 +3567,11 @@
 
     var html = '';
     lista.forEach(function(c) {
+      var total = parseInt(c.total_destinatarios, 10) || 0;
+      var lidoPor = parseInt(c.leituras_associados, 10) || 0;
+      var pendente = Math.max(total - lidoPor, 0);
+      var taxa = total > 0 ? (lidoPor / total) * 100 : 0;
+      var classeTaxa = taxa >= 70 ? 'taxa-alta' : taxa >= 40 ? 'taxa-media' : 'taxa-baixa';
       html += '<div class="comunicado-card">' +
         '<div class="comunicado-header">' +
           '<span class="comunicado-titulo">' + escapeHtml(c.titulo) + '</span>' +
@@ -3542,7 +3579,14 @@
         '</div>' +
         '<div class="comunicado-conteudo">' + escapeHtml(c.conteudo) + '</div>' +
         (c.categoria_alvo ? '<span class="comunicado-categoria">' + escapeHtml(c.categoria_alvo) + '</span>' : '') +
+        '<div class="comunicado-stats">' +
+          '<span>Enviado para <strong>' + total + '</strong></span>' +
+          '<span>Lido por <strong>' + lidoPor + '</strong></span>' +
+          '<span>Pendente <strong>' + pendente + '</strong></span>' +
+          '<span class="comunicado-taxa ' + classeTaxa + '">Taxa de leitura: ' + taxa.toFixed(1).replace('.', ',') + '%</span>' +
+        '</div>' +
         '<div style="margin-top:10px;">' +
+          '<button class="btn-pequeno" onclick="abrirLeiturasComunicado(\'' + c.id + '\')">Ver leituras</button> ' +
           '<button class="btn-pequeno" onclick="abrirEdicaoComunicado(\'' + c.id + '\')">Editar</button> ' +
           '<button class="btn-pequeno" onclick="excluirComunicado(\'' + c.id + '\')">Excluir</button>' +
         '</div>' +
@@ -3550,6 +3594,108 @@
     });
     container.innerHTML = html;
   }
+
+  // ---------- Confirmação de leitura dos comunicados (item de sprint 3) ----------
+  var leiturasComunicadoCache = [];
+  var leiturasComunicadoId = null;
+  var abaLeiturasAtiva = 'lidos';
+
+  function abrirLeiturasComunicado(id) {
+    leiturasComunicadoId = id;
+    document.getElementById('resumo-leituras-comunicado').innerHTML = '';
+    document.getElementById('lista-leituras-comunicado').innerHTML = '<div class="vazio">Carregando...</div>';
+    document.getElementById('busca-leituras-comunicado').value = '';
+    ativarAbaLeituras('lidos');
+    document.getElementById('overlay-modal-leituras').style.display = 'flex';
+
+    fetch(API_URL + '/comunicados/' + id + '/leituras', {
+      headers: { 'Authorization': 'Bearer ' + estado.token }
+    })
+    .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
+    .then(function(res) {
+      if (!res.ok) {
+        document.getElementById('lista-leituras-comunicado').innerHTML = '<div class="vazio">Erro ao carregar leituras.</div>';
+        return;
+      }
+      document.getElementById('titulo-modal-leituras').textContent = 'Leituras — ' + res.data.titulo;
+      leiturasComunicadoCache = res.data.leituras;
+
+      var total = leiturasComunicadoCache.length;
+      var lidoPor = leiturasComunicadoCache.filter(function(l) { return l.lido; }).length;
+      var taxa = total > 0 ? (lidoPor / total) * 100 : 0;
+      var classeTaxa = taxa >= 70 ? 'taxa-alta' : taxa >= 40 ? 'taxa-media' : 'taxa-baixa';
+      document.getElementById('resumo-leituras-comunicado').innerHTML =
+        '<span>Enviado para <strong>' + total + '</strong></span>' +
+        '<span>Lido por <strong>' + lidoPor + '</strong></span>' +
+        '<span>Pendente <strong>' + (total - lidoPor) + '</strong></span>' +
+        '<span class="comunicado-taxa ' + classeTaxa + '">Taxa de leitura: ' + taxa.toFixed(1).replace('.', ',') + '%</span>';
+
+      renderizarListaLeituras();
+    })
+    .catch(function() { document.getElementById('lista-leituras-comunicado').innerHTML = '<div class="vazio">Erro ao conectar ao servidor.</div>'; });
+  }
+
+  function ativarAbaLeituras(aba) {
+    abaLeiturasAtiva = aba;
+    document.getElementById('btn-aba-leituras-lidos').classList.toggle('ativa', aba === 'lidos');
+    document.getElementById('btn-aba-leituras-nao-lidos').classList.toggle('ativa', aba === 'nao-lidos');
+    renderizarListaLeituras();
+  }
+  document.getElementById('btn-aba-leituras-lidos').onclick = function() { ativarAbaLeituras('lidos'); };
+  document.getElementById('btn-aba-leituras-nao-lidos').onclick = function() { ativarAbaLeituras('nao-lidos'); };
+  document.getElementById('busca-leituras-comunicado').oninput = renderizarListaLeituras;
+  document.getElementById('btn-fechar-modal-leituras').onclick = function() {
+    document.getElementById('overlay-modal-leituras').style.display = 'none';
+  };
+
+  function renderizarListaLeituras() {
+    var busca = document.getElementById('busca-leituras-comunicado').value.trim().toLowerCase();
+    var filtrada = leiturasComunicadoCache.filter(function(l) {
+      if (abaLeiturasAtiva === 'lidos' && !l.lido) return false;
+      if (abaLeiturasAtiva === 'nao-lidos' && l.lido) return false;
+      if (busca && l.nome.toLowerCase().indexOf(busca) < 0) return false;
+      return true;
+    });
+    var container = document.getElementById('lista-leituras-comunicado');
+    if (filtrada.length === 0) {
+      container.innerHTML = '<div class="vazio">Nenhum associado encontrado.</div>';
+      return;
+    }
+    container.innerHTML = filtrada.map(function(l) {
+      var sub = l.email + (l.lido ? ' · Lido em ' + formatarDataHora(l.lido_em) : '');
+      return '<div class="item-ficha">' +
+        '<div>' +
+          '<div class="item-ficha-titulo">' + escapeHtml(l.nome) + '</div>' +
+          '<div class="item-ficha-sub">' + escapeHtml(sub) + '</div>' +
+        '</div>' +
+        '<span class="badge ' + (l.lido ? 'pago' : 'pendente') + '">' + (l.lido ? '✅ Lido' : '⏳ Não lido') + '</span>' +
+      '</div>';
+    }).join('');
+  }
+
+  function exportarLeiturasComunicado(formato) {
+    if (!leiturasComunicadoId) return;
+    fetch(API_URL + '/comunicados/' + leiturasComunicadoId + '/leituras/exportar/' + formato, {
+      headers: { 'Authorization': 'Bearer ' + estado.token }
+    })
+    .then(function(resp) {
+      if (!resp.ok) { return resp.json().then(function(d) { throw new Error(d.erro || 'Erro ao exportar'); }); }
+      return resp.blob();
+    })
+    .then(function(blob) {
+      var url = URL.createObjectURL(blob);
+      var link = document.createElement('a');
+      link.href = url;
+      link.download = 'leituras-comunicado.' + (formato === 'excel' ? 'xlsx' : 'pdf');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    })
+    .catch(function(err) { mostrarToast(err.message || 'Erro ao exportar leituras', true); });
+  }
+  document.getElementById('btn-exportar-leituras-excel').onclick = function() { exportarLeiturasComunicado('excel'); };
+  document.getElementById('btn-exportar-leituras-pdf').onclick = function() { exportarLeiturasComunicado('pdf'); };
 
   function abrirEdicaoComunicado(id) {
     var c = comunicadosCache.find(function(x) { return x.id === id; });

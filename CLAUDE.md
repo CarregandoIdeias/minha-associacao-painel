@@ -375,6 +375,24 @@ reaproveitando os padrões visuais existentes (`.badge`, `.painel`,
 `confirmarAcao()`, `.toast`). Consome `GET/POST/PUT/DELETE /sprint` e
 `PATCH /sprint/:id/status` (ver `backend/CLAUDE.md`).
 
+## Confirmação de leitura dos comunicados (item de sprint 3, 27/07/2026)
+
+Cada card em `#lista-comunicados-container` (`renderizarComunicados()`)
+ganhou `.comunicado-stats` (Enviado para / Lido por / Pendente / Taxa de
+leitura, cor escalando verde/amarelo/vermelho conforme `taxa >= 70/40/<40`)
+e um botão "Ver leituras" novo, além de Editar/Excluir já existentes.
+
+Modal novo `#overlay-modal-leituras` (`abrirLeiturasComunicado(id)`,
+`.modal-ficha` reaproveitado da ficha do associado): 2 abas de verdade
+("Associados que leram" com data/hora, "Associados que não leram" só
+nome/e-mail — colunas diferentes por design, por isso são abas e não um
+filtro sobre uma lista única), busca por nome (`renderizarListaLeituras()`,
+filtra o array já buscado, sem re-fetch) e exportar Excel/PDF
+(`exportarLeiturasComunicado()`, mesmo padrão fetch+blob+link temporário
+de `exportarLogs()` em `superadmin.html`, adaptado pra cá pela primeira
+vez). Consome `GET /comunicados/:id/leituras` e
+`/leituras/exportar/:formato`, novos em `routes/comunicados.js`.
+
 ## Visualização de comprovante do Super Admin alinhada com a da associação (27/07/2026)
 
 `superadmin.html`: `renderizarArquivoBase64()` renderizava PDF como um
