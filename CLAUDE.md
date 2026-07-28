@@ -375,6 +375,28 @@ reaproveitando os padrões visuais existentes (`.badge`, `.painel`,
 `confirmarAcao()`, `.toast`). Consome `GET/POST/PUT/DELETE /sprint` e
 `PATCH /sprint/:id/status` (ver `backend/CLAUDE.md`).
 
+## Intranet — abas Produção/Homologação + acesso rápido à infraestrutura (27/07/2026)
+
+`intranet.html` ganhou duas abas (`ativarAmbiente('producao'|'homologacao')`,
+preferência salva em `localStorage` sob `intranet-ambiente`): os mesmos 6
+cards de sempre (Super Admin/Painel/Portal/Landing/Manual/Sprint), só que
+cada aba usa URL **absoluta** do domínio certo (produção ou
+`-staging`), em vez do link relativo de antes — como a mesma página é
+servida nos dois ambientes Vercel, um link relativo sempre apontaria pro
+ambiente atual, não necessariamente o que a pessoa quer acessar.
+
+Nova seção por aba, "Acesso rápido — infraestrutura": cards menores
+(`.card-pequeno`) linkando pros dashboards reais — GitHub (branch `main`
+na aba produção, `staging` na aba homologação, ambos os repos: painel e
+backend), Vercel, Supabase e Render, cada um apontando pro projeto/branch
+do ambiente daquela aba. URLs fornecidas pelo usuário (não adivinhadas —
+Vercel/Render/Supabase usam slug de conta que não dá pra deduzir).
+
+**Não commitado junto com CLAUDE.md na hora** (lacuna encontrada e
+corrigida em sessão seguinte) — lição: sempre conferir que o commit de
+uma mudança de UI inclui a atualização de doc correspondente antes de dar
+push, não assumir que "é só HTML/CSS, não precisa documentar".
+
 ## Navegação final: "Acessos" na sidebar (Usuários + Auditoria), "Parametrização" só via Preferências (item de sprint 4, etapa 2, 27/07/2026)
 
 Ajuste em cima da etapa 1 (seção seguinte) — a estrutura combinada não
