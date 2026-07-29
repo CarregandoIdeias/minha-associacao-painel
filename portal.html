@@ -213,7 +213,7 @@
     border-radius: 12px;
   }
   .app-header-avatar-btn:hover { background: var(--accent-soft); }
-  .app-header-avatar-btn .nome { font-size: 14px; font-weight: 600; text-align: left; }
+  .app-header-avatar-btn .nome { font-size: 14px; font-weight: 600; text-align: left; color: var(--text); }
   .app-header-avatar-btn .papel { font-size: 12px; color: var(--text-muted); text-align: left; }
   .app-header-avatar-btn .icone-caret { width: 14px; height: 14px; color: var(--text-muted); flex-shrink: 0; }
 
@@ -471,6 +471,27 @@
     font-size: 12px;
     font-weight: 700;
   }
+
+  .ficha-secao { margin-bottom: 22px; }
+  .ficha-secao:last-child { margin-bottom: 0; }
+  .ficha-secao-titulo {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .ficha-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px 20px;
+  }
+  .ficha-item { display: flex; flex-direction: column; gap: 3px; }
+  .ficha-label { font-size: 12px; color: var(--text-muted); }
+  .ficha-valor { font-size: 14px; font-weight: 500; }
 
   .perfil-topo {
     display: flex;
@@ -753,6 +774,10 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
       Meus Dados
     </button>
+    <button class="nav-item" id="aba-financeiro">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+      Financeiro
+    </button>
     <button class="nav-item" id="aba-comunicados">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
       Comunicados
@@ -768,7 +793,7 @@
     <div class="app-header">
       <div>
         <div class="app-header-saudacao" id="app-header-saudacao">Olá<span>!</span></div>
-        <div class="app-header-email" id="app-header-email"></div>
+        <div class="app-header-email" id="app-header-nome-associacao"></div>
       </div>
       <div class="app-header-perfil">
         <button class="app-header-avatar-btn" id="btn-abrir-perfil">
@@ -851,6 +876,10 @@
           </div>
         </div>
       </div>
+    </div>
+
+    <div id="secao-financeiro" style="display:none;">
+      <div class="page-header"><h1>Financeiro</h1></div>
       <div class="painel">
         <div class="painel-header"><h3>Minhas cobranças</h3></div>
         <div id="tabela-minhas-cobrancas-container">
@@ -1203,9 +1232,24 @@
     var primeiroNome = (estado.nome || '').trim().split(/\s+/)[0] || '';
     document.getElementById('app-header-saudacao').innerHTML =
       saudacaoPorHorario() + (primeiroNome ? ', <span>' + escapeHtml(primeiroNome) + '</span>!' : '!');
-    document.getElementById('app-header-email').textContent = estado.email || '';
+    document.getElementById('app-header-nome-associacao').textContent = estado.nomeAssociacao || '';
     document.getElementById('app-header-nome').textContent = estado.nome || 'Associado';
     document.getElementById('app-header-avatar').textContent = iniciaisNome(estado.nome);
+  }
+
+  // Nome da associação, exibido abaixo da saudação no lugar do e-mail --
+  // GET /configuracoes/identidade é liberado pra qualquer usuário
+  // autenticado do tenant, não só admin/diretoria (ver backend/CLAUDE.md).
+  function carregarNomeAssociacao() {
+    fetch(API_URL + '/configuracoes/identidade', {
+      headers: { 'Authorization': 'Bearer ' + estado.token }
+    })
+    .then(function(resp) { return resp.json(); })
+    .then(function(dados) {
+      estado.nomeAssociacao = dados.nome || '';
+      document.getElementById('app-header-nome-associacao').textContent = estado.nomeAssociacao;
+    })
+    .catch(function() {});
   }
 
   document.getElementById('btn-abrir-perfil').onclick = function(e) {
@@ -1285,6 +1329,7 @@
     document.getElementById('tela-trocar-senha-obrigatoria').style.display = 'none';
     document.getElementById('tela-dashboard').style.display = 'flex';
     renderizarHeader();
+    carregarNomeAssociacao();
     ativarAba('inicio');
     carregarInicio();
   }
@@ -1457,7 +1502,7 @@
 
   // ---------- Navegação (sidebar) ----------
   function ativarAba(idAtiva) {
-    ['inicio', 'meus-dados', 'comunicados'].forEach(function(nome) {
+    ['inicio', 'meus-dados', 'financeiro', 'comunicados'].forEach(function(nome) {
       var item = document.getElementById('aba-' + nome);
       if (item) item.classList.toggle('ativa', nome === idAtiva);
       var secao = document.getElementById('secao-' + nome);
@@ -1469,6 +1514,7 @@
 
   document.getElementById('aba-inicio').onclick = function() { ativarAba('inicio'); carregarInicio(); };
   document.getElementById('aba-meus-dados').onclick = function() { ativarAba('meus-dados'); carregarMeusDados(); };
+  document.getElementById('aba-financeiro').onclick = function() { ativarAba('financeiro'); carregarFinanceiro(); };
   document.getElementById('aba-comunicados').onclick = function() { ativarAba('comunicados'); carregarComunicados(); };
 
   // ---------- Menu hambúrguer (mobile) ----------
@@ -1665,26 +1711,72 @@
         container.innerHTML = '<div class="vazio">' + escapeHtml(res.data.erro || 'Erro ao carregar seus dados') + '</div>';
         return;
       }
-      var a = res.data;
-      container.innerHTML =
-        '<p style="margin-bottom:8px;"><strong>' + escapeHtml(a.nome_completo) + '</strong></p>' +
-        '<p style="font-size:13px; color:var(--text-muted); margin-bottom:4px;">CPF: ' + escapeHtml(a.cpf || '—') + '</p>' +
-        '<p style="font-size:13px; color:var(--text-muted); margin-bottom:4px;">Categoria: ' + escapeHtml(a.categoria || '—') + '</p>' +
-        '<p style="font-size:13px; color:var(--text-muted); margin-bottom:8px;">Ingresso: ' + formatarData(a.data_ingresso) + '</p>' +
-        '<span class="badge ' + a.status + '">' + a.status + '</span>';
+      renderizarFichaAssociado(res.data);
 
       var avatar = document.getElementById('avatar-associado');
-      if (a.foto_base64) {
-        renderizarFotoBase64(avatar, a.foto_base64);
+      if (res.data.foto_base64) {
+        renderizarFotoBase64(avatar, res.data.foto_base64);
       }
     })
     .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
+  }
 
+  function campoFicha(rotulo, valor) {
+    return '<div class="ficha-item"><span class="ficha-label">' + escapeHtml(rotulo) + '</span><span class="ficha-valor">' + escapeHtml(valor || '—') + '</span></div>';
+  }
+
+  function renderizarFichaAssociado(a) {
+    var container = document.getElementById('perfil-associado-container');
+    var enderecoLinha = [a.endereco_logradouro, a.endereco_numero].filter(Boolean).join(', ');
+    if (a.endereco_complemento) enderecoLinha = [enderecoLinha, a.endereco_complemento].filter(Boolean).join(' - ');
+    var cidadeUf = [a.endereco_cidade, a.endereco_estado].filter(Boolean).join('/');
+
+    container.innerHTML =
+      '<div class="ficha-secao">' +
+        '<h4 class="ficha-secao-titulo">Dados pessoais</h4>' +
+        '<div class="ficha-grid">' +
+          campoFicha('Nome completo', a.nome_completo) +
+          campoFicha('CPF', a.cpf) +
+          campoFicha('RG', a.rg) +
+          campoFicha('Telefone', a.telefone) +
+          campoFicha('E-mail', estado.email) +
+        '</div>' +
+      '</div>' +
+      '<div class="ficha-secao">' +
+        '<h4 class="ficha-secao-titulo">Endereço</h4>' +
+        '<div class="ficha-grid">' +
+          campoFicha('CEP', a.endereco_cep) +
+          campoFicha('Logradouro', enderecoLinha) +
+          campoFicha('Bairro', a.endereco_bairro) +
+          campoFicha('Cidade/UF', cidadeUf) +
+        '</div>' +
+      '</div>' +
+      '<div class="ficha-secao">' +
+        '<h4 class="ficha-secao-titulo">Plano e situação</h4>' +
+        '<div class="ficha-grid">' +
+          campoFicha('Plano/Categoria', a.categoria) +
+          '<div class="ficha-item"><span class="ficha-label">Situação</span><span class="ficha-valor"><span class="badge ' + a.status + '">' + escapeHtml(a.status) + '</span></span></div>' +
+          campoFicha('Associado desde', formatarData(a.data_ingresso)) +
+          campoFicha('Cadastro em', formatarData(a.criado_em)) +
+        '</div>' +
+      '</div>';
+  }
+
+  // ---------- Financeiro ----------
+  function carregarFinanceiro() {
     fetch(API_URL + '/portal/minhas-cobrancas', {
       headers: { 'Authorization': 'Bearer ' + estado.token }
     })
-    .then(function(resp) { return resp.json(); })
-    .then(function(lista) { renderizarMinhasCobrancas(lista); })
+    .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
+    .then(function(res) {
+      if (!res.ok) {
+        if (tratarTrialExpirado(res.data)) return;
+        document.getElementById('tabela-minhas-cobrancas-container').innerHTML =
+          '<div class="vazio">' + escapeHtml(res.data.erro || 'Erro ao carregar suas cobranças') + '</div>';
+        return;
+      }
+      renderizarMinhasCobrancas(res.data);
+    })
     .catch(function() { mostrarToast('Erro ao carregar suas cobranças', true); });
   }
 
