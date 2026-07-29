@@ -1514,6 +1514,10 @@
         <label>Papel</label>
         <select id="usuario-papel">
           <option value="diretoria">Diretoria</option>
+          <option value="financeiro">Financeiro</option>
+          <option value="atendimento">Atendimento</option>
+          <option value="operador">Operador</option>
+          <option value="consulta">Somente Consulta</option>
           <option value="associado">Associado</option>
         </select>
       </div>
@@ -2183,7 +2187,34 @@
   };
 
   // ---------- Login ----------
-  var PAPEL_LABEL = { admin: 'Administrador', diretoria: 'Diretoria', associado: 'Associado' };
+  var PAPEL_LABEL = {
+    admin: 'Administrador', diretoria: 'Diretoria', associado: 'Associado',
+    financeiro: 'Financeiro', atendimento: 'Atendimento', operador: 'Operador', consulta: 'Somente Consulta',
+  };
+
+  // Matriz de permissões dos perfis granulares (item 5 do backlog de
+  // sugestões, 28/07/2026) -- espelha exatamente o que o backend já
+  // impõe em cada autorizar(...) de routes/*.js. Isso é só UX (esconder
+  // botão que ia dar 403); a segurança de verdade já está no backend,
+  // então uma divergência aqui só mostraria/esconderia um botão errado,
+  // nunca abriria uma brecha.
+  var PERMISSOES = {
+    associados_criar: ['admin', 'diretoria', 'atendimento', 'operador'],
+    associados_editar: ['admin', 'diretoria', 'atendimento', 'operador'],
+    associados_excluir: ['admin'],
+    cobrancas_criar: ['admin', 'diretoria', 'financeiro', 'operador'],
+    cobrancas_editar: ['admin', 'diretoria', 'financeiro', 'operador'],
+    cobrancas_pagar: ['admin', 'diretoria', 'financeiro', 'operador'],
+    cobrancas_estornar: ['admin'],
+    cobrancas_excluir: ['admin'],
+    comunicados_criar: ['admin', 'diretoria', 'atendimento', 'operador'],
+    comunicados_editar: ['admin', 'diretoria', 'atendimento', 'operador'],
+    comunicados_excluir: ['admin', 'diretoria', 'atendimento', 'operador'],
+  };
+  function podeFazer(acao) {
+    var permitidos = PERMISSOES[acao];
+    return !permitidos || permitidos.indexOf(estado.papel) !== -1;
+  }
 
   function iniciaisNome(nome) {
     if (!nome) return '--';
@@ -2354,6 +2385,9 @@
     } else {
       document.getElementById('btn-menu-preferencias').style.display = 'none';
     }
+    document.getElementById('btn-novo-associado').style.display = podeFazer('associados_criar') ? 'flex' : 'none';
+    document.getElementById('btn-nova-cobranca').style.display = podeFazer('cobrancas_criar') ? 'flex' : 'none';
+    document.getElementById('btn-novo-comunicado').style.display = podeFazer('comunicados_criar') ? 'flex' : 'none';
     ativarAba('dashboard');
     carregarIdentidadeAssociacao();
     carregarAssociados();
@@ -2726,8 +2760,8 @@
         '<td>' + formatarData(a.data_ingresso) + '</td>' +
         '<td style="white-space:nowrap;">' +
           '<button class="btn-pequeno" onclick="abrirFichaAssociado(\'' + a.id + '\', \'ver\')">Ver ficha</button> ' +
-          '<button class="btn-pequeno" onclick="abrirFichaAssociado(\'' + a.id + '\', \'editar\')">Editar</button> ' +
-          '<button class="btn-pequeno" onclick="excluirAssociado(\'' + a.id + '\')">Excluir</button>' +
+          (podeFazer('associados_editar') ? '<button class="btn-pequeno" onclick="abrirFichaAssociado(\'' + a.id + '\', \'editar\')">Editar</button> ' : '') +
+          (podeFazer('associados_excluir') ? '<button class="btn-pequeno" onclick="excluirAssociado(\'' + a.id + '\')">Excluir</button>' : '') +
         '</td>' +
         '</tr>';
     });
@@ -3415,13 +3449,17 @@
       }
       if (c.status !== 'pago') {
         acoes += '<button class="btn-pequeno" onclick="abrirModalPix(\'' + c.id + '\')">Pix</button> ';
-        acoes += '<button class="btn-pequeno" onclick="marcarComoPago(\'' + c.id + '\')">Marcar como pago</button> ';
-        acoes += '<button class="btn-pequeno" onclick="abrirEdicaoCobranca(\'' + c.id + '\')">Editar</button> ';
+        if (podeFazer('cobrancas_pagar')) {
+          acoes += '<button class="btn-pequeno" onclick="marcarComoPago(\'' + c.id + '\')">Marcar como pago</button> ';
+        }
+        if (podeFazer('cobrancas_editar')) {
+          acoes += '<button class="btn-pequeno" onclick="abrirEdicaoCobranca(\'' + c.id + '\')">Editar</button> ';
+        }
       }
-      if (c.status === 'pago' && estado.papel === 'admin') {
+      if (c.status === 'pago' && podeFazer('cobrancas_estornar')) {
         acoes += '<button class="btn-pequeno" onclick="estornarPagamento(\'' + c.id + '\')">Estornar</button> ';
       }
-      if (estado.papel === 'admin') {
+      if (podeFazer('cobrancas_excluir')) {
         acoes += '<button class="btn-pequeno" onclick="excluirCobranca(\'' + c.id + '\')">Excluir</button>';
       }
       html += '<tr>' +
@@ -3791,8 +3829,8 @@
         '<div style="margin-top:10px;">' +
           '<button class="btn-pequeno" onclick="abrirLeiturasComunicado(\'' + c.id + '\')">Ver leituras</button> ' +
           (c.origem_plataforma ? '' :
-            '<button class="btn-pequeno" onclick="abrirEdicaoComunicado(\'' + c.id + '\')">Editar</button> ' +
-            '<button class="btn-pequeno" onclick="excluirComunicado(\'' + c.id + '\')">Excluir</button>') +
+            (podeFazer('comunicados_editar') ? '<button class="btn-pequeno" onclick="abrirEdicaoComunicado(\'' + c.id + '\')">Editar</button> ' : '') +
+            (podeFazer('comunicados_excluir') ? '<button class="btn-pequeno" onclick="excluirComunicado(\'' + c.id + '\')">Excluir</button>' : '')) +
         '</div>' +
         '</div>';
     });
@@ -4017,7 +4055,10 @@
     .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
   }
 
-  var rotuloPapel = { admin: 'Admin', diretoria: 'Diretoria', associado: 'Associado' };
+  var rotuloPapel = {
+    admin: 'Admin', diretoria: 'Diretoria', associado: 'Associado',
+    financeiro: 'Financeiro', atendimento: 'Atendimento', operador: 'Operador', consulta: 'Somente Consulta',
+  };
 
   function renderizarUsuarios(lista) {
     usuariosCache = lista;
