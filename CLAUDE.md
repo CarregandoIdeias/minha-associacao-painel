@@ -411,6 +411,34 @@ corrigida em sessão seguinte) — lição: sempre conferir que o commit de
 uma mudança de UI inclui a atualização de doc correspondente antes de dar
 push, não assumir que "é só HTML/CSS, não precisa documentar".
 
+## Planos renomeados: Profissional/Enterprise → Intermediário/Avançado (29/07/2026)
+
+Consequência direta do refresh da landing page (seção acima, "Atualização
+de funcionalidades e renomeação de planos") — a nomenclatura nova precisou
+se refletir nos painéis reais, senão o cliente veria "Profissional" no
+Super Admin/Dashboard mas "Intermediário" só existiria na página de
+vendas. Ver `backend/CLAUDE.md` pra a migration (`ALTER TYPE ... RENAME
+VALUE`, sem UPDATE de dados) e o motivo de não ter sido preciso migrar
+linha nenhuma.
+
+`superadmin.html`: `<option value="profissional">`/`<option
+value="enterprise">` viraram `value="intermediario"`/`value="avancado"`
+nos dois lugares que existiam (filtro da lista de associações, formulário
+de criar/editar associação); `PRECOS_PLANO`/`ROTULOS_PLANO` (espelho do
+`backend/utils/precos.js`, só pra sugerir valor antes de salvar)
+atualizados com as novas chaves.
+
+`index.html`: mesma coisa em `PRECOS_PLANO`/`INFO_PLANO`/`ROTULOS_PLANO` e
+no array de `renderizarOpcoesPlano()` (modal de contratação/upgrade de
+plano) — `['basico', 'profissional', 'enterprise']` virou `['basico',
+'intermediario', 'avancado']`.
+
+**Não precisou mexer em**: `portal.html` (associado não vê nem escolhe
+plano da associação) e as duas ocorrências de `classe_profissional` em
+`superadmin.html` (tipo de associação — Moradores/Classe profissional/
+Esportiva-recreativa/ONG — não tem relação com plano de assinatura, é um
+falso positivo da busca por "profissional").
+
 ## Navegação final: "Acessos" na sidebar (Usuários + Auditoria), "Parametrização" só via Preferências (item de sprint 4, etapa 2, 27/07/2026)
 
 Ajuste em cima da etapa 1 (seção seguinte) — a estrutura combinada não

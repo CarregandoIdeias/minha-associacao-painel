@@ -505,8 +505,8 @@
             <option value="">Todos os planos</option>
             <option value="trial">Trial</option>
             <option value="basico">Básico</option>
-            <option value="profissional">Profissional</option>
-            <option value="enterprise">Enterprise</option>
+            <option value="intermediario">Intermediário</option>
+            <option value="avancado">Avançado</option>
           </select>
           <select id="filtro-status-assoc">
             <option value="">Todos os status</option>
@@ -758,8 +758,8 @@
       <select id="assoc-plano">
         <option value="trial">Trial</option>
         <option value="basico">Básico</option>
-        <option value="profissional">Profissional</option>
-        <option value="enterprise">Enterprise</option>
+        <option value="intermediario">Intermediário</option>
+        <option value="avancado">Avançado</option>
       </select>
     </div>
     <div class="campo" id="campo-trial-dias">
@@ -942,10 +942,10 @@
   var PRECOS_PLANO = {
     trial: { base: 0, porAssociado: 0 },
     basico: { base: 49.90, porAssociado: 2.00 },
-    profissional: { base: 99.90, porAssociado: 1.50 },
-    enterprise: { base: 199.90, porAssociado: 1.00 }
+    intermediario: { base: 99.90, porAssociado: 1.50 },
+    avancado: { base: 199.90, porAssociado: 1.00 }
   };
-  var ROTULOS_PLANO = { trial: 'Trial', basico: 'Básico', profissional: 'Profissional', enterprise: 'Enterprise' };
+  var ROTULOS_PLANO = { trial: 'Trial', basico: 'Básico', intermediario: 'Intermediário', avancado: 'Avançado' };
   // status_assinatura (backend) -> classe CSS do badge (reaproveita .badge.ativo/.inativo já existentes)
   var CLASSE_BADGE_STATUS = { ativa: 'ativo', bloqueada: 'inativo', trial: 'trial', trial_expirado: 'vencida', vencida: 'vencida', vencendo: 'vencendo' };
   var ROTULO_STATUS_ASSINATURA = { trial_expirado: 'trial expirado' };

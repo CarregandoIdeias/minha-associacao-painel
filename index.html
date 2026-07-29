@@ -1664,15 +1664,15 @@
   var PRECOS_PLANO = {
     trial: { base: 0, porAssociado: 0 },
     basico: { base: 49.90, porAssociado: 2.00 },
-    profissional: { base: 99.90, porAssociado: 1.50 },
-    enterprise: { base: 199.90, porAssociado: 1.00 }
+    intermediario: { base: 99.90, porAssociado: 1.50 },
+    avancado: { base: 199.90, porAssociado: 1.00 }
   };
   var INFO_PLANO = {
     basico: { nome: 'Básico', porte: 'Pequeno porte · até 50 associados' },
-    profissional: { nome: 'Profissional', porte: 'Médio porte · 50 a 200 associados' },
-    enterprise: { nome: 'Enterprise', porte: 'Grande porte · 200+ associados' }
+    intermediario: { nome: 'Intermediário', porte: 'Médio porte · 50 a 200 associados' },
+    avancado: { nome: 'Avançado', porte: 'Grande porte · 200+ associados' }
   };
-  var ROTULOS_PLANO = { trial: 'Trial', basico: 'Básico', profissional: 'Profissional', enterprise: 'Enterprise' };
+  var ROTULOS_PLANO = { trial: 'Trial', basico: 'Básico', intermediario: 'Intermediário', avancado: 'Avançado' };
   var planoAtualDados = null;
   var planoEscolhidoContratacao = null;
   var comprovantePlanoSelecionadoBase64 = null;
@@ -1919,7 +1919,7 @@
     var totalAssociados = (planoAtualDados && planoAtualDados.total_associados) || 0;
     var container = document.getElementById('opcoes-plano');
     var html = '';
-    ['basico', 'profissional', 'enterprise'].forEach(function(chave) {
+    ['basico', 'intermediario', 'avancado'].forEach(function(chave) {
       var info = INFO_PLANO[chave];
       var precos = PRECOS_PLANO[chave];
       var valorComAtual = precos.base + precos.porAssociado * totalAssociados;
