@@ -15,6 +15,29 @@ Admin), sem build step, publicados direto no Vercel. Cada um tem login,
 sessão (`localStorage`) e layout próprios — nenhum depende de import ou
 build dos outros.
 
+## Manual da plataforma atualizado com planos e gating (29/07/2026)
+
+`manual.html` (guia público de como usar as 3 aplicações, linkado pela
+Intranet) ganhou um callout novo logo no início da seção "Painel da
+Associação" explicando os 3 planos (Básico/Intermediário/Avançado) e que
+alguns recursos ao longo do guia aparecem marcados com o plano mínimo
+necessário — reaproveita a classe `.quem` já existente (badge usado antes
+só pra "só visível pra quem é admin") pra esses avisos de plano, sem CSS
+novo.
+
+Pontos atualizados nos 3 passo-a-passo: Dashboard (nomeia os planos e
+explica o aviso de limite de associados, sempre só informativo), Financeiro
+(alerta de vencimento customizável é Intermediário+), Comunicados (export
+Excel/PDF é Intermediário+, e o selo de comunicado oficial da plataforma),
+Acessos (reescrito pra listar os 4 perfis granulares — Financeiro/
+Atendimento/Operador/Somente Consulta — que não estavam documentados
+antes, com nota de grandfathering e de que a aba Auditoria é Avançado),
+Super Admin > Associações (nomeia os 4 planos no cadastro) e Portal do
+Associado > Meus Dados (adiciona a carteirinha digital, também não
+documentada antes, como Intermediário+). Ver `backend/CLAUDE.md`, seção
+"Gating de funcionalidades por plano", pra matriz completa por trás
+dessas marcações.
+
 ## API_URL detecta o ambiente pelo hostname (27/07/2026)
 
 Não é mais um valor fixo apontando pra produção — cada arquivo (`index.html`,

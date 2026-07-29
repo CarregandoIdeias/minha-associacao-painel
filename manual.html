@@ -262,7 +262,7 @@
           <div class="ap-step-num">3</div>
           <div class="ap-step-body">
             <h4>Associações — cadastrar e gerenciar clientes</h4>
-            <p>Em <strong>Associações</strong>, clique em <strong>+ Nova associação</strong> pra cadastrar um cliente novo: dados da associação, nome do responsável (vira o admin inicial dela), plano contratado e duração do período trial. Uma senha provisória é gerada na hora — copie e envie pro responsável, ela só aparece uma vez.</p>
+            <p>Em <strong>Associações</strong>, clique em <strong>+ Nova associação</strong> pra cadastrar um cliente novo: dados da associação, nome do responsável (vira o admin inicial dela), plano contratado (<strong>Trial</strong>, <strong>Básico</strong>, <strong>Intermediário</strong> ou <strong>Avançado</strong> — cada um libera mais recursos pra diretoria, ver detalhe na seção do Painel da Associação abaixo) e duração do período trial. Uma senha provisória é gerada na hora — copie e envie pro responsável, ela só aparece uma vez.</p>
             <ul>
               <li>Buscar/filtrar por nome, cidade, UF, plano ou status</li>
               <li>Editar dados a qualquer momento, inclusive bloquear/desbloquear o acesso</li>
@@ -325,6 +325,10 @@
 
   <section class="ap-section alt">
     <div class="ap-shell">
+      <div class="ap-callout ap-reveal">
+        <div class="ico">i</div>
+        <p><strong>Sobre os planos:</strong> o ASSOCIA PLUS tem três planos — <strong>Básico</strong>, <strong>Intermediário</strong> e <strong>Avançado</strong>. Cadastro de associados, cobrança por Pix e mural de comunicados funcionam em qualquer um deles. Alguns recursos extras — perfis de acesso além de Diretoria, personalizar o prazo de alerta de vencimento, exportar relatórios em Excel/PDF, carteirinha digital do associado e a tela de Auditoria — só ficam disponíveis a partir do Intermediário ou do Avançado. Ao longo deste guia, esses pontos aparecem marcados com uma etiqueta indicando o plano necessário. O plano atual da associação e a opção de fazer upgrade aparecem no card do Dashboard (passo 2 abaixo).</p>
+      </div>
       <div class="ap-section-head ap-reveal">
         <span class="tag">Passo a passo</span>
         <h2>Do login à gestão do dia a dia</h2>
@@ -343,8 +347,9 @@
             <h4>Dashboard — indicadores da associação</h4>
             <p>KPIs de associados (total, ativos, novos no mês, inadimplentes), receita do mês, mensalidades vencidas/a vencer, gráficos de crescimento e receita, e cards de apoio com atividades recentes, próximos vencimentos, últimos associados e comunicados recentes.</p>
             <span class="quem">Plano e trial</span>
-            <p>No topo do Dashboard aparece um card com o plano atual: se está no <strong>Trial</strong>, mostra a contagem regressiva (dias/horas/minutos) até expirar e um botão <strong>Contratar Plano</strong>; se já é um plano pago, mostra status, próxima renovação, valor da mensalidade e um botão <strong>Gerenciar Plano</strong> pra pedir upgrade. Ao clicar em contratar, escolha o plano, pague via Pix (QR Code ou copia-e-cola) e envie o comprovante — a solicitação fica aguardando aprovação do Super Admin.</p>
+            <p>No topo do Dashboard aparece um card com o plano atual: se está no <strong>Trial</strong>, mostra a contagem regressiva (dias/horas/minutos) até expirar e um botão <strong>Contratar Plano</strong>; se já é um plano pago (<strong>Básico</strong>, <strong>Intermediário</strong> ou <strong>Avançado</strong>), mostra status, próxima renovação, valor da mensalidade e um botão <strong>Gerenciar Plano</strong> pra pedir upgrade. Ao clicar em contratar, escolha o plano, pague via Pix (QR Code ou copia-e-cola) e envie o comprovante — a solicitação fica aguardando aprovação do Super Admin. Durante o Trial, todos os recursos da plataforma ficam liberados, mesmo os que normalmente exigem Intermediário ou Avançado.</p>
             <p>Conforme o vencimento da assinatura (ou o fim do trial) se aproxima, esse card muda de cor e passa a pulsar — um aviso amarelo discreto vira vermelho e mais chamativo perto da data, e continua avisando mesmo depois de vencido, sem esconder o acesso aos próprios dados.</p>
+            <p>Se a associação estiver perto do limite de associados do plano contratado (até 50 no Básico, até 200 no Intermediário; o Avançado não tem limite), um aviso aparece aqui sugerindo upgrade — é só um alerta, o cadastro de novos associados nunca é bloqueado por causa disso.</p>
           </div>
         </div>
         <div class="ap-step">
@@ -361,7 +366,7 @@
             <p>Crie uma cobrança pra um associado (descrição, valor, vencimento). O associado paga usando a chave Pix da própria associação (QR Code gerado automaticamente) e envia o comprovante pelo Portal dele. Aqui na diretoria, você vê o comprovante enviado e clica em <strong>Confirmar pagamento</strong> pra marcar como pago — ou estorna se foi engano.</p>
             <ul>
               <li>Filtro por status (pendente, pago, vencido)</li>
-              <li>Alerta automático de vencimento (configurável em dias)</li>
+              <li>Alerta automático de vencimento — o prazo padrão é 3 dias; personalizar esse número é recurso do plano Intermediário ou Avançado (em Preferências, ver passo 7)</li>
               <li>Edição só é permitida enquanto a cobrança não estiver paga</li>
             </ul>
           </div>
@@ -370,15 +375,22 @@
           <div class="ap-step-num">5</div>
           <div class="ap-step-body">
             <h4>Comunicados — avisos com confirmação de leitura</h4>
-            <p>Publique um comunicado (com destaque opcional e agendamento de publicação). Cada card mostra, na hora, pra quantos associados foi enviado, quantos já leram, quantos faltam e a taxa de leitura. Clique em <strong>Ver leituras</strong> pra abrir a lista completa, dividida em "quem leu" (com data e hora) e "quem ainda não leu", com busca por nome e exportação em Excel ou PDF. Cada associado vê o mural dele no Portal, com o que ainda não leu em destaque.</p>
+            <p>Publique um comunicado (com destaque opcional e agendamento de publicação). Cada card mostra, na hora, pra quantos associados foi enviado, quantos já leram, quantos faltam e a taxa de leitura. Clique em <strong>Ver leituras</strong> pra abrir a lista completa, dividida em "quem leu" (com data e hora) e "quem ainda não leu", com busca por nome. Cada associado vê o mural dele no Portal, com o que ainda não leu em destaque.</p>
+            <p>Comunicados enviados pela própria Carregando Ideias (avisos oficiais da plataforma, não escritos pela diretoria) aparecem com um selo "Comunicado oficial" e não podem ser editados nem excluídos por aqui.</p>
+            <span class="quem">Recurso do plano Intermediário+</span>
+            <p>Os botões <strong>Exportar Excel</strong> e <strong>Exportar PDF</strong> da lista de leituras só aparecem a partir do plano Intermediário.</p>
           </div>
         </div>
         <div class="ap-step">
           <div class="ap-step-num">6</div>
           <div class="ap-step-body">
             <h4>Acessos — usuários e auditoria</h4>
-            <p>Reúne em duas abas tudo relacionado a quem entra no painel. Na aba <strong>Usuários</strong>: convide outra pessoa da diretoria (papel <strong>diretoria</strong> — acesso amplo, sem gerenciar usuários) ou vincule o login de um associado já cadastrado; edite nome/papel, desative/reative o acesso, gere uma senha provisória nova pra alguém que esqueceu a dela, ou exclua — exceto a própria conta. A tabela mostra desde quando cada pessoa tem conta e quando foi o último acesso dela. Na aba <strong>Auditoria</strong>: um histórico de tudo que aconteceu nessa associação (quem cadastrou o quê, quem editou, quem excluiu, logins), com filtros por pessoa/módulo/tipo de ação/período e exportação em Excel ou PDF — a mesma ideia da tela de Auditoria do Super Admin, só que só com o que é dessa associação.</p>
-            <span class="quem">Só visível pra quem é admin</span>
+            <p>Reúne em duas abas tudo relacionado a quem entra no painel. Na aba <strong>Usuários</strong>: convide outra pessoa pra ajudar na gestão, escolhendo um papel — <strong>Diretoria</strong> (acesso amplo, sem gerenciar usuários), <strong>Financeiro</strong> (cobranças completas; associados e comunicados só pra ver), <strong>Atendimento</strong> (associados e comunicados completos; cobranças só pra ver), <strong>Operador</strong> (acesso completo a associados, cobranças e comunicados) ou <strong>Somente Consulta</strong> (só visualização em tudo, sem criar/editar nada) — ou vincule o login de um associado já cadastrado. Edite nome/papel, desative/reative o acesso, gere uma senha provisória nova pra alguém que esqueceu a dela, ou exclua — exceto a própria conta. A tabela mostra desde quando cada pessoa tem conta e quando foi o último acesso dela.</p>
+            <span class="quem">Financeiro, Atendimento, Operador e Somente Consulta: recurso do plano Intermediário+</span>
+            <p>Se a associação já tinha alguém com um desses papéis antes de mudar pra um plano que não os inclui, essa pessoa continua com o acesso normalmente — o que fica bloqueado é atribuir esse papel a alguém novo enquanto o plano não permitir.</p>
+            <p>Na aba <strong>Auditoria</strong>: um histórico de tudo que aconteceu nessa associação (quem cadastrou o quê, quem editou, quem excluiu, logins), com filtros por pessoa/módulo/tipo de ação/período e exportação em Excel ou PDF — a mesma ideia da tela de Auditoria do Super Admin, só que só com o que é dessa associação.</p>
+            <span class="quem">Aba Auditoria: recurso do plano Avançado</span>
+            <span class="quem">Aba Usuários: só visível pra quem é admin</span>
           </div>
         </div>
         <div class="ap-step">
@@ -421,10 +433,12 @@
         <div class="ap-step">
           <div class="ap-step-num">2</div>
           <div class="ap-step-body">
-            <h4>Meus Dados — cadastro e cobranças</h4>
-            <p>Vê o próprio cadastro (nome, CPF, categoria, status) e a lista de cobranças em aberto e já pagas.</p>
+            <h4>Meus Dados — cadastro, cobranças e carteirinha</h4>
+            <p>Vê o próprio cadastro completo (dados pessoais, RG, endereço, categoria, status, associado desde quando) e a lista de cobranças em aberto e já pagas. Também dá pra trocar a foto de perfil por ali.</p>
             <span class="quem">Pagar com Pix</span>
             <p>Em cada cobrança pendente, clica em <strong>Pix</strong> pra abrir o QR Code (ou copia o código "copia e cola") gerado com a chave Pix daquela associação. Depois de pagar, escolhe o arquivo do comprovante (foto ou PDF) e envia — a cobrança fica "aguardando confirmação" até a diretoria validar o recebimento.</p>
+            <span class="quem">Carteirinha digital — recurso do plano Intermediário+</span>
+            <p>O botão <strong>Ver carteirinha</strong> abre um cartão digital com foto, nome, categoria e status do associado, com um QR Code identificador — útil pra mostrar em eventos da associação.</p>
           </div>
         </div>
         <div class="ap-step">
