@@ -569,6 +569,40 @@ Vários pedidos do usuário no mesmo dia, todos só em `portal.html` (exceto a l
 
 **Achado de infraestrutura nesta mesma sessão, não deste arquivo mas relevante pra quem testar essas mudanças local**: o `.env` local do backend estava apontando pra produção em vez de staging — ver `backend/CLAUDE.md`, seção "Regra mais importante deste repositório", antes de rodar qualquer coisa local.
 
+## Perfis de acesso granulares no painel da associação (28/07/2026, item 5 do backlog de sugestões)
+
+Ver `backend/CLAUDE.md` pra matriz completa e a migration do enum. Aqui
+só o lado `index.html` (`portal.html`/`superadmin.html` não mudaram —
+os 4 perfis novos são só pra quem trabalha no painel da associação).
+
+`#usuario-papel` (modal de criar/editar usuário em Acessos) ganhou 4
+`<option>` novas (Financeiro/Atendimento/Operador/Somente Consulta),
+entre "Diretoria" e "Associado". `PAPEL_LABEL` (usado no header/Meu
+Perfil) e `rotuloPapel` (tabela de Usuários — mapa **separado**,
+já existia antes desta mudança, não é o mesmo objeto que `PAPEL_LABEL`)
+ganharam as mesmas 4 chaves.
+
+**Novo padrão reutilizável**: `PERMISSOES` (objeto) + `podeFazer(acao)`,
+declarados logo depois de `PAPEL_LABEL`. Cada chave de `PERMISSOES` é uma
+ação (`associados_criar`, `cobrancas_pagar`, `comunicados_excluir` etc.)
+mapeada pra lista de papéis permitidos — espelha exatamente o que cada
+`autorizar(...)` do backend já aceita, de propósito, pra não haver
+divergência entre "o botão aparece" e "a chamada funciona". Usado em:
+- `entrarNoDashboard()`: esconde os 3 botões de "+Novo" (Associado/
+  Cobrança/Comunicado) do cabeçalho de cada seção.
+- Dentro das 3 funções de renderização de linha (`renderizarTabela` →
+  linhas de associados, `renderizarCobrancas`, `renderizarComunicados`):
+  cada botão de ação (Editar/Excluir/Marcar como pago/Estornar) só entra
+  na string de HTML se `podeFazer('...')` for true. "Ver ficha"/"Ver
+  comprovante"/"Ver leituras"/"Pix" continuam sempre visíveis (leitura,
+  liberada pros 4 perfis novos na matriz).
+
+**Isso é só UX, não a camada de segurança** — mesmo que alguém chame a
+função de ação direto pelo console do navegador bypassando o botão
+escondido, o backend já rejeita com 403 de qualquer forma (`podeFazer()`
+existe só pra não mostrar um botão que ia falhar, comentário já deixado
+no próprio código).
+
 ## Comunicado da plataforma pra todas as associações (28/07/2026, item 7 do backlog de sugestões)
 
 Depois de uma análise pedida pelo usuário sobre as 3 camadas do produto
