@@ -569,6 +569,36 @@ Vários pedidos do usuário no mesmo dia, todos só em `portal.html` (exceto a l
 
 **Achado de infraestrutura nesta mesma sessão, não deste arquivo mas relevante pra quem testar essas mudanças local**: o `.env` local do backend estava apontando pra produção em vez de staging — ver `backend/CLAUDE.md`, seção "Regra mais importante deste repositório", antes de rodar qualquer coisa local.
 
+## Comunicado da plataforma pra todas as associações (28/07/2026, item 7 do backlog de sugestões)
+
+Depois de uma análise pedida pelo usuário sobre as 3 camadas do produto
+(Super Admin/associação/associado), essa foi a primeira melhoria do
+backlog resultante a ser implementada — ver `backend/CLAUDE.md` pra o
+detalhe da rota nova e do achado de teste (broadcast atingiu uma
+associação real do staging sem querer, limpo depois).
+
+`superadmin.html`: nova aba "Comunicados" na sidebar (`#aba-comunicados-plataforma`,
+entre "Contratações" e "Config. Pix"), visível pra `super_admin` e
+`administrador` (oculta pra `suporte`, mesmo critério `GESTAO` do
+backend — `estado.papel !== 'suporte'`, não existia um exemplo de gating
+nível-GESTAO no front antes disso, só `=== 'super_admin'`). Formulário
+simples (título + `<textarea>` de conteúdo) com `confirmarAcao()` antes de
+enviar (irreversível — atinge todas as associações ativas na hora) e
+`POST /superadmin/comunicados-plataforma`. **Bug de CSS pré-existente
+corrigido de passagem**: a regra base `.campo input, .campo select { ... }`
+nunca incluía `textarea` (só as media queries de mobile assumiam que
+incluía) — este arquivo nunca tinha tido um `<textarea>` dentro de
+`.campo` antes, então o gap nunca tinha aparecido. Corrigido pra incluir
+`textarea` na regra base + `resize: vertical`.
+
+`index.html`/`portal.html`: `renderizarComunicados()` nos dois ganhou o
+selo `.comunicado-oficial` ("Comunicado oficial") quando
+`c.origem_plataforma` vem `true` — reaproveita a mesma classe/estilo nos
+dois arquivos (copiado, não compartilhado, mesmo padrão de sempre nesse
+projeto sem build step). Em `index.html`, esses cards também escondem os
+botões Editar/Excluir (o backend já bloqueia com 403, isso é só evitar
+mostrar uma ação que vai falhar).
+
 ## Convenções
 
 - Sem framework/bundler — tudo inline (CSS e JS dentro do próprio HTML).
