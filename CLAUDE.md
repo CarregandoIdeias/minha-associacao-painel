@@ -283,6 +283,20 @@ uma classe só deve controlar parte do espaçamento. Detalhe completo de
 como cada bug se manifestou em `README.md`, seção "Landing page (ASSOCIA
 PLUS)".
 
+## Landing page — Atualização de funcionalidades e renomeação de planos (29/07/2026)
+
+Refresh completo da `landing.html` com conteúdo mais atual e alinhado às funcionalidades desenvolvidas:
+
+- **Seção de desafios**: Novo título "Os desafios de quem gerencia associações (e como ASSOCIA PLUS resolve)", conteúdo mais direto e engajador — 3 cards descrevendo melhor os problemas reais (dados fragmentados, cobrança manual, comunicação ineficaz).
+- **Seção Organize. Comunique. Evolua**: Descrições dos 3 pilares ampliadas com funcionalidades recentes — Carteirinha digital do associado, Perfis de acesso granulares (Financeiro/Atendimento/Operador/Somente Consulta), Dashboard com 7+ indicadores, Relatórios exportáveis, Comunicados oficiais da plataforma, Auditoria completa.
+- **Renomeação de planos**: `Básico/Profissional/Enterprise` → `Básico/Intermediário/Avançado` (mesmas faixas de porte, mesmos preços, só reorganizado).
+  - **Básico** (até 50 assoc., R$ 49,90 + R$ 2,00/assoc.): Ideal para começar — Cadastro, Pix, Mural, Dashboard básico, Portal limitado, Suporte por e-mail.
+  - **Intermediário** (50-200 assoc., R$ 99,90 + R$ 1,50/assoc., **Mais Escolhido**): Controle robusto — Tudo do Básico + Alertas automáticos, Portal completo com carteirinha, Dashboard avançado com 7+, Relatórios Excel/PDF, Perfis de acesso, Suporte prioritário.
+  - **Avançado** (200+ assoc., R$ 199,90 + R$ 1,00/assoc.): Escala total — Tudo do Intermediário + Auditoria, Comunicados oficiais, Análise avançada de dados, Integração com sistemas externos, Atendimento dedicado, Customizações sob demanda, SLA garantido.
+- **Seção Segurança**: Retitulada "Segurança & Escalabilidade", reforçados isolamento de dados por design, criptografia ponta a ponta, auditoria completa e infraestrutura preparada pra escalar.
+
+Cada funcionalidade de plano agora tem descrição clara de para quem é — "Ideal para..." — e uma lista detalhada de o que inclui, melhorando a clareza pra novos clientes na decisão de qual plano escolher.
+
 ## Super Admin — gerenciamento de administradores (Fase 1 da melhoria do Super Admin, 26/07/2026)
 
 `superadmin.html` ganhou duas telas novas na sidebar: **Administradores** (`secao-administradores`, só visível se `estado.papel === 'super_admin'` — CRUD completo: criar/editar/ativar-desativar/redefinir senha, reaproveitando o `overlay-modal-credenciais` já existente, agora com título/texto dinâmicos via `abrirModalCredenciais()` em vez de texto fixo de associação) e **Meu Perfil** (`secao-meu-perfil`, sempre visível — troca da própria senha via `overlay-modal-alterar-senha`, que também é reaproveitado em modo forçado sem botão cancelar quando `deve_trocar_senha` vem `true` no login).
