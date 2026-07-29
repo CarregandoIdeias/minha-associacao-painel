@@ -472,6 +472,33 @@
     font-weight: 700;
   }
 
+  .carteirinha-card {
+    background: linear-gradient(160deg, var(--bg-card), var(--accent-soft));
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 26px 24px;
+    text-align: center;
+  }
+  .carteirinha-foto {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    background: var(--accent-soft);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    margin: 0 auto 14px;
+  }
+  .carteirinha-foto svg { width: 44px; height: 44px; }
+  .carteirinha-foto img { width: 100%; height: 100%; object-fit: cover; }
+  .carteirinha-nome { font-size: 17px; font-weight: 700; }
+  .carteirinha-associacao { font-size: 12px; color: var(--text-muted); margin-bottom: 14px; }
+  .carteirinha-info { font-size: 13px; color: var(--text-muted); margin-bottom: 6px; }
+  .carteirinha-qr { margin-top: 16px; display: flex; justify-content: center; }
+  .carteirinha-qr svg { width: 140px; height: 140px; }
+
   .ficha-secao { margin-bottom: 22px; }
   .ficha-secao:last-child { margin-bottom: 0; }
   .ficha-secao-titulo {
@@ -868,6 +895,7 @@
             <div>
               <input type="file" id="input-foto-associado" accept="image/*" style="display:none;">
               <button class="btn btn-ghost" id="btn-trocar-foto">Trocar foto</button>
+              <button class="btn btn-ghost" id="btn-ver-carteirinha">Ver carteirinha</button>
               <p style="font-size:12px; color:var(--text-muted); margin-top:6px;">JPG ou PNG, a imagem será redimensionada automaticamente.</p>
             </div>
           </div>
@@ -900,6 +928,26 @@
       </div>
     </div>
 
+  </div>
+</div>
+
+<!-- ===== MODAL CARTEIRINHA DIGITAL ===== -->
+<div class="overlay" id="overlay-modal-carteirinha">
+  <div class="modal">
+    <h3>Carteirinha digital</h3>
+    <div class="carteirinha-card">
+      <div class="carteirinha-foto" id="carteirinha-foto">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
+      <div class="carteirinha-nome" id="carteirinha-nome">—</div>
+      <div class="carteirinha-associacao" id="carteirinha-associacao">—</div>
+      <div class="carteirinha-info" id="carteirinha-categoria">—</div>
+      <div class="carteirinha-info"><span class="badge" id="carteirinha-status">—</span></div>
+      <div class="carteirinha-qr" id="carteirinha-qr"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="btn-fechar-carteirinha">Fechar</button>
+    </div>
   </div>
 </div>
 
@@ -1699,6 +1747,10 @@
     return false;
   }
 
+  // Cache do último /portal/meus-dados carregado -- a carteirinha digital
+  // reaproveita esses dados em vez de buscar de novo (ver abrirCarteirinha()).
+  var associadoAtual = null;
+
   function carregarMeusDados() {
     fetch(API_URL + '/portal/meus-dados', {
       headers: { 'Authorization': 'Bearer ' + estado.token }
@@ -1711,6 +1763,7 @@
         container.innerHTML = '<div class="vazio">' + escapeHtml(res.data.erro || 'Erro ao carregar seus dados') + '</div>';
         return;
       }
+      associadoAtual = res.data;
       renderizarFichaAssociado(res.data);
 
       var avatar = document.getElementById('avatar-associado');
@@ -1761,6 +1814,44 @@
         '</div>' +
       '</div>';
   }
+
+  // ---------- Carteirinha digital ----------
+  // Versão simples: um cartão gerado na hora a partir dos dados já
+  // carregados (associadoAtual), pra mostrar na tela do celular em
+  // eventos. O QR é só cosmético/identificador (id do associado) -- não
+  // há endpoint de verificação por scan ainda, se isso for pedido depois
+  // é um endpoint público novo que valida o id e devolve só status
+  // ativo/inadimplente, sem dado pessoal.
+  function abrirCarteirinha() {
+    if (!associadoAtual) {
+      mostrarToast('Aguarde seus dados carregarem e tente de novo.', true);
+      return;
+    }
+    var a = associadoAtual;
+
+    document.getElementById('carteirinha-nome').textContent = a.nome_completo || '';
+    document.getElementById('carteirinha-associacao').textContent = estado.nomeAssociacao || '';
+    document.getElementById('carteirinha-categoria').textContent = a.categoria || 'Associado';
+
+    var statusEl = document.getElementById('carteirinha-status');
+    statusEl.className = 'badge ' + a.status;
+    statusEl.textContent = a.status;
+
+    var fotoEl = document.getElementById('carteirinha-foto');
+    if (a.foto_base64) {
+      renderizarFotoBase64(fotoEl, a.foto_base64);
+    } else {
+      fotoEl.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
+    }
+
+    renderizarQrCode('carteirinha-qr', 'ASSOCIADO:' + a.id);
+    document.getElementById('overlay-modal-carteirinha').style.display = 'flex';
+  }
+
+  document.getElementById('btn-ver-carteirinha').onclick = abrirCarteirinha;
+  document.getElementById('btn-fechar-carteirinha').onclick = function() {
+    document.getElementById('overlay-modal-carteirinha').style.display = 'none';
+  };
 
   // ---------- Financeiro ----------
   function carregarFinanceiro() {
