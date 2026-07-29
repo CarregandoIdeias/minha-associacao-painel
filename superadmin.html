@@ -2374,6 +2374,8 @@
         erroEl.style.display = 'block';
         return;
       }
+      estado.token = res.data.token;
+      salvarSessao();
       document.getElementById('overlay-modal-alterar-senha').style.display = 'none';
       trocaSenhaForcada = false;
       mostrarToast('Senha alterada com sucesso!');

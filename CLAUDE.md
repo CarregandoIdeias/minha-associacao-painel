@@ -6,6 +6,19 @@ backend (`../minha-associacao-backend`, ou `CarregandoIdeias/minha-associacao-ba
 no GitHub) para o sistema completo — é lá que vive a documentação de
 segurança, RLS, modelo de dados e rotas da API.
 
+## superadmin.html agora salva o token reemitido ao trocar a própria senha (29/07/2026)
+
+Consequência de um fix de segurança no backend (`backend/CLAUDE.md`,
+"JWT não invalidado ao trocar senha") — `PUT /superadmin/perfil/senha`
+passou a invalidar o token antigo na hora (compara `senha_alterada_em`
+com o `iat` do JWT). Como essa rota nunca tinha devolvido um token novo
+antes, o Super Admin ficaria "deslogado" sem aviso nenhum logo após
+trocar a própria senha. O handler em `superadmin.html` (troca de senha,
+tanto voluntária quanto forçada por `deve_trocar_senha`) agora salva
+`res.data.token` em `estado.token` + `salvarSessao()`, mesmo padrão já
+usado em `index.html`/`portal.html` pros próprios fluxos de troca de
+senha.
+
 ## O que é
 
 Front-end da plataforma de gestão de associações — três arquivos HTML
