@@ -409,6 +409,69 @@
     color: var(--accent);
   }
 
+  .resumo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+  }
+  .card-resumo-corpo { padding: 22px; }
+  .situacao-destaque {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .proxima-cobranca {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .proxima-cobranca-desc { font-weight: 600; font-size: 14px; }
+  .proxima-cobranca-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .resumo-contadores {
+    display: flex;
+    gap: 20px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+  .resumo-contador-numero { font-size: 20px; font-weight: 700; }
+  .resumo-contador-label { font-size: 12px; color: var(--text-muted); }
+  .comunicado-mini {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .comunicado-mini:last-child { border-bottom: none; }
+  .comunicado-mini-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .comunicado-mini-titulo { font-weight: 600; font-size: 14px; flex: 1; }
+  .ponto-nao-lido {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+  .comunicado-mini-data { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .badge-contador {
+    background: var(--accent);
+    color: #fff;
+    border-radius: 20px;
+    padding: 2px 9px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
   .perfil-topo {
     display: flex;
     align-items: center;
@@ -682,7 +745,11 @@
   <nav class="sidebar" id="sidebar-principal">
     <div class="logo"><div class="logo-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div></div>
 
-    <button class="nav-item ativa" id="aba-meus-dados">
+    <button class="nav-item ativa" id="aba-inicio">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Início
+    </button>
+    <button class="nav-item" id="aba-meus-dados">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
       Meus Dados
     </button>
@@ -726,7 +793,45 @@
       </div>
     </div>
 
-    <div id="secao-meus-dados">
+    <div id="secao-inicio">
+      <div class="page-header"><h1>Início</h1></div>
+      <div class="resumo-grid">
+        <div class="painel">
+          <div class="painel-header"><h3>Situação financeira</h3></div>
+          <div class="card-resumo-corpo">
+            <div class="situacao-destaque">
+              <span>Sua situação</span>
+              <span class="badge" id="inicio-badge-situacao">—</span>
+            </div>
+            <div id="inicio-proxima-cobranca-container">
+              <div class="vazio">Carregando...</div>
+            </div>
+            <div class="resumo-contadores">
+              <div>
+                <div class="resumo-contador-numero" id="inicio-contador-pendentes">—</div>
+                <div class="resumo-contador-label">Pendentes</div>
+              </div>
+              <div>
+                <div class="resumo-contador-numero" id="inicio-contador-atrasadas">—</div>
+                <div class="resumo-contador-label">Atrasadas</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="painel">
+          <div class="painel-header">
+            <h3>Comunicados</h3>
+            <span class="badge-contador" id="inicio-badge-comunicados" style="display:none;">0</span>
+          </div>
+          <div id="inicio-comunicados-container">
+            <div class="vazio">Carregando...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="secao-meus-dados" style="display:none;">
       <div class="page-header"><h1>Meus Dados</h1></div>
       <div class="painel" style="margin-bottom:24px;">
         <div class="painel-header"><h3>Meu cadastro</h3></div>
@@ -1180,9 +1285,8 @@
     document.getElementById('tela-trocar-senha-obrigatoria').style.display = 'none';
     document.getElementById('tela-dashboard').style.display = 'flex';
     renderizarHeader();
-    ativarAba('meus-dados');
-    carregarMeusDados();
-    carregarComunicados();
+    ativarAba('inicio');
+    carregarInicio();
   }
 
   function salvarSessao() {
@@ -1353,7 +1457,7 @@
 
   // ---------- Navegação (sidebar) ----------
   function ativarAba(idAtiva) {
-    ['meus-dados', 'comunicados'].forEach(function(nome) {
+    ['inicio', 'meus-dados', 'comunicados'].forEach(function(nome) {
       var item = document.getElementById('aba-' + nome);
       if (item) item.classList.toggle('ativa', nome === idAtiva);
       var secao = document.getElementById('secao-' + nome);
@@ -1363,6 +1467,7 @@
     fecharSidebarMobile();
   }
 
+  document.getElementById('aba-inicio').onclick = function() { ativarAba('inicio'); carregarInicio(); };
   document.getElementById('aba-meus-dados').onclick = function() { ativarAba('meus-dados'); carregarMeusDados(); };
   document.getElementById('aba-comunicados').onclick = function() { ativarAba('comunicados'); carregarComunicados(); };
 
@@ -1390,8 +1495,23 @@
         return;
       }
       renderizarComunicados(res.data);
+      marcarComunicadosVisiveisComoLidos(res.data);
     })
     .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
+  }
+
+  // Abrir o mural já conta como "ver" os comunicados -- marca os ainda não
+  // lidos em segundo plano, sem bloquear a renderização. É o que faz o
+  // contador de não lidos do Início zerar depois que o associado passa
+  // por aqui.
+  function marcarComunicadosVisiveisComoLidos(lista) {
+    lista.forEach(function(c) {
+      if (c.lido) return;
+      fetch(API_URL + '/comunicados/' + c.id + '/marcar-lido', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + estado.token }
+      }).catch(function() {});
+    });
   }
 
   function renderizarComunicados(lista) {
@@ -1414,6 +1534,109 @@
         '</div>';
     });
     container.innerHTML = html;
+  }
+
+  // ---------- Início (mini-dashboard) ----------
+  function carregarInicio() {
+    fetch(API_URL + '/portal/meus-dados', {
+      headers: { 'Authorization': 'Bearer ' + estado.token }
+    })
+    .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
+    .then(function(res) {
+      if (!res.ok) {
+        if (tratarTrialExpirado(res.data)) return;
+        return;
+      }
+      var badge = document.getElementById('inicio-badge-situacao');
+      badge.className = 'badge ' + res.data.status;
+      badge.textContent = (res.data.status || '').replace(/_/g, ' ');
+    })
+    .catch(function() {});
+
+    fetch(API_URL + '/portal/minhas-cobrancas', {
+      headers: { 'Authorization': 'Bearer ' + estado.token }
+    })
+    .then(function(resp) { return resp.json(); })
+    .then(function(lista) { renderizarResumoFinanceiro(lista); })
+    .catch(function() { mostrarToast('Erro ao carregar suas cobranças', true); });
+
+    fetch(API_URL + '/comunicados', {
+      headers: { 'Authorization': 'Bearer ' + estado.token }
+    })
+    .then(function(resp) { return resp.json(); })
+    .then(function(lista) { renderizarResumoComunicados(lista); })
+    .catch(function() { mostrarToast('Erro ao carregar comunicados', true); });
+  }
+
+  function renderizarResumoFinanceiro(lista) {
+    var container = document.getElementById('inicio-proxima-cobranca-container');
+    if (!Array.isArray(lista)) lista = [];
+    // abrirModalPix() busca a cobrança em minhasCobrancasCache -- precisa
+    // estar povoado mesmo se o associado nunca abriu a aba "Meus Dados".
+    minhasCobrancasCache = lista;
+
+    var pendentes = lista.filter(function(c) { return c.status === 'pendente'; });
+    var atrasadas = pendentes.filter(function(c) { return c.status_exibicao === 'atrasado'; });
+    document.getElementById('inicio-contador-pendentes').textContent = pendentes.length;
+    document.getElementById('inicio-contador-atrasadas').textContent = atrasadas.length;
+
+    if (pendentes.length === 0) {
+      container.innerHTML = '<div class="vazio" style="padding:20px 0;">Nenhuma cobrança pendente. Tudo em dia!</div>';
+      return;
+    }
+
+    var ordenadas = pendentes.slice().sort(function(a, b) { return new Date(a.vencimento) - new Date(b.vencimento); });
+    var proxima = ordenadas[0];
+    var valorFormatado = 'R$ ' + parseFloat(proxima.valor).toFixed(2).replace('.', ',');
+    var statusTexto = proxima.status_exibicao.replace(/_/g, ' ');
+    if (proxima.status_exibicao === 'vencendo_em_breve' && proxima.dias_restantes != null) {
+      statusTexto = proxima.dias_restantes === 0 ? 'vence hoje' : 'vence em ' + proxima.dias_restantes + 'd';
+    } else if (proxima.status_exibicao === 'atrasado' && proxima.dias_restantes != null) {
+      statusTexto = 'atrasada há ' + Math.abs(proxima.dias_restantes) + 'd';
+    }
+
+    container.innerHTML =
+      '<div class="proxima-cobranca">' +
+        '<div>' +
+          '<div class="proxima-cobranca-desc">' + escapeHtml(proxima.descricao) + ' — ' + valorFormatado + '</div>' +
+          '<div class="proxima-cobranca-sub">Vencimento ' + formatarData(proxima.vencimento) + ' · <span class="badge ' + proxima.status_exibicao + '">' + escapeHtml(statusTexto) + '</span></div>' +
+        '</div>' +
+        '<button class="btn-pequeno" id="btn-inicio-pagar">Pagar com Pix</button>' +
+      '</div>';
+    document.getElementById('btn-inicio-pagar').onclick = function() { abrirModalPix(proxima.id); };
+  }
+
+  function renderizarResumoComunicados(lista) {
+    var container = document.getElementById('inicio-comunicados-container');
+    var badge = document.getElementById('inicio-badge-comunicados');
+    if (!Array.isArray(lista)) lista = [];
+
+    var naoLidos = lista.filter(function(c) { return !c.lido; }).length;
+    if (naoLidos > 0) {
+      badge.style.display = 'inline-block';
+      badge.textContent = naoLidos;
+    } else {
+      badge.style.display = 'none';
+    }
+
+    if (lista.length === 0) {
+      container.innerHTML = '<div class="vazio">Nenhum comunicado publicado ainda.</div>';
+      return;
+    }
+
+    var html = '<div style="padding:6px 22px;">';
+    lista.slice(0, 3).forEach(function(c) {
+      html += '<div class="comunicado-mini">' +
+        '<div class="comunicado-mini-header">' +
+          (!c.lido ? '<span class="ponto-nao-lido"></span>' : '') +
+          '<span class="comunicado-mini-titulo">' + escapeHtml(c.titulo) + '</span>' +
+        '</div>' +
+        '<div class="comunicado-mini-data">' + formatarDataHora(c.publicado_em) + '</div>' +
+        '</div>';
+    });
+    html += '</div><div style="padding:14px 22px; border-top:1px solid var(--border);"><button class="btn-pequeno" id="btn-inicio-ver-comunicados">Ver todos</button></div>';
+    container.innerHTML = html;
+    document.getElementById('btn-inicio-ver-comunicados').onclick = function() { ativarAba('comunicados'); carregarComunicados(); };
   }
 
   // ---------- Meus Dados ----------
