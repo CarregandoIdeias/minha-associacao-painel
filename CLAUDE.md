@@ -15,6 +15,38 @@ Admin), sem build step, publicados direto no Vercel. Cada um tem login,
 sessão (`localStorage`) e layout próprios — nenhum depende de import ou
 build dos outros.
 
+## Manual — dois bugs de CSS corrigidos após o conteúdo novo (29/07/2026)
+
+Achados pelo usuário logo depois da atualização de conteúdo (seção
+seguinte) — mesma classe de bug já documentada pra `landing.html`
+("Landing page (ASSOCIA PLUS)", `painel/README.md`): padding/margin como
+shorthand numa segunda classe do mesmo elemento zera silenciosamente o
+que a primeira classe (`.ap-shell`) já tinha definido.
+
+1. **`.ap-app-header { padding: 48px 0 8px; }`** e **`.ap-backtotop {
+   padding: 8px 0 0; }`** — os dois elementos (`<div class="ap-shell
+   ap-app-header ...">`, `<div class="ap-shell ap-backtotop">`) também
+   têm `.ap-shell`, que define `padding: 0 20px` (mobile) / `0 32px`
+   (desktop) pro respiro lateral do conteúdo. O shorthand de 3 valores
+   (`topo direita/esquerda embaixo`) sobrescrevia esse `0 20px` com `0`
+   liso nos dois lados — o texto de "Aplicação X de 3" / título / parágrafo
+   de cada app-header, e o link "Continuar para..." de cada backtotop,
+   ficavam colados na borda da tela (mais visível no mobile, onde os 20px
+   fazem mais diferença proporcional). Corrigido trocando pra longhand
+   (`padding-top`/`padding-bottom`), sem tocar no valor horizontal que
+   pertence só a `.ap-shell`.
+2. Conferidas todas as outras combinações de classe com `.ap-shell` no
+   arquivo (`ap-nav-row`, `ap-footer-row`) — já usavam longhand, sem o
+   mesmo problema.
+
+**Lição pra qualquer HTML novo neste projeto** (reforça o que já estava
+documentado pra `landing.html`): antes de dar uma classe nova a um
+elemento que já tem `.ap-shell` (ou qualquer classe que defina padding/
+margin horizontal para o layout), usar sempre `padding-top`/
+`padding-bottom` na classe nova — nunca o shorthand de 2 ou 3 valores,
+mesmo que pareça mais curto, porque ele sempre inclui o eixo horizontal
+implicitamente e prevalece por ordem de declaração no CSS.
+
 ## Manual da plataforma atualizado com planos e gating (29/07/2026)
 
 `manual.html` (guia público de como usar as 3 aplicações, linkado pela
