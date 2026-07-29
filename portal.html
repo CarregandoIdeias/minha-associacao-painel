@@ -540,6 +540,25 @@
   }
   .avatar-associado img { width: 100%; height: 100%; object-fit: cover; }
   .avatar-associado svg { width: 36px; height: 36px; color: var(--accent); }
+  .avatar-associado-wrapper { position: relative; flex-shrink: 0; }
+  .btn-camera-foto {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #0A0A0A;
+    border: 2px solid var(--bg-card);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+  }
+  .btn-camera-foto svg { width: 15px; height: 15px; }
+  .btn-camera-foto:hover { filter: brightness(1.08); }
 
   /* ---------- Modal ---------- */
   .overlay {
@@ -889,12 +908,16 @@
         <div class="painel-header"><h3>Meu cadastro</h3></div>
         <div style="padding:22px;">
           <div class="perfil-topo">
-            <div class="avatar-associado" id="avatar-associado">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <div class="avatar-associado-wrapper">
+              <div class="avatar-associado" id="avatar-associado">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              </div>
+              <button type="button" class="btn-camera-foto" id="btn-trocar-foto" title="Trocar foto" aria-label="Trocar foto">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+              </button>
+              <input type="file" id="input-foto-associado" accept="image/*" style="display:none;">
             </div>
             <div>
-              <input type="file" id="input-foto-associado" accept="image/*" style="display:none;">
-              <button class="btn btn-ghost" id="btn-trocar-foto">Trocar foto</button>
               <button class="btn btn-ghost" id="btn-ver-carteirinha">Ver carteirinha</button>
               <p style="font-size:12px; color:var(--text-muted); margin-top:6px;">JPG ou PNG, a imagem será redimensionada automaticamente.</p>
             </div>
