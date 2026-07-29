@@ -520,6 +520,17 @@
     background: var(--accent-soft);
     color: var(--accent);
   }
+  .comunicado-oficial {
+    display: inline-block;
+    margin-top: 8px;
+    margin-left: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 12px;
+    background: var(--accent);
+    color: #0A0A0A;
+  }
   .comunicado-stats { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin-top: 10px; font-size: 12.5px; color: var(--text-muted); }
   .comunicado-stats strong { color: var(--text); }
   .comunicado-taxa { font-weight: 700; }
@@ -3770,6 +3781,7 @@
         '</div>' +
         '<div class="comunicado-conteudo">' + escapeHtml(c.conteudo) + '</div>' +
         (c.categoria_alvo ? '<span class="comunicado-categoria">' + escapeHtml(c.categoria_alvo) + '</span>' : '') +
+        (c.origem_plataforma ? '<span class="comunicado-oficial">Comunicado oficial</span>' : '') +
         '<div class="comunicado-stats">' +
           '<span>Enviado para <strong>' + total + '</strong></span>' +
           '<span>Lido por <strong>' + lidoPor + '</strong></span>' +
@@ -3778,8 +3790,9 @@
         '</div>' +
         '<div style="margin-top:10px;">' +
           '<button class="btn-pequeno" onclick="abrirLeiturasComunicado(\'' + c.id + '\')">Ver leituras</button> ' +
-          '<button class="btn-pequeno" onclick="abrirEdicaoComunicado(\'' + c.id + '\')">Editar</button> ' +
-          '<button class="btn-pequeno" onclick="excluirComunicado(\'' + c.id + '\')">Excluir</button>' +
+          (c.origem_plataforma ? '' :
+            '<button class="btn-pequeno" onclick="abrirEdicaoComunicado(\'' + c.id + '\')">Editar</button> ' +
+            '<button class="btn-pequeno" onclick="excluirComunicado(\'' + c.id + '\')">Excluir</button>') +
         '</div>' +
         '</div>';
     });
