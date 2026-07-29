@@ -1229,11 +1229,14 @@
           <p class="texto-ajuda">
             Cobranças pendentes dentro desse prazo aparecem destacadas como "vencendo em breve" — tanto para a diretoria quanto para o associado.
           </p>
+          <p class="texto-ajuda" id="aviso-plano-alertas" style="display:none; color:var(--warning);">
+            Personalizar esse prazo é um recurso do plano Intermediário ou superior. No plano atual, o prazo fica fixo em 3 dias.
+          </p>
           <div class="campo" style="max-width:280px;">
             <label>Avisar com quantos dias de antecedência?</label>
             <input type="number" id="config-dias-alerta" min="0" max="30" placeholder="ex: 3">
           </div>
-          <div class="form-footer">
+          <div class="form-footer" id="rodape-config-alertas">
             <button class="btn" id="btn-salvar-config-alertas">Salvar</button>
           </div>
         </div>
@@ -1657,7 +1660,7 @@
     }
     return 'https://minha-associacao-backend.onrender.com';
   })();
-  var estado = { token: null, papel: null, nome: null, email: null };
+  var estado = { token: null, papel: null, nome: null, email: null, plano: null };
 
   // Espelho do backend/utils/precos.js — só pra sugerir/exibir valores antes
   // de salvar (o cálculo real é sempre feito no servidor).
@@ -1685,6 +1688,29 @@
     } catch (e) {
       return '';
     }
+  }
+
+  // Gating de funcionalidades por plano (29/07/2026) — plano vem embutido
+  // no próprio token (backend/routes/auth.js, assinarToken), decodificado
+  // do mesmo jeito que o e-mail acima, sem verificar assinatura porque é
+  // só pra decisão de UI (esconder botão/aba de recurso não incluído no
+  // plano). O bloqueio de verdade é sempre no backend (exigirPlano,
+  // middleware/auth.js) — uma divergência aqui só esconderia/mostraria um
+  // elemento errado, nunca abriria uma brecha real.
+  function decodificarPlanoDoToken(token) {
+    try {
+      var payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.plano || null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  var NIVEL_PLANO = { trial: 99, basico: 1, intermediario: 2, avancado: 3 };
+  function planoAtende(nivelMinimo) {
+    var nivelAtual = NIVEL_PLANO[estado.plano] != null ? NIVEL_PLANO[estado.plano] : 0;
+    var nivelExigido = NIVEL_PLANO[nivelMinimo] != null ? NIVEL_PLANO[nivelMinimo] : 0;
+    return nivelAtual >= nivelExigido;
   }
 
   var tokenRedefinicao = null;
@@ -1843,11 +1869,23 @@
         : '⚠️ Sua assinatura vence em ' + alerta.dias_restantes + (alerta.dias_restantes === 1 ? ' dia' : ' dias');
       infoPago = 'Evite a suspensão do acesso à plataforma realizando a renovação antes da data de vencimento.';
     }
+    // Aviso suave de limite de associados (gating por plano, 29/07/2026) --
+    // só informativo/upsell, nunca bloqueia o cadastro (ver GET /plano,
+    // backend/routes/plano.js, perto_do_limite). Independente do alerta de
+    // vencimento acima, são preocupações diferentes (capacidade x cobrança).
+    var avisoLimite = '';
+    if (d.perto_do_limite) {
+      avisoLimite = '<div class="card-plano-info" style="margin-top:6px;">' +
+        '📈 Você está com ' + d.total_associados + ' de ' + d.limite_associados + ' associados do plano ' + info.nome + '. ' +
+        'Considere fazer upgrade para continuar crescendo sem se preocupar com o limite.' +
+      '</div>';
+    }
     bloco.innerHTML =
       '<div class="card-plano pago' + classeAlertaPlano(alerta) + '">' +
         '<div>' +
           '<div class="card-plano-titulo">' + tituloPago + '<span class="badge-plano">' + info.nome + '</span></div>' +
           '<div class="card-plano-info">' + infoPago + '</div>' +
+          avisoLimite +
         '</div>' +
         (estado.papel === 'admin' ? '<button class="btn' + (alerta ? '' : ' btn-ghost') + '" id="btn-gerenciar-plano">' + (alerta ? 'Renovar Plano' : 'Gerenciar Plano') + '</button>' : '') +
       '</div>';
@@ -2216,6 +2254,33 @@
     return !permitidos || permitidos.indexOf(estado.papel) !== -1;
   }
 
+  // Perfis de acesso granulares (Financeiro/Atendimento/Operador/Somente
+  // Consulta) exigem plano Intermediário+ (gating por plano, 29/07/2026).
+  // Grandfathering: se estiver editando um usuário que JÁ tem um desses
+  // papéis, a opção continua disponível pra não obrigar a trocar de papel
+  // só por causa dessa mudança — o backend também só bloqueia atribuir um
+  // papel granular NOVO, nunca desfaz um já existente (ver PAPEIS_GRANULARES
+  // em backend/routes/usuarios.js).
+  var PAPEIS_GRANULARES = ['financeiro', 'atendimento', 'operador', 'consulta'];
+  var LABEL_ORIGINAL_PAPEL = {};
+  (function capturarLabelsOriginaisPapel() {
+    var select = document.getElementById('usuario-papel');
+    Array.prototype.forEach.call(select.options, function(opt) {
+      LABEL_ORIGINAL_PAPEL[opt.value] = opt.textContent;
+    });
+  })();
+  function atualizarOpcoesPapelUsuario(papelAtualSendoEditado) {
+    var select = document.getElementById('usuario-papel');
+    var podeAtribuirGranular = planoAtende('intermediario');
+    Array.prototype.forEach.call(select.options, function(opt) {
+      if (PAPEIS_GRANULARES.indexOf(opt.value) === -1) return;
+      var eEssePapelJaAtribuido = papelAtualSendoEditado && opt.value === papelAtualSendoEditado;
+      var bloqueado = !podeAtribuirGranular && !eEssePapelJaAtribuido;
+      opt.disabled = bloqueado;
+      opt.textContent = LABEL_ORIGINAL_PAPEL[opt.value] + (bloqueado ? ' (requer plano Intermediário+)' : '');
+    });
+  }
+
   function iniciaisNome(nome) {
     if (!nome) return '--';
     var partes = nome.trim().split(/\s+/);
@@ -2345,6 +2410,7 @@
         return;
       }
       estado.token = res.data.token;
+      estado.plano = decodificarPlanoDoToken(res.data.token);
       salvarSessao();
       document.getElementById('overlay-modal-alterar-senha').style.display = 'none';
       mostrarToast('Senha alterada com sucesso.');
@@ -2385,6 +2451,9 @@
     } else {
       document.getElementById('btn-menu-preferencias').style.display = 'none';
     }
+    // Auditoria completa é recurso exclusivo do plano Avançado (gating por
+    // plano, 29/07/2026) -- ver GET /auditoria (backend/routes/auditoria.js).
+    document.getElementById('btn-aba-acessos-auditoria').style.display = planoAtende('avancado') ? '' : 'none';
     document.getElementById('btn-novo-associado').style.display = podeFazer('associados_criar') ? 'flex' : 'none';
     document.getElementById('btn-nova-cobranca').style.display = podeFazer('cobrancas_criar') ? 'flex' : 'none';
     document.getElementById('btn-novo-comunicado').style.display = podeFazer('comunicados_criar') ? 'flex' : 'none';
@@ -2429,6 +2498,7 @@
       estado.papel = dados.papel;
       estado.nome = dados.nome || '';
       estado.email = decodificarEmailDoToken(dados.token);
+      estado.plano = decodificarPlanoDoToken(dados.token);
 
       // Valida o token com uma chamada leve antes de assumir a sessão como válida
       fetch(API_URL + '/configuracoes/pix', {
@@ -2485,6 +2555,7 @@
       estado.papel = res.data.usuario.papel;
       estado.nome = res.data.usuario.nome || '';
       estado.email = decodificarEmailDoToken(res.data.token);
+      estado.plano = decodificarPlanoDoToken(res.data.token);
 
       if (res.data.deve_trocar_senha) {
         document.getElementById('login-senha').value = '';
@@ -2539,6 +2610,7 @@
         return;
       }
       estado.token = res.data.token;
+      estado.plano = decodificarPlanoDoToken(res.data.token);
       document.getElementById('troca-senha-atual').value = '';
       document.getElementById('troca-senha-nova').value = '';
       document.getElementById('troca-senha-confirmar').value = '';
@@ -3249,6 +3321,16 @@
   }
 
   function carregarConfigAlertas() {
+    // Personalizar o prazo é recurso do plano Intermediário+ (gating por
+    // plano, 29/07/2026) -- no Básico o campo fica só leitura, travado no
+    // default (3 dias), e o botão Salvar some. Ver PUT /configuracoes/alertas
+    // (backend/routes/configuracoes.js), que rejeita a gravação de qualquer
+    // forma -- isso aqui é só a UI refletindo o mesmo limite.
+    var podeEditar = planoAtende('intermediario');
+    document.getElementById('config-dias-alerta').readOnly = !podeEditar;
+    document.getElementById('rodape-config-alertas').style.display = podeEditar ? '' : 'none';
+    document.getElementById('aviso-plano-alertas').style.display = podeEditar ? 'none' : 'block';
+
     fetch(API_URL + '/configuracoes/alertas', {
       headers: { 'Authorization': 'Bearer ' + estado.token }
     })
@@ -3848,6 +3930,11 @@
     document.getElementById('lista-leituras-comunicado').innerHTML = '<div class="vazio">Carregando...</div>';
     document.getElementById('busca-leituras-comunicado').value = '';
     ativarAbaLeituras('lidos');
+    // Exportar Excel/PDF é recurso do plano Intermediário+ (gating por
+    // plano, 29/07/2026) -- ver GET /comunicados/:id/leituras/exportar/:formato.
+    var podeExportar = planoAtende('intermediario');
+    document.getElementById('btn-exportar-leituras-excel').style.display = podeExportar ? '' : 'none';
+    document.getElementById('btn-exportar-leituras-pdf').style.display = podeExportar ? '' : 'none';
     document.getElementById('overlay-modal-leituras').style.display = 'flex';
 
     fetch(API_URL + '/comunicados/' + id + '/leituras', {
@@ -4167,6 +4254,7 @@
     document.getElementById('titulo-modal-usuario').textContent = 'Editar usuário';
     document.getElementById('editar-usuario-id').value = u.id;
     document.getElementById('usuario-nome').value = u.nome;
+    atualizarOpcoesPapelUsuario(u.papel);
     document.getElementById('usuario-papel').value = u.papel;
     document.getElementById('campo-usuario-email').style.display = 'none';
     document.getElementById('campo-usuario-associado').style.display = 'none';
@@ -4389,6 +4477,7 @@
     document.getElementById('editar-usuario-id').value = '';
     document.getElementById('usuario-nome').value = '';
     document.getElementById('usuario-email').value = '';
+    atualizarOpcoesPapelUsuario(null);
     document.getElementById('usuario-papel').value = 'diretoria';
     document.getElementById('campo-usuario-email').style.display = 'block';
     document.getElementById('campo-usuario-associado').style.display = 'none';

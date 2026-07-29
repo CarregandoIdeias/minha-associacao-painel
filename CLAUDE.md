@@ -411,6 +411,59 @@ corrigida em sessão seguinte) — lição: sempre conferir que o commit de
 uma mudança de UI inclui a atualização de doc correspondente antes de dar
 push, não assumir que "é só HTML/CSS, não precisa documentar".
 
+## Gating de funcionalidades por plano (Fase 2 da melhoria de planos, 29/07/2026)
+
+Ver `backend/CLAUDE.md` pra matriz completa, as 3 decisões de produto
+confirmadas antes de implementar (grandfathering, limite de associados só
+avisa/nunca bloqueia, backend real + esconder no front) e os testes em
+staging. Aqui só o lado do front (`index.html`/`portal.html`).
+
+**`index.html`**: `estado` ganhou `plano` (decodificado do próprio JWT
+via `decodificarPlanoDoToken()`, mesmo padrão de `decodificarEmailDoToken`
+já existente — sem verificar assinatura, é só pra UI, o bloqueio real é
+sempre no backend). Novo helper `planoAtende(nivelMinimo)` (espelha
+`NIVEL_PLANO`/`planoAtendeNivel` de `backend/utils/precos.js`) — chamado
+em 4 pontos:
+- `carregarConfigAlertas()`: campo de dias vira `readOnly` e o botão
+  Salvar some quando `!planoAtende('intermediario')`, com aviso
+  (`#aviso-plano-alertas`) explicando que é recurso do plano Intermediário+.
+- `atualizarOpcoesPapelUsuario(papelAtualSendoEditado)` (novo): desabilita
+  as 4 `<option>` granulares (`financeiro/atendimento/operador/consulta`)
+  em `#usuario-papel` quando o plano não atende, **exceto** a opção que já
+  é o papel atual do usuário sendo editado (grandfathering no front
+  também — reabrir a ficha de um financeiro legado não trava a opção dele
+  mesmo, só impede escolher OUTRO papel granular). Chamada em
+  `abrirEdicaoUsuario()` (com o papel atual) e no clique de
+  `#btn-novo-usuario` (com `null`, sem exceção). Rótulos originais
+  capturados uma vez (`LABEL_ORIGINAL_PAPEL`) pra poder anexar "(requer
+  plano Intermediário+)" sem perder o texto original ao reabrir o modal
+  várias vezes.
+- `abrirLeiturasComunicado()`: botões `#btn-exportar-leituras-excel`/`-pdf`
+  somem quando `!planoAtende('intermediario')`.
+- `entrarNoDashboard()`: `#btn-aba-acessos-auditoria` (sub-aba dentro de
+  Acessos) some quando `!planoAtende('avancado')` — a sidebar `#aba-acessos`
+  em si continua só admin (RBAC, não mudou), esse é um gate adicional por
+  cima.
+- `renderizarBlocoPlano()`: novo bloco `avisoLimite`, aparece dentro do
+  card de plano do Dashboard quando `GET /plano` devolve
+  `perto_do_limite: true` — texto tipo "Você está com 45 de 50
+  associados do plano Básico". Puramente informativo, não desabilita
+  nada; convive com o alerta de vencimento de assinatura já existente
+  (são preocupações independentes).
+
+**`portal.html`**: mesmo padrão de `decodificarPlanoDoToken`/
+`planoAtende` copiado (arquivo autocontido, sem import entre eles, mesmo
+princípio de sempre nesse projeto). `#btn-ver-carteirinha` some em
+`entrarNoPortal()` quando `!planoAtende('intermediario')`. **Só gate de
+UI** — a carteirinha é montada com dado que o próprio associado já recebe
+em `GET /portal/meus-dados`, não tem rota própria pra proteger no
+backend (ver `backend/CLAUDE.md` pra o porquê disso ser uma exceção
+deliberada à regra "sempre backend + front").
+
+**`superadmin.html` não precisou de nenhuma mudança** — Super Admin
+gerencia todas as associações independente do plano de cada uma, nunca é
+alvo de gating.
+
 ## Planos renomeados: Profissional/Enterprise → Intermediário/Avançado (29/07/2026)
 
 Consequência direta do refresh da landing page (seção acima, "Atualização

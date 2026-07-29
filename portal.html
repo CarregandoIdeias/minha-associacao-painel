@@ -1059,7 +1059,7 @@
     }
     return 'https://minha-associacao-backend.onrender.com';
   })();
-  var estado = { token: null, nome: null, email: null };
+  var estado = { token: null, nome: null, email: null, plano: null };
 
   function decodificarEmailDoToken(token) {
     try {
@@ -1068,6 +1068,29 @@
     } catch (e) {
       return '';
     }
+  }
+
+  // Gating de funcionalidades por plano (29/07/2026) — mesmo padrão de
+  // painel/index.html: plano vem embutido no token (backend/routes/auth.js),
+  // decodificado sem verificar assinatura porque é só pra decisão de UI
+  // (esconder a carteirinha se o plano da associação não incluir). Não tem
+  // rota própria protegida por trás da carteirinha (é montada com dado que
+  // o associado já recebe em /portal/meus-dados), então esse gate é só de
+  // UI mesmo — não há dado sensível adicional pra bloquear no backend aqui.
+  function decodificarPlanoDoToken(token) {
+    try {
+      var payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.plano || null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  var NIVEL_PLANO = { trial: 99, basico: 1, intermediario: 2, avancado: 3 };
+  function planoAtende(nivelMinimo) {
+    var nivelAtual = NIVEL_PLANO[estado.plano] != null ? NIVEL_PLANO[estado.plano] : 0;
+    var nivelExigido = NIVEL_PLANO[nivelMinimo] != null ? NIVEL_PLANO[nivelMinimo] : 0;
+    return nivelAtual >= nivelExigido;
   }
 
   var tokenRedefinicao = null;
@@ -1400,6 +1423,7 @@
         return;
       }
       estado.token = res.data.token;
+      estado.plano = decodificarPlanoDoToken(res.data.token);
       salvarSessao();
       document.getElementById('overlay-modal-alterar-senha').style.display = 'none';
       mostrarToast('Senha alterada com sucesso.');
@@ -1420,6 +1444,10 @@
     document.getElementById('tela-trocar-senha-obrigatoria').style.display = 'none';
     document.getElementById('tela-dashboard').style.display = 'flex';
     renderizarHeader();
+    // Carteirinha digital é recurso do plano Intermediário+ da associação
+    // (gating por plano, 29/07/2026) -- só de UI, ver comentário em
+    // decodificarPlanoDoToken acima.
+    document.getElementById('btn-ver-carteirinha').style.display = planoAtende('intermediario') ? '' : 'none';
     carregarNomeAssociacao();
     ativarAba('inicio');
     carregarInicio();
@@ -1449,6 +1477,7 @@
       estado.token = dados.token;
       estado.nome = dados.nome || '';
       estado.email = decodificarEmailDoToken(dados.token);
+      estado.plano = decodificarPlanoDoToken(dados.token);
 
       // Valida o token com uma chamada leve antes de assumir a sessão como válida
       fetch(API_URL + '/portal/meus-dados', {
@@ -1505,6 +1534,7 @@
       estado.token = res.data.token;
       estado.nome = res.data.usuario.nome || '';
       estado.email = decodificarEmailDoToken(res.data.token);
+      estado.plano = decodificarPlanoDoToken(res.data.token);
 
       if (res.data.deve_trocar_senha) {
         document.getElementById('login-senha').value = '';
@@ -1559,6 +1589,7 @@
         return;
       }
       estado.token = res.data.token;
+      estado.plano = decodificarPlanoDoToken(res.data.token);
       document.getElementById('troca-senha-atual').value = '';
       document.getElementById('troca-senha-nova').value = '';
       document.getElementById('troca-senha-confirmar').value = '';
