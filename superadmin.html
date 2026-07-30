@@ -47,7 +47,6 @@
   .saudacao .data { font-size: 13px; font-weight: 400; color: var(--text-muted); margin-top: 2px; }
   .logo { font-weight: 800; font-size: 14px; color: var(--accent); }
   .logo span { color: var(--text); }
-  .theme-toggle { background: var(--accent-soft); border: none; border-radius: 10px; width: 38px; height: 38px; font-size: 16px; cursor: pointer; color: var(--accent); }
 
   .graficos { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 28px; }
   .grafico-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 20px; box-shadow: var(--shadow); }
@@ -77,8 +76,6 @@
   .sidebar.recolhida .logo,
   .sidebar.recolhida .rotulo-nav { display: none; }
   .sidebar.recolhida .nav-item { justify-content: center; padding: 11px; }
-  .sidebar.recolhida .sidebar-footer { flex-direction: column; }
-  .sidebar.recolhida .sidebar-footer .btn-ghost { width: 38px; padding: 0; }
 
   .nav-item {
     display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-radius: 10px;
@@ -89,8 +86,6 @@
   .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
   .nav-item:hover { background: var(--accent-soft); color: var(--accent); }
   .nav-item.ativa { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
-
-  .sidebar-footer { margin-top: auto; display: flex; align-items: center; gap: 8px; padding-top: 16px; border-top: 1px solid var(--border); }
 
   .content-area { flex: 1; min-width: 0; padding: 32px 40px; }
   .secao-conteudo { display: none; }
@@ -121,9 +116,38 @@
   .dropdown-notificacoes .alerta-item { padding: 12px 18px; }
   .dropdown-notificacoes .vazio { padding: 24px; font-size: 13px; }
 
-  .perfil-chip { display: flex; align-items: center; gap: 8px; padding: 6px 12px 6px 6px; border-radius: 20px; background: var(--accent-soft); }
+  .app-header-perfil { position: relative; flex-shrink: 0; }
+  .app-header-avatar-btn { display: flex; align-items: center; gap: 8px; padding: 6px 12px 6px 6px; border-radius: 20px; background: var(--accent-soft); border: none; cursor: pointer; font-family: inherit; }
+  .app-header-avatar-btn:hover { background: var(--accent-hover); }
   .avatar-mini { width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: #0A0A0A; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; flex-shrink: 0; }
-  .nome-mini { font-size: 13px; font-weight: 600; }
+  .app-header-avatar-btn .nome-mini { font-size: 13px; font-weight: 600; text-align: left; color: var(--text); }
+  .app-header-avatar-btn .papel-mini { font-size: 11px; color: var(--text-muted); text-align: left; }
+  .app-header-avatar-btn .icone-caret { width: 14px; height: 14px; color: var(--text-muted); flex-shrink: 0; }
+
+  .dropdown-perfil {
+    display: none; position: absolute; top: calc(100% + 8px); right: 0;
+    min-width: 210px; background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 12px; box-shadow: var(--shadow); overflow: hidden; z-index: 60;
+  }
+  .dropdown-perfil.aberto { display: block; }
+  .dropdown-perfil button {
+    display: flex; align-items: center; gap: 10px; width: 100%; padding: 11px 16px;
+    background: none; border: none; text-align: left; font-family: inherit;
+    font-size: 14px; color: var(--text); cursor: pointer;
+  }
+  .dropdown-perfil button:hover { background: var(--accent-soft); color: var(--accent); }
+  .dropdown-perfil button svg { width: 16px; height: 16px; flex-shrink: 0; }
+  .dropdown-perfil button.perigo:hover { background: rgba(231,76,60,0.1); color: var(--danger); }
+  .dropdown-perfil hr { border: none; border-top: 1px solid var(--border); margin: 4px 0; }
+
+  .abas-ficha { display: flex; gap: 6px; border-bottom: 1px solid var(--border); margin-bottom: 18px; }
+  .aba-ficha {
+    background: none; border: none; padding: 10px 4px; margin-right: 14px;
+    font-family: inherit; font-size: 13.5px; font-weight: 600; color: var(--text-muted);
+    cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px;
+  }
+  .aba-ficha:hover { color: var(--text); }
+  .aba-ficha.ativa { color: var(--accent); border-bottom-color: var(--accent); }
 
   .alerta-item { display: flex; align-items: flex-start; gap: 10px; padding: 12px 22px; border-bottom: 1px solid var(--border); font-size: 13.5px; }
   .alerta-item:last-child { border-bottom: none; }
@@ -214,7 +238,7 @@
     .topo-conteudo { margin-bottom: 16px; }
     .saudacao { font-size: 17px; }
     .nome-mini { display: none; }
-    .perfil-chip { padding: 6px 8px; font-size: 12px; }
+    .app-header-avatar-btn { padding: 6px 8px; font-size: 12px; }
     .kpi-card { padding: 14px; }
     .kpi-card .rotulo { font-size: 10px; }
     .kpi-card .valor { font-size: 18px; }
@@ -391,13 +415,9 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 9h1"/><path d="M9 13h1"/><path d="M14 9h1"/><path d="M14 13h1"/><path d="M10 21v-4h4v4"/></svg>
       <span class="rotulo-nav">Associações</span>
     </button>
-    <button class="nav-item" id="aba-administradores">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-      <span class="rotulo-nav">Administradores</span>
-    </button>
-    <button class="nav-item" id="aba-auditoria">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
-      <span class="rotulo-nav">Auditoria</span>
+    <button class="nav-item" id="aba-acessos">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      <span class="rotulo-nav">Acessos</span>
     </button>
     <button class="nav-item" id="aba-contratacoes">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
@@ -408,19 +428,6 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
       <span class="rotulo-nav">Comunicados</span>
     </button>
-    <button class="nav-item" id="aba-config-plataforma" style="display:none;">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-      <span class="rotulo-nav">Config. Pix</span>
-    </button>
-    <button class="nav-item" id="aba-meu-perfil">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      <span class="rotulo-nav">Meu Perfil</span>
-    </button>
-
-    <div class="sidebar-footer">
-      <button class="theme-toggle" id="btn-tema" title="Alternar tema">☀</button>
-      <button class="btn btn-ghost" id="btn-sair" style="flex:1;">Sair</button>
-    </div>
   </nav>
 
   <div class="content-area">
@@ -441,9 +448,39 @@
             <div id="lista-alertas-dropdown"><div class="vazio">Nenhum alerta no momento.</div></div>
           </div>
         </div>
-        <div class="perfil-chip">
-          <div class="avatar-mini" id="avatar-superadmin">A</div>
-          <span class="nome-mini" id="nome-superadmin">Administrador</span>
+        <div class="app-header-perfil">
+          <button class="app-header-avatar-btn" id="btn-abrir-perfil" title="Menu do perfil">
+            <div class="avatar-mini" id="avatar-superadmin">A</div>
+            <div>
+              <div class="nome-mini" id="nome-superadmin">Administrador</div>
+              <div class="papel-mini" id="papel-superadmin">—</div>
+            </div>
+            <svg class="icone-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="dropdown-perfil" id="dropdown-perfil">
+            <button id="btn-menu-meu-perfil">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              Meu Perfil
+            </button>
+            <button id="btn-menu-alterar-senha">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              Alterar Senha
+            </button>
+            <button id="btn-menu-preferencias" style="display:none;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+              Preferências
+            </button>
+            <button id="btn-menu-tema">
+              <svg id="icone-tema-claro" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+              <svg id="icone-tema-escuro" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              <span id="texto-menu-tema">Tema Escuro</span>
+            </button>
+            <hr>
+            <button class="perigo" id="btn-sair">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              Sair
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -518,63 +555,70 @@
       </div>
     </div>
 
-    <div id="secao-administradores" class="secao-conteudo">
-      <div class="painel">
-        <div class="painel-header">
-          <h3>Administradores da plataforma</h3>
-          <button class="btn" id="btn-novo-administrador">+ Novo administrador</button>
-        </div>
-        <div id="tabela-administradores-container"><div class="vazio">Carregando...</div></div>
+    <div id="secao-acessos" class="secao-conteudo">
+      <div class="abas-ficha">
+        <button type="button" class="aba-ficha ativa" id="btn-aba-acessos-administradores">Administradores</button>
+        <button type="button" class="aba-ficha" id="btn-aba-acessos-auditoria">Auditoria</button>
       </div>
-    </div>
 
-    <div id="secao-auditoria" class="secao-conteudo">
-      <div class="painel">
-        <div class="painel-header">
-          <h3>Logs de auditoria</h3>
-          <div class="topo-acoes">
-            <button class="btn btn-ghost" id="btn-exportar-pdf">Exportar PDF</button>
+      <div id="conteudo-aba-acessos-administradores">
+        <div class="painel">
+          <div class="painel-header">
+            <h3>Administradores da plataforma</h3>
+            <button class="btn" id="btn-novo-administrador">+ Novo administrador</button>
           </div>
+          <div id="tabela-administradores-container"><div class="vazio">Carregando...</div></div>
         </div>
-        <div class="filtros-associacoes">
-          <input type="text" id="filtro-log-usuario" placeholder="Usuário (nome ou e-mail)...">
-          <input type="text" id="filtro-log-associacao" placeholder="Associação...">
-          <select id="filtro-log-modulo">
-            <option value="">Todos os módulos</option>
-            <option value="associacoes">Associações</option>
-            <option value="administradores">Administradores</option>
-            <option value="associados">Associados</option>
-            <option value="cobrancas">Cobranças</option>
-            <option value="comunicados">Comunicados</option>
-            <option value="usuarios">Usuários</option>
-            <option value="configuracoes">Configurações</option>
-            <option value="autenticacao">Autenticação</option>
-            <option value="auditoria">Auditoria</option>
-          </select>
-          <select id="filtro-log-tipo-acao">
-            <option value="">Todas as ações</option>
-            <option value="login">Login</option>
-            <option value="logout">Logout</option>
-            <option value="criacao">Criação</option>
-            <option value="edicao">Edição</option>
-            <option value="exclusao">Exclusão</option>
-            <option value="alteracao_senha">Alteração de senha</option>
-            <option value="alteracao_permissoes">Alteração de permissões</option>
-            <option value="exportacao">Exportação de dados</option>
-          </select>
-          <input type="date" id="filtro-log-data-inicio" style="max-width:150px;">
-          <input type="date" id="filtro-log-data-fim" style="max-width:150px;">
-          <select id="filtro-log-ordenar" style="max-width:150px;">
-            <option value="desc">Mais recentes</option>
-            <option value="asc">Mais antigos</option>
-          </select>
-        </div>
-        <div id="tabela-logs-container"><div class="vazio">Carregando...</div></div>
-        <div class="painel-header" style="border-top:1px solid var(--border); border-bottom:none;">
-          <span id="texto-paginacao-logs" style="font-size:13px; color:var(--text-muted);"></span>
-          <div class="topo-acoes">
-            <button class="btn-pequeno" id="btn-pagina-anterior-logs">← Anterior</button>
-            <button class="btn-pequeno" id="btn-pagina-proxima-logs">Próxima →</button>
+      </div>
+
+      <div id="conteudo-aba-acessos-auditoria" style="display:none;">
+        <div class="painel">
+          <div class="painel-header">
+            <h3>Logs de auditoria</h3>
+            <div class="topo-acoes">
+              <button class="btn btn-ghost" id="btn-exportar-pdf">Exportar PDF</button>
+            </div>
+          </div>
+          <div class="filtros-associacoes">
+            <input type="text" id="filtro-log-usuario" placeholder="Usuário (nome ou e-mail)...">
+            <input type="text" id="filtro-log-associacao" placeholder="Associação...">
+            <select id="filtro-log-modulo">
+              <option value="">Todos os módulos</option>
+              <option value="associacoes">Associações</option>
+              <option value="administradores">Administradores</option>
+              <option value="associados">Associados</option>
+              <option value="cobrancas">Cobranças</option>
+              <option value="comunicados">Comunicados</option>
+              <option value="usuarios">Usuários</option>
+              <option value="configuracoes">Configurações</option>
+              <option value="autenticacao">Autenticação</option>
+              <option value="auditoria">Auditoria</option>
+            </select>
+            <select id="filtro-log-tipo-acao">
+              <option value="">Todas as ações</option>
+              <option value="login">Login</option>
+              <option value="logout">Logout</option>
+              <option value="criacao">Criação</option>
+              <option value="edicao">Edição</option>
+              <option value="exclusao">Exclusão</option>
+              <option value="alteracao_senha">Alteração de senha</option>
+              <option value="alteracao_permissoes">Alteração de permissões</option>
+              <option value="exportacao">Exportação de dados</option>
+            </select>
+            <input type="date" id="filtro-log-data-inicio" style="max-width:150px;">
+            <input type="date" id="filtro-log-data-fim" style="max-width:150px;">
+            <select id="filtro-log-ordenar" style="max-width:150px;">
+              <option value="desc">Mais recentes</option>
+              <option value="asc">Mais antigos</option>
+            </select>
+          </div>
+          <div id="tabela-logs-container"><div class="vazio">Carregando...</div></div>
+          <div class="painel-header" style="border-top:1px solid var(--border); border-bottom:none;">
+            <span id="texto-paginacao-logs" style="font-size:13px; color:var(--text-muted);"></span>
+            <div class="topo-acoes">
+              <button class="btn-pequeno" id="btn-pagina-anterior-logs">← Anterior</button>
+              <button class="btn-pequeno" id="btn-pagina-proxima-logs">Próxima →</button>
+            </div>
           </div>
         </div>
       </div>
@@ -608,7 +652,7 @@
       </div>
     </div>
 
-    <div id="secao-config-plataforma" class="secao-conteudo">
+    <div id="secao-parametrizacao" class="secao-conteudo">
       <div class="painel">
         <div class="painel-header"><h3>Configuração de Pix da plataforma</h3></div>
         <div style="padding:22px;">
@@ -964,13 +1008,39 @@
 
   function aplicarTema(tema) {
     document.documentElement.setAttribute('data-theme', tema);
-    document.getElementById('btn-tema').textContent = tema === 'dark' ? '☾' : '☀';
+    document.getElementById('icone-tema-claro').style.display = tema === 'dark' ? 'none' : '';
+    document.getElementById('icone-tema-escuro').style.display = tema === 'dark' ? '' : 'none';
+    document.getElementById('texto-menu-tema').textContent = tema === 'dark' ? 'Tema Claro' : 'Tema Escuro';
     localStorage.setItem('tema-superadmin', tema);
   }
   aplicarTema(localStorage.getItem('tema-superadmin') || 'light');
-  document.getElementById('btn-tema').onclick = function() {
+  document.getElementById('btn-menu-tema').onclick = function() {
     aplicarTema(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
     if (estado.token && graficoCrescimento) carregarDashboard();
+  };
+
+  // ---------- Menu do avatar (Meu Perfil / Alterar Senha / Preferências / Tema / Sair) ----------
+  document.getElementById('btn-abrir-perfil').onclick = function(e) {
+    e.stopPropagation();
+    document.getElementById('dropdown-perfil').classList.toggle('aberto');
+  };
+  document.addEventListener('click', function(e) {
+    var dropdown = document.getElementById('dropdown-perfil');
+    if (dropdown.classList.contains('aberto') && !e.target.closest('.app-header-perfil')) {
+      dropdown.classList.remove('aberto');
+    }
+  });
+  document.getElementById('btn-menu-meu-perfil').onclick = function() {
+    document.getElementById('dropdown-perfil').classList.remove('aberto');
+    ativarSecaoSuperAdmin('meu-perfil');
+  };
+  document.getElementById('btn-menu-alterar-senha').onclick = function() {
+    document.getElementById('dropdown-perfil').classList.remove('aberto');
+    abrirModalAlterarSenha(false);
+  };
+  document.getElementById('btn-menu-preferencias').onclick = function() {
+    document.getElementById('dropdown-perfil').classList.remove('aberto');
+    ativarSecaoSuperAdmin('parametrizacao');
   };
 
   function mostrarToast(msg, erro) {
@@ -1176,25 +1246,39 @@
 
   // ---------- Navegação (sidebar) ----------
   function ativarSecaoSuperAdmin(nome) {
-    ['dashboard', 'associacoes', 'administradores', 'auditoria', 'contratacoes', 'comunicados-plataforma', 'config-plataforma', 'meu-perfil'].forEach(function(secao) {
-      document.getElementById('aba-' + secao).classList.toggle('ativa', secao === nome);
+    // 'parametrizacao' e 'meu-perfil' não têm item próprio na sidebar (só
+    // alcançáveis pelo menu do avatar, ver dropdown-perfil) -- por isso o
+    // "if (item)" antes de mexer na classe .ativa da sidebar.
+    ['dashboard', 'associacoes', 'acessos', 'contratacoes', 'comunicados-plataforma', 'parametrizacao', 'meu-perfil'].forEach(function(secao) {
+      var item = document.getElementById('aba-' + secao);
+      if (item) item.classList.toggle('ativa', secao === nome);
       document.getElementById('secao-' + secao).classList.toggle('ativa', secao === nome);
     });
     if (nome === 'associacoes') carregarAssociacoes();
-    if (nome === 'administradores') carregarAdministradores();
-    if (nome === 'auditoria') { paginaAtualLogs = 1; carregarLogs(); }
+    // "Acessos" tem 2 sub-abas internas: Administradores e Auditoria (mesmo
+    // padrão do Painel da Associação). Administradores só existe pra quem é
+    // super_admin -- se não for, abre direto em Auditoria.
+    if (nome === 'acessos') ativarAbaAcessos(estado.papel === 'super_admin' ? 'administradores' : 'auditoria');
     if (nome === 'contratacoes') carregarContratacoes();
-    if (nome === 'config-plataforma') carregarConfigPlataforma();
+    if (nome === 'parametrizacao') carregarConfigPlataforma();
     if (nome === 'meu-perfil') preencherMeuPerfil();
   }
   document.getElementById('aba-dashboard').onclick = function() { ativarSecaoSuperAdmin('dashboard'); };
   document.getElementById('aba-associacoes').onclick = function() { ativarSecaoSuperAdmin('associacoes'); };
-  document.getElementById('aba-administradores').onclick = function() { ativarSecaoSuperAdmin('administradores'); };
-  document.getElementById('aba-auditoria').onclick = function() { ativarSecaoSuperAdmin('auditoria'); };
+  document.getElementById('aba-acessos').onclick = function() { ativarSecaoSuperAdmin('acessos'); };
   document.getElementById('aba-contratacoes').onclick = function() { ativarSecaoSuperAdmin('contratacoes'); };
   document.getElementById('aba-comunicados-plataforma').onclick = function() { ativarSecaoSuperAdmin('comunicados-plataforma'); };
-  document.getElementById('aba-config-plataforma').onclick = function() { ativarSecaoSuperAdmin('config-plataforma'); };
-  document.getElementById('aba-meu-perfil').onclick = function() { ativarSecaoSuperAdmin('meu-perfil'); };
+
+  function ativarAbaAcessos(nome) {
+    ['administradores', 'auditoria'].forEach(function(aba) {
+      document.getElementById('conteudo-aba-acessos-' + aba).style.display = aba === nome ? 'block' : 'none';
+      document.getElementById('btn-aba-acessos-' + aba).classList.toggle('ativa', aba === nome);
+    });
+    if (nome === 'administradores') carregarAdministradores();
+    if (nome === 'auditoria') { paginaAtualLogs = 1; carregarLogs(); }
+  }
+  document.getElementById('btn-aba-acessos-administradores').onclick = function() { ativarAbaAcessos('administradores'); };
+  document.getElementById('btn-aba-acessos-auditoria').onclick = function() { ativarAbaAcessos('auditoria'); };
 
   document.getElementById('btn-enviar-comunicado-plataforma').onclick = function() {
     var titulo = document.getElementById('comunicado-plataforma-titulo').value.trim();
@@ -1252,8 +1336,11 @@
     document.getElementById('tela-dashboard').style.display = 'flex';
     document.getElementById('nome-superadmin').textContent = estado.nome || 'Administrador';
     document.getElementById('avatar-superadmin').textContent = (estado.nome || 'A').charAt(0).toUpperCase();
-    document.getElementById('aba-administradores').style.display = (estado.papel === 'super_admin') ? 'flex' : 'none';
-    document.getElementById('aba-config-plataforma').style.display = (estado.papel === 'super_admin') ? 'flex' : 'none';
+    document.getElementById('papel-superadmin').textContent = ROTULOS_PAPEL_SUPERADMIN[estado.papel] || estado.papel || '—';
+    // Administradores (sub-aba de Acessos) e Preferências (Config. Pix, no
+    // menu do avatar) só existem pra quem é super_admin.
+    document.getElementById('btn-aba-acessos-administradores').style.display = (estado.papel === 'super_admin') ? '' : 'none';
+    document.getElementById('btn-menu-preferencias').style.display = (estado.papel === 'super_admin') ? 'flex' : 'none';
     // Comunicados da plataforma: nível "gestão" (super_admin + administrador),
     // mesmo critério do backend (GESTAO em routes/superadmin.js) -- suporte
     // continua só leitura.
