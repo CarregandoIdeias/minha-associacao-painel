@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Política de Privacidade — ASSOCIA PLUS</title>
+<meta name="description" content="Como o ASSOCIA PLUS coleta, usa e protege dados pessoais, em conformidade com a LGPD.">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F7F5EF;
+    --bg-card: #ffffff;
+    --bg-alt: #F0ECE0;
+    --text: #1A1712;
+    --text-muted: #6B6558;
+    --border: #E4E0D2;
+    --accent: #C9A84C;
+    --accent-hover: #E8CC80;
+    --accent-soft: rgba(201, 168, 76, 0.12);
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --sans: 'Poppins', -apple-system, 'Segoe UI', Roboto, sans-serif;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0A0A0A; --bg-card: #1A1A1A; --bg-alt: #141414;
+      --text: #F9F8F5; --text-muted: #888888; --border: #232323;
+      --accent: #C9A84C; --accent-hover: #E8CC80; --accent-soft: rgba(201, 168, 76, 0.14);
+      --shadow: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
+      color-scheme: dark;
+    }
+  }
+  [data-theme="dark"] {
+    --bg: #0A0A0A; --bg-card: #1A1A1A; --bg-alt: #141414;
+    --text: #F9F8F5; --text-muted: #888888; --border: #232323;
+    --accent: #C9A84C; --accent-hover: #E8CC80; --accent-soft: rgba(201, 168, 76, 0.14);
+    --shadow: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
+    color-scheme: dark;
+  }
+  [data-theme="light"] {
+    --bg: #F7F5EF; --bg-card: #ffffff; --bg-alt: #F0ECE0;
+    --text: #1A1712; --text-muted: #6B6558; --border: #E4E0D2;
+    --accent: #C9A84C; --accent-hover: #E8CC80; --accent-soft: rgba(201, 168, 76, 0.12);
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    color-scheme: light;
+  }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--sans); line-height: 1.6; -webkit-font-smoothing: antialiased; }
+  h1, h2 { font-family: var(--sans); font-weight: 700; text-wrap: balance; color: var(--text); margin: 0; }
+  p, li { margin: 0; }
+  a { color: var(--accent); }
+
+  .ap-hairline { height: 3px; background: linear-gradient(90deg, var(--accent), var(--accent-hover), var(--accent)); }
+  .ap-shell { max-width: 780px; margin: 0 auto; padding: 0 24px; }
+
+  .ap-nav { padding: 20px 0; border-bottom: 1px solid var(--border); }
+  .ap-nav .ap-shell { display: flex; align-items: center; justify-content: space-between; }
+  .ap-mark { font-size: 18px; font-weight: 800; display: flex; align-items: baseline; gap: 6px; }
+  .ap-mark .ap-plus { font-weight: 700; font-size: 11px; letter-spacing: .1em; color: #0A0A0A; background: var(--accent); padding: 3px 6px 2px; border-radius: 4px; transform: translateY(-5px); }
+  .ap-nav a.voltar { font-size: 13.5px; color: var(--text-muted); text-decoration: none; }
+  .ap-nav a.voltar:hover { color: var(--accent); }
+
+  .ap-doc-header { padding: 48px 0 8px; }
+  .ap-doc-header .tag { font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+  .ap-doc-header h1 { font-size: clamp(26px, 4vw, 34px); margin-top: 8px; }
+  .ap-doc-header .meta { margin-top: 10px; font-size: 13.5px; color: var(--text-muted); }
+
+  .ap-callout { background: var(--bg-card); border: 1px solid var(--accent); border-radius: 12px; padding: 18px 20px; margin: 28px 0; }
+  .ap-callout p { font-size: 13.5px; color: var(--text-muted); font-weight: 400; }
+  .ap-callout strong { color: var(--text); }
+
+  .ap-doc { padding: 12px 0 64px; }
+  .ap-doc section { margin-bottom: 36px; }
+  .ap-doc h2 { font-size: 18px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  .ap-doc p { font-size: 14.5px; color: var(--text-muted); font-weight: 400; margin-bottom: 10px; }
+  .ap-doc p:last-child { margin-bottom: 0; }
+  .ap-doc ul { padding-left: 20px; margin: 10px 0; display: grid; gap: 6px; }
+  .ap-doc li { font-size: 14.5px; color: var(--text-muted); }
+  .ap-doc strong { color: var(--text); font-weight: 600; }
+  .ap-doc table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 13.5px; }
+  .ap-doc th, .ap-doc td { text-align: left; padding: 8px 10px; border: 1px solid var(--border); color: var(--text-muted); vertical-align: top; }
+  .ap-doc th { color: var(--text); font-weight: 600; background: var(--bg-alt); }
+
+  .placeholder { background: var(--accent-soft); color: var(--text); padding: 1px 5px; border-radius: 4px; font-weight: 600; }
+
+  .ap-footer { border-top: 1px solid var(--border); padding: 28px 0; }
+  .ap-footer p { font-size: 13px; color: var(--text-muted); }
+</style>
+</head>
+<body>
+  <div class="ap-hairline"></div>
+
+  <nav class="ap-nav">
+    <div class="ap-shell">
+      <div class="ap-mark">ASSOCIA<span class="ap-plus">PLUS</span></div>
+      <a class="voltar" href="landing.html">← Voltar ao site</a>
+    </div>
+  </nav>
+
+  <header class="ap-doc-header">
+    <div class="ap-shell">
+      <span class="tag">Documento legal</span>
+      <h1>Política de Privacidade</h1>
+      <p class="meta">Última atualização: 30 de julho de 2026</p>
+    </div>
+  </header>
+
+  <div class="ap-shell">
+    <div class="ap-callout">
+      <p><strong>Aviso importante:</strong> este documento é um rascunho estruturado para cobrir os pontos que a LGPD (Lei Geral de Proteção de Dados) exige que uma política de privacidade explique. Os campos marcados como <span class="placeholder">[A PREENCHER]</span> precisam ser completados com os dados reais da empresa antes da publicação, e o texto como um todo deve ser revisado por um profissional jurídico antes de valer como documento definitivo.</p>
+    </div>
+  </div>
+
+  <main class="ap-doc">
+    <div class="ap-shell">
+
+      <section id="quem-somos">
+        <h2>1. Quem somos</h2>
+        <p>Esta Política de Privacidade descreve como o <strong>ASSOCIA PLUS</strong>, operado por <span class="placeholder">[RAZÃO SOCIAL]</span>, inscrita no CNPJ <span class="placeholder">[CNPJ]</span> ("nós", "nossa plataforma"), coleta, usa, armazena e protege dados pessoais de quem utiliza o sistema — associações-clientes, seus administradores/diretoria e os associados de cada uma.</p>
+        <p>Para dúvidas, solicitações ou exercício de direitos sobre dados pessoais, entre em contato pelo e-mail <span class="placeholder">[E-MAIL DE PRIVACIDADE]</span>.</p>
+      </section>
+
+      <section id="quem-e-titular">
+        <h2>2. Quem esta política protege</h2>
+        <p>Esta plataforma é usada por três perfis diferentes, cada um com um tipo de relação diferente com os dados:</p>
+        <ul>
+          <li><strong>Associações-clientes</strong> (controladoras dos dados dos próprios associados) — contratam a plataforma para gerir seus associados.</li>
+          <li><strong>Administradores/diretoria/equipe</strong> de cada associação — pessoas que acessam o sistema em nome da associação.</li>
+          <li><strong>Associados</strong> — membros de cada associação-cliente, cujos dados são cadastrados pela própria associação (não se cadastram diretamente na plataforma).</li>
+        </ul>
+        <p>Nesse modelo, cada associação-cliente é a <strong>controladora</strong> dos dados dos próprios associados perante a LGPD, e o ASSOCIA PLUS atua como <strong>operador</strong> — processamos os dados seguindo as instruções da associação, através do sistema.</p>
+      </section>
+
+      <section id="dados-coletados">
+        <h2>3. Quais dados coletamos</h2>
+        <table>
+          <tr><th>Categoria</th><th>Dados</th><th>De quem</th></tr>
+          <tr><td>Identificação</td><td>Nome, e-mail, CPF, RG</td><td>Todos os perfis</td></tr>
+          <tr><td>Contato</td><td>Telefone, endereço completo</td><td>Associados</td></tr>
+          <tr><td>Imagem</td><td>Foto de perfil</td><td>Associados</td></tr>
+          <tr><td>Financeiro</td><td>Histórico de cobranças, comprovantes de pagamento</td><td>Associados</td></tr>
+          <tr><td>Acesso</td><td>Senha (armazenada com hash irreversível, nunca em texto puro), histórico de login, endereço IP</td><td>Todos os perfis</td></tr>
+          <tr><td>Uso da plataforma</td><td>Registro de ações administrativas (auditoria) — quem fez o quê e quando</td><td>Administradores/diretoria/equipe</td></tr>
+        </table>
+        <p>Não coletamos dados sensíveis além dos estritamente necessários pra identificação do associado (CPF/RG), e não usamos os dados coletados para nenhuma finalidade de publicidade ou perfilamento comportamental.</p>
+      </section>
+
+      <section id="finalidade">
+        <h2>4. Para que usamos esses dados</h2>
+        <ul>
+          <li>Permitir o cadastro e a gestão de associados pela associação-cliente</li>
+          <li>Gerar e controlar cobranças/mensalidades (Pix) e o histórico financeiro</li>
+          <li>Autenticar o acesso de cada usuário e manter sua sessão</li>
+          <li>Enviar comunicados da associação (e, eventualmente, da própria plataforma) aos associados</li>
+          <li>Gerar carteirinha digital de identificação do associado</li>
+          <li>Manter um log de auditoria das ações administrativas, para segurança e rastreabilidade</li>
+          <li>Emitir cobrança pela assinatura da plataforma à associação-cliente</li>
+        </ul>
+      </section>
+
+      <section id="base-legal">
+        <h2>5. Base legal (LGPD, art. 7º)</h2>
+        <p>O tratamento desses dados se apoia principalmente em:</p>
+        <ul>
+          <li><strong>Execução de contrato</strong> — os dados de administradores/diretoria e os dados financeiros existem porque são necessários pra prestar o serviço contratado pela associação.</li>
+          <li><strong>Cumprimento de obrigação legal ou regulatória da associação</strong> — muitas associações têm obrigação estatutária/legal de manter cadastro de seus membros.</li>
+          <li><strong>Legítimo interesse</strong> — para o log de auditoria e para medidas de segurança (ex.: registro de IP em tentativas de login), sempre limitado ao necessário e sem impacto desproporcional aos direitos do titular.</li>
+        </ul>
+      </section>
+
+      <section id="compartilhamento">
+        <h2>6. Com quem os dados são compartilhados</h2>
+        <p>Não vendemos nem alugamos dados pessoais a terceiros. Os dados são processados pelos seguintes prestadores de infraestrutura, na função de operadores/suboperadores, só na medida necessária para hospedar e operar a plataforma:</p>
+        <ul>
+          <li><strong>Supabase</strong> — hospedagem do banco de dados (PostgreSQL)</li>
+          <li><strong>Render</strong> — hospedagem do servidor da aplicação (backend)</li>
+          <li><strong>Vercel</strong> — hospedagem das páginas do painel/portal (frontend)</li>
+        </ul>
+        <p>Dados de um associado só ficam visíveis para a própria associação a que ele pertence — o isolamento entre associações é garantido tecnicamente no banco de dados (Row Level Security), não só por regra de código.</p>
+      </section>
+
+      <section id="retencao">
+        <h2>7. Por quanto tempo guardamos os dados</h2>
+        <p>Os dados ficam armazenados enquanto a conta/associação estiver ativa na plataforma. Após o encerramento do contrato com uma associação-cliente, os dados são mantidos por até <span class="placeholder">[PRAZO A DEFINIR]</span> para cumprir eventuais obrigações legais, contábeis ou de defesa em processos, e então eliminados ou anonimizados.</p>
+      </section>
+
+      <section id="seguranca">
+        <h2>8. Como protegemos os dados</h2>
+        <ul>
+          <li>Isolamento de dados entre associações reforçado no próprio banco de dados (Row Level Security), não só por lógica de aplicação</li>
+          <li>Senhas armazenadas com hash irreversível (nunca em texto puro)</li>
+          <li>Conexão criptografada (TLS) entre o navegador, o servidor e o banco de dados</li>
+          <li>Acesso da equipe da plataforma aos dados de associações-clientes restrito a suporte técnico, com log de auditoria de qualquer ação administrativa</li>
+        </ul>
+      </section>
+
+      <section id="direitos">
+        <h2>9. Seus direitos como titular de dados</h2>
+        <p>Nos termos da LGPD, você pode solicitar, a qualquer momento:</p>
+        <ul>
+          <li>Confirmação de que tratamos seus dados, e acesso a eles</li>
+          <li>Correção de dados incompletos, inexatos ou desatualizados</li>
+          <li>Anonimização, bloqueio ou eliminação de dados desnecessários ou tratados em desconformidade com a lei</li>
+          <li>Portabilidade dos dados a outro fornecedor</li>
+          <li>Eliminação dos dados tratados com base no seu consentimento</li>
+          <li>Informação sobre com quem compartilhamos seus dados</li>
+        </ul>
+        <p>Se você é associado de uma associação-cliente, o pedido normalmente deve ser feito primeiro à própria associação (controladora dos seus dados) — mas também pode nos contatar diretamente em <span class="placeholder">[E-MAIL DE PRIVACIDADE]</span> que encaminhamos ou respondemos dentro do prazo legal.</p>
+      </section>
+
+      <section id="cookies">
+        <h2>10. Cookies e armazenamento local</h2>
+        <p>A plataforma não usa cookies de rastreamento nem de terceiros para publicidade. A sessão de login é mantida via <em>localStorage</em> do navegador (um mecanismo técnico, não um cookie), usado só para manter você autenticado.</p>
+      </section>
+
+      <section id="alteracoes">
+        <h2>11. Alterações desta política</h2>
+        <p>Podemos atualizar esta política eventualmente. Mudanças relevantes serão comunicadas com destaque nesta página, com a data da última atualização sempre visível no topo.</p>
+      </section>
+
+      <section id="contato">
+        <h2>12. Contato</h2>
+        <p>Dúvidas sobre esta política ou sobre o tratamento dos seus dados: <span class="placeholder">[E-MAIL DE PRIVACIDADE]</span>.</p>
+      </section>
+
+    </div>
+  </main>
+
+  <footer class="ap-footer">
+    <div class="ap-shell">
+      <p>ASSOCIA PLUS · © 2026</p>
+    </div>
+  </footer>
+
+</body>
+</html>

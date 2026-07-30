@@ -6,6 +6,54 @@ backend (`../minha-associacao-backend`, ou `CarregandoIdeias/minha-associacao-ba
 no GitHub) para o sistema completo — é lá que vive a documentação de
 segurança, RLS, modelo de dados e rotas da API.
 
+## Política de Privacidade (LGPD) + correção de alegações falsas na landing (30/07/2026)
+
+Antes de o usuário começar a comercializar de verdade (sem cliente ativo
+ainda), duas pendências levantadas por mim mesmo numa conversa anterior
+sobre "o que falta antes de vender": ausência de política de
+privacidade/LGPD (a plataforma guarda CPF/RG/endereço/foto) e uma
+alegação de marketing na landing que não era verdade.
+
+**Nova página `privacidade.html`** — documento estático, sem login/API,
+mesma paleta/fonte do resto (`--accent` dourado, Poppins), reaproveitando
+o padrão visual de `manual.html` mas simplificado (sem nav com âncoras
+múltiplas nem menu hambúrguer, só um link "← Voltar ao site"). Cobre os
+pontos padrão de uma política LGPD: quem somos, quem é o titular em cada
+papel (associação-cliente = controladora dos dados dos próprios
+associados, ASSOCIA PLUS = operador), quais dados são coletados, pra que
+servem, base legal, com quem são compartilhados (Supabase/Render/Vercel,
+como suboperadores de infra, nunca vendidos a terceiro), retenção,
+segurança, direitos do titular, cookies (usa só `localStorage`, não
+cookie de rastreamento), como mudar a política, contato.
+
+**Importante — isso é um rascunho, não documento jurídico pronto**: os
+campos `[RAZÃO SOCIAL]`, `[CNPJ]`, `[E-MAIL DE PRIVACIDADE]` e `[PRAZO A
+DEFINIR]` (retenção pós-encerramento de contrato) estão marcados como
+placeholder de propósito — o usuário optou por preencher depois em vez de
+passar os dados na hora. Um aviso (`.ap-callout`) no topo da própria
+página já deixa isso explícito pro usuário (e pra qualquer um que abra o
+HTML), recomendando revisão por advogado antes de considerar definitivo.
+Link adicionado no rodapé de `landing.html` (`.ap-footer a`, CSS novo —
+antes o footer não tinha nenhum link, só texto).
+
+**Duas alegações falsas corrigidas em `landing.html`**, achadas ao
+revisar o texto antes de sugerir isso como pendência de lançamento:
+- *"Relatórios exportáveis em Excel/PDF"* (aparecia 2x, hero de
+  funcionalidades + card do plano Intermediário) — Excel foi removido do
+  produto inteiro em 29/07 (ver `backend/CLAUDE.md`), só PDF existe.
+  Texto corrigido pra "Relatórios exportáveis em PDF" nos dois lugares.
+- *"Monitoramento contínuo, backups automáticos diários"* (card de
+  confiança/segurança) — **nenhum dos dois existe de fato**: confirmado
+  com o usuário que o Supabase de produção está no plano **Free** (sem
+  backup automático, que só existe em planos pagos do Supabase) e não há
+  nenhuma ferramenta de monitoramento/alerta configurada (nem Sentry, nem
+  UptimeRobot, nada). Texto trocado por algo que já é verdade hoje
+  (isolamento por associação, hash de senha, TLS, suporte dedicado) — sem
+  prometer backup/monitoramento que não existe. **Se o usuário decidir
+  ativar backup de verdade no futuro** (upgrade do plano Supabase), esse
+  texto pode voltar a ser adicionado, mas só depois de confirmado que
+  passou a ser verdade.
+
 ## Controle inteligente de limite de associados + sugestão de upgrade (`index.html`, 30/07/2026)
 
 Ver `backend/CLAUDE.md` pra os campos novos de `GET /plano`
