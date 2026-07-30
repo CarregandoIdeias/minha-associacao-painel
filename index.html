@@ -1130,7 +1130,6 @@
           <div class="painel-header">
             <h3>Logs de auditoria</h3>
             <div class="topo-acoes">
-              <button class="btn btn-ghost" id="btn-exportar-auditoria-excel">Exportar Excel</button>
               <button class="btn btn-ghost" id="btn-exportar-auditoria-pdf">Exportar PDF</button>
             </div>
           </div>
@@ -1486,7 +1485,6 @@
 
     <div class="filtros-ficha">
       <input type="text" id="busca-leituras-comunicado" placeholder="Pesquisar por nome..." style="flex:1; min-width:180px; padding:9px 12px; border:1px solid var(--border); border-radius:8px; background:var(--bg); color:var(--text); font-family:inherit; font-size:13px;">
-      <button type="button" class="btn-pequeno" id="btn-exportar-leituras-excel">Exportar Excel</button>
       <button type="button" class="btn-pequeno" id="btn-exportar-leituras-pdf">Exportar PDF</button>
     </div>
 
@@ -2790,7 +2788,7 @@
           '<div class="mini-item-nome">' + escapeHtml(a.nome_completo) + '</div>' +
           '<div class="mini-item-sub">' + formatarData(a.data_ingresso) + '</div>' +
         '</div>' +
-        '<span class="badge ' + a.status + '">' + a.status + '</span>' +
+        '<span class="badge ' + escapeHtml(a.status) + '">' + escapeHtml(a.status) + '</span>' +
         '</div>';
     });
     container.innerHTML = html;
@@ -2828,7 +2826,7 @@
         '<td>' + escapeHtml(a.cpf || '—') + '</td>' +
         '<td>' + escapeHtml(a.telefone || '—') + '</td>' +
         '<td>' + escapeHtml(a.categoria || '—') + '</td>' +
-        '<td><span class="badge ' + a.status + '">' + a.status + '</span></td>' +
+        '<td><span class="badge ' + escapeHtml(a.status) + '">' + escapeHtml(a.status) + '</span></td>' +
         '<td>' + formatarData(a.data_ingresso) + '</td>' +
         '<td style="white-space:nowrap;">' +
           '<button class="btn-pequeno" onclick="abrirFichaAssociado(\'' + a.id + '\', \'ver\')">Ver ficha</button> ' +
@@ -2971,7 +2969,7 @@
           '<div class="item-ficha-sub">' + sub + '</div>' +
         '</div>' +
         '<div style="display:flex; align-items:center; gap:8px;">' +
-          '<span class="badge ' + statusExibicao + '">' + (rotulosStatusCobranca[statusExibicao] || statusExibicao) + '</span>' +
+          '<span class="badge ' + escapeHtml(statusExibicao) + '">' + escapeHtml(rotulosStatusCobranca[statusExibicao] || statusExibicao) + '</span>' +
           (c.tem_comprovante ? '<button class="btn-pequeno" onclick="abrirComprovante(\'' + c.id + '\')">Comprovante</button>' : '') +
         '</div>' +
       '</div>';
@@ -3549,7 +3547,7 @@
         '<td>' + escapeHtml(c.descricao) + '</td>' +
         '<td>' + valorFormatado + '</td>' +
         '<td>' + formatarData(c.vencimento) + '</td>' +
-        '<td><span class="badge ' + statusExibicao + '">' + statusTexto + '</span></td>' +
+        '<td><span class="badge ' + escapeHtml(statusExibicao) + '">' + escapeHtml(statusTexto) + '</span></td>' +
         '<td style="white-space:nowrap;">' + acoes + '</td>' +
         '</tr>';
     });
@@ -3816,7 +3814,7 @@
     .then(function(res) {
       var container = document.getElementById('lista-atividades-container');
       if (!res.ok) {
-        container.innerHTML = '<div class="vazio">' + (res.data.erro || 'Erro ao carregar atividades') + '</div>';
+        container.innerHTML = '<div class="vazio">' + escapeHtml(res.data.erro || 'Erro ao carregar atividades') + '</div>';
         return;
       }
       if (res.data.length === 0) {
@@ -3930,11 +3928,9 @@
     document.getElementById('lista-leituras-comunicado').innerHTML = '<div class="vazio">Carregando...</div>';
     document.getElementById('busca-leituras-comunicado').value = '';
     ativarAbaLeituras('lidos');
-    // Exportar Excel/PDF é recurso do plano Intermediário+ (gating por
-    // plano, 29/07/2026) -- ver GET /comunicados/:id/leituras/exportar/:formato.
-    var podeExportar = planoAtende('intermediario');
-    document.getElementById('btn-exportar-leituras-excel').style.display = podeExportar ? '' : 'none';
-    document.getElementById('btn-exportar-leituras-pdf').style.display = podeExportar ? '' : 'none';
+    // Exportar PDF é recurso do plano Intermediário+ (gating por plano,
+    // 29/07/2026) -- ver GET /comunicados/:id/leituras/exportar/:formato.
+    document.getElementById('btn-exportar-leituras-pdf').style.display = planoAtende('intermediario') ? '' : 'none';
     document.getElementById('overlay-modal-leituras').style.display = 'flex';
 
     fetch(API_URL + '/comunicados/' + id + '/leituras', {
@@ -4002,9 +3998,9 @@
     }).join('');
   }
 
-  function exportarLeiturasComunicado(formato) {
+  function exportarLeiturasComunicado() {
     if (!leiturasComunicadoId) return;
-    fetch(API_URL + '/comunicados/' + leiturasComunicadoId + '/leituras/exportar/' + formato, {
+    fetch(API_URL + '/comunicados/' + leiturasComunicadoId + '/leituras/exportar/pdf', {
       headers: { 'Authorization': 'Bearer ' + estado.token }
     })
     .then(function(resp) {
@@ -4015,7 +4011,7 @@
       var url = URL.createObjectURL(blob);
       var link = document.createElement('a');
       link.href = url;
-      link.download = 'leituras-comunicado.' + (formato === 'excel' ? 'xlsx' : 'pdf');
+      link.download = 'leituras-comunicado.pdf';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -4023,8 +4019,7 @@
     })
     .catch(function(err) { mostrarToast(err.message || 'Erro ao exportar leituras', true); });
   }
-  document.getElementById('btn-exportar-leituras-excel').onclick = function() { exportarLeiturasComunicado('excel'); };
-  document.getElementById('btn-exportar-leituras-pdf').onclick = function() { exportarLeiturasComunicado('pdf'); };
+  document.getElementById('btn-exportar-leituras-pdf').onclick = function() { exportarLeiturasComunicado(); };
 
   function abrirEdicaoComunicado(id) {
     var c = comunicadosCache.find(function(x) { return x.id === id; });
@@ -4172,7 +4167,7 @@
       html += '<tr>' +
         '<td>' + escapeHtml(u.nome) + '</td>' +
         '<td>' + escapeHtml(u.email) + '</td>' +
-        '<td><span class="comunicado-categoria">' + (rotuloPapel[u.papel] || u.papel) + '</span></td>' +
+        '<td><span class="comunicado-categoria">' + escapeHtml(rotuloPapel[u.papel] || u.papel) + '</span></td>' +
         '<td><span class="badge ' + (u.ativo ? 'ativo' : 'desligado') + '">' + (u.ativo ? 'ativo' : 'inativo') + '</span></td>' +
         '<td>' + formatarData(u.criado_em) + '</td>' +
         '<td>' + (u.ultimo_acesso ? formatarDataHora(u.ultimo_acesso) : 'nunca acessou') + '</td>' +
@@ -4420,9 +4415,9 @@
     document.getElementById('overlay-modal-log-auditoria').style.display = 'none';
   };
 
-  function exportarAuditoria(formato) {
+  function exportarAuditoria() {
     var params = filtrosAuditoriaQueryString();
-    fetch(API_URL + '/auditoria/exportar/' + formato + '?' + params.join('&'), {
+    fetch(API_URL + '/auditoria/exportar/pdf?' + params.join('&'), {
       headers: { 'Authorization': 'Bearer ' + estado.token }
     })
     .then(function(resp) {
@@ -4433,7 +4428,7 @@
       var url = URL.createObjectURL(blob);
       var link = document.createElement('a');
       link.href = url;
-      link.download = 'auditoria.' + (formato === 'excel' ? 'xlsx' : 'pdf');
+      link.download = 'auditoria.pdf';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -4441,8 +4436,7 @@
     })
     .catch(function(err) { mostrarToast(err.message || 'Erro ao exportar auditoria', true); });
   }
-  document.getElementById('btn-exportar-auditoria-excel').onclick = function() { exportarAuditoria('excel'); };
-  document.getElementById('btn-exportar-auditoria-pdf').onclick = function() { exportarAuditoria('pdf'); };
+  document.getElementById('btn-exportar-auditoria-pdf').onclick = function() { exportarAuditoria(); };
 
   function atualizarCampoVinculoAssociado() {
     var papel = document.getElementById('usuario-papel').value;

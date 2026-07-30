@@ -6,6 +6,37 @@ backend (`../minha-associacao-backend`, ou `CarregandoIdeias/minha-associacao-ba
 no GitHub) para o sistema completo — é lá que vive a documentação de
 segurança, RLS, modelo de dados e rotas da API.
 
+## Itens de severidade baixa da auditoria de segurança (29/07/2026, continuação)
+
+Depois dos 5 médios (backend), o usuário pediu pra resolver também os
+de severidade baixa. Do lado do front:
+
+**Exportação Excel removida, só PDF continua** — consequência de
+`exceljs` ter sido removido inteiro do backend (nenhuma versão publicada
+escapa de ~10 vulnerabilidades transitivas via `archiver`, ver
+`backend/CLAUDE.md`). Removidos os 3 botões "Exportar Excel"
+(`superadmin.html`, e `index.html` × 2 — auditoria e leituras de
+comunicado) e simplificadas as 3 funções JS correspondentes
+(`exportarLogs`, `exportarAuditoria`, `exportarLeiturasComunicado`) pra
+não receberem mais parâmetro `formato` — só existe PDF agora, não fazia
+sentido manter a ramificação. O gate de plano (Intermediário+ pra
+leituras, Avançado pra Auditoria) continua exatamente igual, só no botão
+PDF que sobrou.
+
+**Escaping nivelado entre os 3 apps** — vários pontos usavam `status`/
+`papel`/`cidade`/`estado` (valores vindos do backend) direto em
+`innerHTML`, sem `escapeHtml()`, tanto como texto quanto como classe CSS
+(`'<span class="badge ' + a.status + '">'`). Risco baixo hoje porque são
+valores de enum, não texto livre — mas se o enum algum dia aceitar
+valor mais solto, ou se um `"` aparecer no meio do valor, isso quebra o
+atributo `class` e abre uma injeção. Corrigido em `index.html`
+(atividades, associados × 2, cobranças × 2, usuários), `superadmin.html`
+(Dashboard "Últimas associações", associados/cobranças da ficha de
+detalhe, contratações) e `portal.html` (resumo financeiro, ficha,
+histórico de cobranças) — todos agora passam por `escapeHtml()` antes de
+virar HTML, igual ao padrão que já existia em outros campos do mesmo
+arquivo.
+
 ## superadmin.html agora salva o token reemitido ao trocar a própria senha (29/07/2026)
 
 Consequência de um fix de segurança no backend (`backend/CLAUDE.md`,

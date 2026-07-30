@@ -533,7 +533,6 @@
         <div class="painel-header">
           <h3>Logs de auditoria</h3>
           <div class="topo-acoes">
-            <button class="btn btn-ghost" id="btn-exportar-excel">Exportar Excel</button>
             <button class="btn btn-ghost" id="btn-exportar-pdf">Exportar PDF</button>
           </div>
         </div>
@@ -1120,7 +1119,7 @@
           var statusClass = a.ativo ? 'ativo' : 'inativo';
           html += '<div class="item-lista">' +
             '<div class="item-lista-titulo">' + escapeHtml(a.nome) + '</div>' +
-            '<div class="item-lista-sub">' + (a.cidade || '—') + ', ' + (a.estado || '?') + '</div>' +
+            '<div class="item-lista-sub">' + escapeHtml(a.cidade || '—') + ', ' + escapeHtml(a.estado || '?') + '</div>' +
             '<span class="item-lista-badge">' + (ROTULOS_PLANO[a.plano] || a.plano) + '</span>' +
             '</div>';
         });
@@ -1478,7 +1477,7 @@
         '<td>' + (ROTULOS_PLANO[a.plano] || a.plano) + '</td>' +
         '<td>' + a.total_associados + '</td>' +
         '<td>' + formatarMoeda(a.valor_mensalidade) + '</td>' +
-        '<td><span class="badge ' + (CLASSE_BADGE_STATUS[a.status_assinatura] || '') + '">' + (ROTULO_STATUS_ASSINATURA[a.status_assinatura] || a.status_assinatura) + '</span></td>' +
+        '<td><span class="badge ' + (CLASSE_BADGE_STATUS[a.status_assinatura] || '') + '">' + escapeHtml(ROTULO_STATUS_ASSINATURA[a.status_assinatura] || a.status_assinatura) + '</span></td>' +
         '<td>' + new Date(a.criado_em).toLocaleDateString('pt-BR') + '</td>' +
         '<td>' + (a.vencimento_assinatura ? new Date(a.vencimento_assinatura).toLocaleDateString('pt-BR') : '—') + '</td>' +
         '<td style="white-space:nowrap;">' +
@@ -1792,7 +1791,7 @@
       if (lista.length === 0) { container.innerHTML = '<div class="vazio">Nenhum associado cadastrado.</div>'; return; }
       var html = '<table><thead><tr><th>Nome</th><th>CPF</th><th>Categoria</th><th>Status</th></tr></thead><tbody>';
       lista.forEach(function(a) {
-        html += '<tr><td>' + escapeHtml(a.nome_completo) + '</td><td>' + escapeHtml(a.cpf || '—') + '</td><td>' + escapeHtml(a.categoria || '—') + '</td><td><span class="badge ' + (a.status === 'ativo' ? 'ativo' : 'inativo') + '">' + a.status + '</span></td></tr>';
+        html += '<tr><td>' + escapeHtml(a.nome_completo) + '</td><td>' + escapeHtml(a.cpf || '—') + '</td><td>' + escapeHtml(a.categoria || '—') + '</td><td><span class="badge ' + (a.status === 'ativo' ? 'ativo' : 'inativo') + '">' + escapeHtml(a.status) + '</span></td></tr>';
       });
       html += '</tbody></table>';
       container.innerHTML = html;
@@ -1809,7 +1808,7 @@
       if (lista.length === 0) { container.innerHTML = '<div class="vazio">Nenhuma cobrança cadastrada.</div>'; return; }
       var html = '<table><thead><tr><th>Associado</th><th>Descrição</th><th>Valor</th><th>Vencimento</th><th>Status</th></tr></thead><tbody>';
       lista.forEach(function(c) {
-        html += '<tr><td>' + escapeHtml(c.associado_nome) + '</td><td>' + escapeHtml(c.descricao) + '</td><td>' + formatarMoeda(c.valor) + '</td><td>' + new Date(c.vencimento).toLocaleDateString('pt-BR') + '</td><td><span class="badge ' + (c.status === 'pago' ? 'ativo' : 'inativo') + '">' + c.status.replace(/_/g,' ') + '</span></td></tr>';
+        html += '<tr><td>' + escapeHtml(c.associado_nome) + '</td><td>' + escapeHtml(c.descricao) + '</td><td>' + formatarMoeda(c.valor) + '</td><td>' + new Date(c.vencimento).toLocaleDateString('pt-BR') + '</td><td><span class="badge ' + (c.status === 'pago' ? 'ativo' : 'inativo') + '">' + escapeHtml(c.status.replace(/_/g,' ')) + '</span></td></tr>';
       });
       html += '</tbody></table>';
       container.innerHTML = html;
@@ -2114,9 +2113,9 @@
     document.getElementById('overlay-modal-log').style.display = 'none';
   };
 
-  function exportarLogs(formato) {
+  function exportarLogs() {
     var params = filtrosLogsQueryString();
-    fetch(API_URL + '/superadmin/logs/exportar/' + formato + '?' + params.join('&'), {
+    fetch(API_URL + '/superadmin/logs/exportar/pdf?' + params.join('&'), {
       headers: { 'Authorization': 'Bearer ' + estado.token }
     })
     .then(function(resp) {
@@ -2127,7 +2126,7 @@
       var url = URL.createObjectURL(blob);
       var link = document.createElement('a');
       link.href = url;
-      link.download = 'logs-auditoria.' + (formato === 'excel' ? 'xlsx' : 'pdf');
+      link.download = 'logs-auditoria.pdf';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -2136,8 +2135,7 @@
     .catch(function(err) { mostrarToast(err.message || 'Erro ao exportar logs', true); });
   }
 
-  document.getElementById('btn-exportar-excel').onclick = function() { exportarLogs('excel'); };
-  document.getElementById('btn-exportar-pdf').onclick = function() { exportarLogs('pdf'); };
+  document.getElementById('btn-exportar-pdf').onclick = function() { exportarLogs(); };
 
   // ---------- Contratações de plano ----------
   var contratacoesCache = [];
@@ -2190,7 +2188,7 @@
         '<td>' + formatarMoeda(s.valor_referencia) + '</td>' +
         '<td>' + escapeHtml(s.solicitado_por_nome || '—') + '</td>' +
         '<td>' + new Date(s.solicitado_em).toLocaleDateString('pt-BR') + '</td>' +
-        '<td><span class="badge ' + (CLASSE_BADGE_CONTRATACAO[s.status] || '') + '">' + (ROTULOS_STATUS_CONTRATACAO[s.status] || s.status) + '</span></td>' +
+        '<td><span class="badge ' + (CLASSE_BADGE_CONTRATACAO[s.status] || '') + '">' + escapeHtml(ROTULOS_STATUS_CONTRATACAO[s.status] || s.status) + '</span></td>' +
         '<td><button class="btn-pequeno" onclick="abrirDetalhesContratacao(\'' + s.id + '\')">Detalhes</button></td>' +
         '</tr>';
     });

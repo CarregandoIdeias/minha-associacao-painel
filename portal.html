@@ -1776,7 +1776,7 @@
       '<div class="proxima-cobranca">' +
         '<div>' +
           '<div class="proxima-cobranca-desc">' + escapeHtml(proxima.descricao) + ' — ' + valorFormatado + '</div>' +
-          '<div class="proxima-cobranca-sub">Vencimento ' + formatarData(proxima.vencimento) + ' · <span class="badge ' + proxima.status_exibicao + '">' + escapeHtml(statusTexto) + '</span></div>' +
+          '<div class="proxima-cobranca-sub">Vencimento ' + formatarData(proxima.vencimento) + ' · <span class="badge ' + escapeHtml(proxima.status_exibicao) + '">' + escapeHtml(statusTexto) + '</span></div>' +
         '</div>' +
         '<button class="btn-pequeno" id="btn-inicio-pagar">Pagar com Pix</button>' +
       '</div>';
@@ -1892,7 +1892,7 @@
         '<h4 class="ficha-secao-titulo">Plano e situação</h4>' +
         '<div class="ficha-grid">' +
           campoFicha('Plano/Categoria', a.categoria) +
-          '<div class="ficha-item"><span class="ficha-label">Situação</span><span class="ficha-valor"><span class="badge ' + a.status + '">' + escapeHtml(a.status) + '</span></span></div>' +
+          '<div class="ficha-item"><span class="ficha-label">Situação</span><span class="ficha-valor"><span class="badge ' + escapeHtml(a.status) + '">' + escapeHtml(a.status) + '</span></span></div>' +
           campoFicha('Associado desde', formatarData(a.data_ingresso)) +
           campoFicha('Cadastro em', formatarData(a.criado_em)) +
         '</div>' +
@@ -1983,7 +1983,7 @@
         '<td>' + escapeHtml(c.descricao) + '</td>' +
         '<td>' + valorFormatado + '</td>' +
         '<td>' + formatarData(c.vencimento) + '</td>' +
-        '<td><span class="badge ' + statusExibicao + '">' + statusTexto + '</span></td>' +
+        '<td><span class="badge ' + escapeHtml(statusExibicao) + '">' + escapeHtml(statusTexto) + '</span></td>' +
         '<td>' + acao + '</td>' +
         '</tr>';
     });
