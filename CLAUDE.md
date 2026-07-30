@@ -6,6 +6,26 @@ backend (`../minha-associacao-backend`, ou `CarregandoIdeias/minha-associacao-ba
 no GitHub) para o sistema completo — é lá que vive a documentação de
 segurança, RLS, modelo de dados e rotas da API.
 
+## `manual.html` atualizado com as mudanças recentes (30/07/2026)
+
+Depois de implementar boas-vindas/controle de limite, o manual (guia
+público das 3 aplicações) ficou defasado em pontos que um usuário real
+leria antes de usar a plataforma. Corrigido:
+
+- **4 menções a "Exportar Excel"** (Auditoria do Super Admin, leituras de
+  comunicado, Auditoria por associação, resumo de recursos por plano) —
+  Excel foi removido do produto inteiro em 29/07, só PDF existe.
+- **Trecho sobre limite de associados estava dizendo o oposto do
+  comportamento atual** ("é só um alerta, o cadastro nunca é bloqueado") —
+  reescrito pra descrever as 3 faixas (80/90/100%), o bloqueio real de
+  cadastro ao atingir o limite, a sugestão automática de upgrade, e que
+  "Gerenciar Plano" nunca oferece downgrade.
+- **Modal de boas-vindas** mencionado nos passos de login do Painel da
+  Associação e do Portal do Associado (não existe na aplicação do Super
+  Admin, não mencionado lá).
+- Rodapé ganhou link **"Privacidade"** pra `privacidade.html`, mesmo
+  padrão do link novo em `landing.html`.
+
 ## Política de Privacidade (LGPD) + correção de alegações falsas na landing (30/07/2026)
 
 Antes de o usuário começar a comercializar de verdade (sem cliente ativo
