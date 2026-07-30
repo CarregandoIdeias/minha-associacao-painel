@@ -321,6 +321,10 @@
   .painel-header { display: flex; justify-content: space-between; align-items: center; padding: 18px 22px; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 10px; }
   .painel-header h3 { font-size: 15px; font-weight: 600; }
 
+  .grid-info-blocos { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+  .perfil-topo { display: flex; align-items: center; gap: 18px; margin-bottom: 20px; }
+  .texto-ajuda { font-size: 13px; color: var(--text-muted); line-height: 1.5; margin-bottom: 20px; }
+
   #tabela-associacoes-container, #tabela-administradores-container, #tabela-logs-container, #tabela-contratacoes-container { overflow-x: auto; }
   .btn-pequeno:disabled, .btn:disabled { opacity: 0.5; cursor: not-allowed; }
   table { width: 100%; border-collapse: collapse; min-width: 980px; }
@@ -672,9 +676,15 @@
       <div class="painel">
         <div class="painel-header"><h3>Meu perfil</h3></div>
         <div style="padding:22px;">
-          <div class="info-linha"><span>Nome</span><span id="perfil-nome">—</span></div>
+          <div class="perfil-topo">
+            <div class="avatar-mini" style="width:56px; height:56px; font-size:20px;" id="perfil-avatar">--</div>
+            <div>
+              <div style="font-size:17px; font-weight:700;" id="perfil-nome">—</div>
+              <div style="font-size:13px; color:var(--text-muted);" id="perfil-papel">—</div>
+            </div>
+          </div>
           <div class="info-linha"><span>E-mail</span><span id="perfil-email">—</span></div>
-          <div class="info-linha"><span>Nível de permissão</span><span id="perfil-papel">—</span></div>
+          <div class="info-linha"><span>Administrador desde</span><span id="perfil-criado-em">—</span></div>
           <div style="margin-top:20px;">
             <button class="btn" id="btn-abrir-alterar-senha">Alterar minha senha</button>
           </div>
@@ -705,15 +715,20 @@
     </div>
 
     <div id="conteudo-aba-informacoes" class="conteudo-aba-detalhe">
-      <div class="painel"><div id="lista-informacoes" style="padding:0 22px;"></div></div>
+      <div class="grid-info-blocos" id="lista-informacoes"></div>
     </div>
 
     <div id="conteudo-aba-usuario" class="conteudo-aba-detalhe" style="display:none;">
       <div class="painel">
         <div style="padding:22px;">
-          <div class="info-linha"><span>Nome</span><span id="usuario-detalhe-nome">—</span></div>
+          <div class="perfil-topo">
+            <div class="avatar-mini" style="width:48px; height:48px; font-size:17px;" id="usuario-detalhe-avatar">--</div>
+            <div>
+              <div style="font-size:16px; font-weight:700;" id="usuario-detalhe-nome">—</div>
+              <span class="badge" id="usuario-detalhe-status">—</span>
+            </div>
+          </div>
           <div class="info-linha"><span>E-mail (login)</span><span id="usuario-detalhe-email">—</span></div>
-          <div class="info-linha"><span>Status</span><span id="usuario-detalhe-status">—</span></div>
           <div class="info-linha"><span>Criado em</span><span id="usuario-detalhe-criado">—</span></div>
           <div style="margin-top:20px;">
             <button class="btn" id="btn-resetar-senha-admin">Gerar nova senha provisória</button>
@@ -740,7 +755,9 @@
 
     <div id="conteudo-aba-configuracoes-assoc" class="conteudo-aba-detalhe" style="display:none;">
       <div class="painel">
+        <div class="painel-header"><h3>Configurações da associação</h3></div>
         <div style="padding:22px;">
+          <p class="texto-ajuda">Edite nome, contato, endereço, plano e outros dados de cadastro dessa associação.</p>
           <button class="btn btn-ghost" id="btn-editar-associacao-detalhe">Editar dados da associação</button>
         </div>
       </div>
@@ -1819,20 +1836,25 @@
       badge.textContent = ROTULO_STATUS_ASSINATURA[a.status_assinatura] || a.status_assinatura;
       badge.className = 'badge ' + (CLASSE_BADGE_STATUS[a.status_assinatura] || '');
 
+      // Agrupado em blocos temáticos (era uma lista única de 14 linhas,
+      // difícil de escanear) -- mesma info de sempre, só reorganizada.
       document.getElementById('lista-informacoes').innerHTML =
-        linhaInfo('Nome', a.nome) + linhaInfo('Tipo', rotuloTipo[a.tipo] || a.tipo) +
-        linhaInfo('E-mail', a.email) + linhaInfo('Telefone', a.telefone) + linhaInfo('Site', a.site) +
-        linhaInfo('Endereço', a.endereco) + linhaInfo('Cidade/UF', (a.cidade || '—') + (a.estado ? '/' + a.estado : '')) +
-        linhaInfo('CEP', a.cep) + linhaInfo('CNPJ / nº cadastro', a.cnpj) +
-        linhaInfo('Plano', ROTULOS_PLANO[a.plano] || a.plano) + linhaInfo('Associados', String(a.total_associados)) +
-        linhaInfo('Valor da mensalidade', formatarMoeda(a.valor_mensalidade)) +
-        linhaInfo('Vencimento da assinatura', a.vencimento_assinatura ? new Date(a.vencimento_assinatura).toLocaleDateString('pt-BR') : null) +
-        linhaInfo('Cadastrada em', new Date(a.criado_em).toLocaleDateString('pt-BR'));
+        blocoInfo('Identificação', linhaInfo('Nome', a.nome) + linhaInfo('Tipo', rotuloTipo[a.tipo] || a.tipo) + linhaInfo('CNPJ / nº cadastro', a.cnpj)) +
+        blocoInfo('Contato', linhaInfo('E-mail', a.email) + linhaInfo('Telefone', a.telefone) + linhaInfo('Site', a.site)) +
+        blocoInfo('Endereço', linhaInfo('Endereço', a.endereco) + linhaInfo('Cidade/UF', (a.cidade || '—') + (a.estado ? '/' + a.estado : '')) + linhaInfo('CEP', a.cep)) +
+        blocoInfo('Plano e assinatura',
+          linhaInfo('Plano', ROTULOS_PLANO[a.plano] || a.plano) + linhaInfo('Associados', String(a.total_associados)) +
+          linhaInfo('Valor da mensalidade', formatarMoeda(a.valor_mensalidade)) +
+          linhaInfo('Vencimento da assinatura', a.vencimento_assinatura ? new Date(a.vencimento_assinatura).toLocaleDateString('pt-BR') : null) +
+          linhaInfo('Cadastrada em', new Date(a.criado_em).toLocaleDateString('pt-BR')));
 
       if (a.admin) {
+        document.getElementById('usuario-detalhe-avatar').textContent = (a.admin.nome || 'A').charAt(0).toUpperCase();
         document.getElementById('usuario-detalhe-nome').textContent = a.admin.nome;
         document.getElementById('usuario-detalhe-email').textContent = a.admin.email;
-        document.getElementById('usuario-detalhe-status').textContent = a.admin.ativo ? 'ativo' : 'inativo';
+        var statusEl = document.getElementById('usuario-detalhe-status');
+        statusEl.textContent = a.admin.ativo ? 'ativo' : 'inativo';
+        statusEl.className = 'badge ' + (a.admin.ativo ? 'ativo' : 'inativo');
         document.getElementById('usuario-detalhe-criado').textContent = new Date(a.admin.criado_em).toLocaleDateString('pt-BR');
       }
 
@@ -1846,6 +1868,10 @@
 
   function linhaInfo(rotulo, valor) {
     return '<div class="info-linha"><span>' + rotulo + '</span><span>' + escapeHtml(valor || '—') + '</span></div>';
+  }
+
+  function blocoInfo(titulo, linhasHtml) {
+    return '<div class="painel"><div class="painel-header"><h3>' + titulo + '</h3></div><div style="padding:0 22px;">' + linhasHtml + '</div></div>';
   }
 
   document.getElementById('btn-voltar-lista').onclick = function() {
@@ -2407,9 +2433,11 @@
   // ---------- Meu Perfil ----------
   function preencherMeuPerfil() {
     document.getElementById('perfil-nome').textContent = estado.nome || '—';
+    document.getElementById('perfil-avatar').textContent = (estado.nome || 'A').charAt(0).toUpperCase();
     document.getElementById('perfil-papel').textContent = ROTULOS_PAPEL_SUPERADMIN[estado.papel] || estado.papel || '—';
     var admin = administradoresCache.find(function(a) { return a.id === estado.id; });
     document.getElementById('perfil-email').textContent = admin ? admin.email : (decodificarEmailDoToken(estado.token) || '—');
+    document.getElementById('perfil-criado-em').textContent = admin ? new Date(admin.criado_em).toLocaleDateString('pt-BR') : '—';
   }
 
   var trocaSenhaForcada = false;
