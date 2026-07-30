@@ -994,6 +994,23 @@
   </div>
 </div>
 
+<!-- ===== MODAL BOAS-VINDAS (PRIMEIRO ACESSO) ===== -->
+<div class="overlay" id="overlay-modal-boas-vindas">
+  <div class="modal">
+    <h3 id="boas-vindas-titulo">Bem-vindo!</h3>
+    <p style="margin-bottom:14px;">Você agora faz parte do portal da associação <strong id="boas-vindas-nome-associacao"></strong>. Por aqui você pode:</p>
+    <ul style="margin:0 0 18px 20px; padding:0; font-size:14px; line-height:1.9; color:var(--text-muted);">
+      <li>Ver e pagar suas mensalidades com Pix</li>
+      <li>Acompanhar comunicados da diretoria</li>
+      <li>Consultar e atualizar sua foto de perfil</li>
+      <li id="boas-vindas-item-carteirinha">Acessar sua carteirinha digital de associado</li>
+    </ul>
+    <div class="modal-actions">
+      <button class="btn" id="btn-comecar-usar-portal">Começar a usar a plataforma</button>
+    </div>
+  </div>
+</div>
+
 <!-- ===== MODAL ALTERAR SENHA ===== -->
 <div class="overlay" id="overlay-modal-alterar-senha">
   <div class="modal">
@@ -1438,6 +1455,26 @@
     abrirModalAlterarSenha();
   };
 
+  // Modal de boas-vindas do primeiro acesso do associado -- mesma flag do
+  // painel da associação (usuarios.boas_vindas_visto_em), gravada no banco
+  // via PATCH /auth/boas-vindas-visto pra não reaparecer ao trocar de
+  // navegador/limpar cache.
+  function abrirModalBoasVindasPortal(d) {
+    document.getElementById('boas-vindas-titulo').textContent =
+      'Bem-vindo' + (estado.nome ? ', ' + estado.nome.split(' ')[0] : '') + '!';
+    document.getElementById('boas-vindas-nome-associacao').textContent = d.nome_associacao || '';
+    document.getElementById('boas-vindas-item-carteirinha').style.display = planoAtende('intermediario') ? '' : 'none';
+    document.getElementById('overlay-modal-boas-vindas').style.display = 'flex';
+  }
+
+  document.getElementById('btn-comecar-usar-portal').onclick = function() {
+    document.getElementById('overlay-modal-boas-vindas').style.display = 'none';
+    fetch(API_URL + '/auth/boas-vindas-visto', {
+      method: 'PATCH',
+      headers: { 'Authorization': 'Bearer ' + estado.token }
+    }).catch(function() {});
+  };
+
   function entrarNoPortal() {
     document.getElementById('tela-login').style.display = 'none';
     document.getElementById('tela-esqueci-senha').style.display = 'none';
@@ -1727,6 +1764,10 @@
       var badge = document.getElementById('inicio-badge-situacao');
       badge.className = 'badge ' + res.data.status;
       badge.textContent = (res.data.status || '').replace(/_/g, ' ');
+
+      if (res.data.boas_vindas_pendente) {
+        abrirModalBoasVindasPortal(res.data);
+      }
     })
     .catch(function() {});
 

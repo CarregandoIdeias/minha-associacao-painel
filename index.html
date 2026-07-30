@@ -1291,6 +1291,23 @@
   </div>
 </div>
 
+<!-- ===== MODAL BOAS-VINDAS (PRIMEIRO ACESSO) ===== -->
+<div class="overlay" id="overlay-modal-boas-vindas">
+  <div class="modal">
+    <h3 id="boas-vindas-titulo">Bem-vindo!</h3>
+    <p style="margin-bottom:16px;">Sua associação já está pronta para uso. Aqui está um resumo do seu plano:</p>
+    <div class="secao-ficha" style="margin-bottom:6px;">
+      <div class="item-ficha"><div><strong>Associação</strong></div><div id="boas-vindas-nome-associacao"></div></div>
+      <div class="item-ficha"><div><strong>Plano contratado</strong></div><div id="boas-vindas-plano"></div></div>
+      <div class="item-ficha"><div><strong>Limite de associados</strong></div><div id="boas-vindas-limite"></div></div>
+      <div class="item-ficha" id="boas-vindas-trial-linha" style="display:none;"><div><strong>Período de teste</strong></div><div id="boas-vindas-trial"></div></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" id="btn-comecar-usar-plataforma">Começar a usar a plataforma</button>
+    </div>
+  </div>
+</div>
+
 <!-- ===== MODAL FICHA DO ASSOCIADO (NOVO/EDITAR) ===== -->
 <div class="overlay" id="overlay-modal">
   <div class="modal modal-ficha">
@@ -1811,9 +1828,45 @@
         document.getElementById('tela-dashboard').style.display = 'flex';
         renderizarBlocoPlano(res.data);
       }
+      if (res.data.boas_vindas_pendente) {
+        abrirModalBoasVindas(res.data);
+      }
     })
     .catch(function() {});
   }
+
+  // Modal de boas-vindas do primeiro acesso (só admin/diretoria, que são os
+  // únicos papéis com acesso a GET /plano). "Já viu" fica gravado no banco
+  // (usuarios.boas_vindas_visto_em), não em localStorage, pra não reaparecer
+  // ao trocar de navegador/limpar cache.
+  function abrirModalBoasVindas(d) {
+    document.getElementById('boas-vindas-titulo').textContent =
+      'Bem-vindo' + (estado.nome ? ', ' + estado.nome.split(' ')[0] : '') + '!';
+    document.getElementById('boas-vindas-nome-associacao').textContent = d.nome_associacao || '—';
+    document.getElementById('boas-vindas-plano').textContent = ROTULOS_PLANO[d.plano] || d.plano;
+    document.getElementById('boas-vindas-limite').textContent =
+      d.limite_associados == null ? 'Ilimitado' : d.limite_associados + ' associados';
+
+    var linhaTrial = document.getElementById('boas-vindas-trial-linha');
+    if (d.plano === 'trial' && d.trial_expira_em) {
+      var diasRestantes = Math.max(0, Math.ceil((new Date(d.trial_expira_em) - new Date()) / 86400000));
+      document.getElementById('boas-vindas-trial').textContent =
+        diasRestantes + (diasRestantes === 1 ? ' dia restante' : ' dias restantes');
+      linhaTrial.style.display = 'flex';
+    } else {
+      linhaTrial.style.display = 'none';
+    }
+
+    document.getElementById('overlay-modal-boas-vindas').style.display = 'flex';
+  }
+
+  document.getElementById('btn-comecar-usar-plataforma').onclick = function() {
+    document.getElementById('overlay-modal-boas-vindas').style.display = 'none';
+    fetch(API_URL + '/auth/boas-vindas-visto', {
+      method: 'PATCH',
+      headers: { 'Authorization': 'Bearer ' + estado.token }
+    }).catch(function() {});
+  };
 
   // Classe de destaque crescente conforme o nível vindo de GET /plano
   // (d.alerta.nivel: 'atencao'/'alerta'/'critico') -- ver utils/precos.js

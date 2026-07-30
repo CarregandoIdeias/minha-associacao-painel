@@ -6,6 +6,38 @@ backend (`../minha-associacao-backend`, ou `CarregandoIdeias/minha-associacao-ba
 no GitHub) para o sistema completo — é lá que vive a documentação de
 segurança, RLS, modelo de dados e rotas da API.
 
+## Modal de boas-vindas no primeiro acesso (`index.html` e `portal.html`, 30/07/2026)
+
+Ver `backend/CLAUDE.md` pra a coluna nova (`usuarios.boas_vindas_visto_em`)
+e os dois endpoints (`PATCH /auth/boas-vindas-visto`, campos novos em
+`GET /plano`/`GET /portal/meus-dados`). Aqui só o lado do front, um modal
+por arquivo, mesmo padrão `.overlay`/`.modal` de sempre, sem CSS novo.
+
+**`index.html`** (admin/diretoria — só quem tem acesso a `GET /plano`):
+`overlay-modal-boas-vindas` mostra nome da associação, rótulo do plano
+(`ROTULOS_PLANO`), limite de associados (`limite_associados`, "Ilimitado"
+quando `null`) e, só se `plano === 'trial'`, dias restantes calculados de
+`trial_expira_em`. Aberto de dentro de `carregarPlano()` quando
+`res.data.boas_vindas_pendente` vem `true` — reaproveita a chamada que
+`entrarNoDashboard()` já fazia, não precisou de fetch novo. Botão
+"Começar a usar a plataforma" fecha o modal na hora e dispara o `PATCH`
+em paralelo (fire-and-forget, sem bloquear a UI esperando resposta).
+
+**`portal.html`** (associado): mesmo padrão, `overlay-modal-boas-vindas`
+com nome da associação e uma lista do que dá pra fazer no portal (Pix,
+comunicados, foto, carteirinha). Aberto de dentro do primeiro `fetch` de
+`carregarInicio()` (`GET /portal/meus-dados`). O item da carteirinha
+(`#boas-vindas-item-carteirinha`) some quando `!planoAtende('intermediario')`
+— mesmo gating por plano já usado no resto do arquivo pro botão "Ver
+carteirinha".
+
+Testado via `curl` direto contra staging (não deu pra testar no navegador
+nesta sessão — ver nota no histórico da sessão). Lógica de UI é
+deliberadamente simples: os dois modais só leem campos que já vinham (ou
+passaram a vir) prontos da API, nenhum cálculo novo do lado do cliente
+além dos dias restantes de trial em `index.html` (mesma conta que
+`iniciarContadorTrial` já faz).
+
 ## Itens de severidade baixa da auditoria de segurança (29/07/2026, continuação)
 
 Depois dos 5 médios (backend), o usuário pediu pra resolver também os
