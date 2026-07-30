@@ -394,6 +394,18 @@
   .card-plano-info { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
   .card-plano-info strong { color: var(--text); }
   .card-plano-info.vencido { color: var(--danger); font-weight: 600; }
+  .card-plano-acoes { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* ---------- Uso do limite de associados (Controle Inteligente, 30/07/2026) ---------- */
+  .barra-uso-plano { background: var(--border); border-radius: 8px; height: 8px; overflow: hidden; margin: 8px 0 4px; max-width: 260px; }
+  .barra-uso-plano-preenchida { height: 100%; border-radius: 8px; background: var(--accent); transition: width .3s; }
+  .barra-uso-plano-preenchida.nivel-alerta { background: var(--warning); }
+  .barra-uso-plano-preenchida.nivel-critico { background: var(--danger); }
+  .aviso-limite { font-size: 13px; line-height: 1.6; margin-top: 10px; padding: 10px 12px; border-radius: 8px; }
+  .aviso-limite.nivel-atencao { background: rgba(120,120,120,0.10); color: var(--text-muted); }
+  .aviso-limite.nivel-alerta { background: rgba(217,164,65,0.14); color: var(--warning); font-weight: 600; }
+  .aviso-limite.nivel-critico { background: rgba(231,76,60,0.14); color: var(--danger); font-weight: 600; }
+  .aviso-limite .aviso-limite-acoes { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
 
   /* ---------- Alerta inteligente de renovação (item de sprint 1.4) ---------- */
   .card-plano.alerta-atencao { background: rgba(217,164,65,0.10); border: 1px solid var(--warning); }
@@ -1615,6 +1627,7 @@
     <h3>Contratar plano</h3>
 
     <div id="bloco-escolha-plano">
+      <div id="aviso-renovacao-inteligente" style="display:none;"></div>
       <p style="font-size:13px; color:var(--text-muted); margin-bottom:14px;">Escolha o plano ideal para o tamanho da sua associação:</p>
       <div class="opcoes-plano" id="opcoes-plano"></div>
       <button class="btn" style="width:100%;" id="btn-avancar-pagamento-plano">Continuar para pagamento</button>
@@ -1899,7 +1912,7 @@
           (estado.papel === 'admin' ? '<button class="btn" id="btn-contratar-dashboard">Contratar Plano</button>' : '') +
         '</div>';
       if (estado.papel === 'admin') {
-        document.getElementById('btn-contratar-dashboard').onclick = abrirModalContratarPlano;
+        document.getElementById('btn-contratar-dashboard').onclick = function() { abrirModalContratarPlano(); };
       }
       iniciarContadorTrial(d.trial_expira_em);
       return;
@@ -1909,10 +1922,19 @@
     var rotulosStatus = { ativa: 'Plano ativo', vencendo: 'Vencendo em breve', vencida: 'Vencida', bloqueada: 'Bloqueado' };
     var info = INFO_PLANO[d.plano] || { nome: d.plano, porte: '' };
 
+    // Dias restantes até o vencimento, mostrado sempre (card do Dashboard,
+    // item 8, 30/07/2026) -- antes só aparecia embutido na mensagem quando
+    // já dentro da janela de alerta.
+    var diasVencimento = null;
+    if (d.vencimento_assinatura) {
+      diasVencimento = Math.round((new Date(d.vencimento_assinatura).setHours(0,0,0,0) - new Date().setHours(0,0,0,0)) / 86400000);
+    }
+
     var tituloPago = 'Seu Plano Atual';
     var infoPago = info.porte + '<br>' +
       'Status: <strong>' + (rotulosStatus[d.status] || d.status) + '</strong> · ' +
-      'Próxima renovação: <strong>' + (d.vencimento_assinatura ? new Date(d.vencimento_assinatura).toLocaleDateString('pt-BR') : '—') + '</strong> · ' +
+      'Próxima renovação: <strong>' + (d.vencimento_assinatura ? new Date(d.vencimento_assinatura).toLocaleDateString('pt-BR') : '—') +
+      (diasVencimento != null ? ' (' + (diasVencimento < 0 ? 'venceu há ' + Math.abs(diasVencimento) + 'd' : diasVencimento + 'd restantes') + ')' : '') + '</strong> · ' +
       'Mensalidade: <strong>' + formatarMoeda(d.valor_mensalidade) + '</strong>';
     if (alerta) {
       tituloPago = alerta.dias_restantes <= 0
@@ -1920,28 +1942,93 @@
         : '⚠️ Sua assinatura vence em ' + alerta.dias_restantes + (alerta.dias_restantes === 1 ? ' dia' : ' dias');
       infoPago = 'Evite a suspensão do acesso à plataforma realizando a renovação antes da data de vencimento.';
     }
-    // Aviso suave de limite de associados (gating por plano, 29/07/2026) --
-    // só informativo/upsell, nunca bloqueia o cadastro (ver GET /plano,
-    // backend/routes/plano.js, perto_do_limite). Independente do alerta de
-    // vencimento acima, são preocupações diferentes (capacidade x cobrança).
-    var avisoLimite = '';
-    if (d.perto_do_limite) {
-      avisoLimite = '<div class="card-plano-info" style="margin-top:6px;">' +
-        '📈 Você está com ' + d.total_associados + ' de ' + d.limite_associados + ' associados do plano ' + info.nome + '. ' +
-        'Considere fazer upgrade para continuar crescendo sem se preocupar com o limite.' +
-      '</div>';
+
+    // Barra de uso + aviso por faixa (80/90/100%, item 2/3, 30/07/2026) --
+    // substitui o aviso único de "perto do limite" por algo com as 3 faixas
+    // e, no crítico, a sugestão automática de upgrade.
+    var blocoUso = '';
+    if (d.limite_associados != null) {
+      var pct = Math.min(100, Math.round((d.total_associados / d.limite_associados) * 100));
+      var nivelBarra = d.alerta_limite ? d.alerta_limite.nivel : '';
+      blocoUso =
+        '<div class="card-plano-info" style="margin-top:8px;">Associados: <strong>' + d.total_associados + ' / ' + d.limite_associados + '</strong></div>' +
+        '<div class="barra-uso-plano"><div class="barra-uso-plano-preenchida' + (nivelBarra ? ' nivel-' + nivelBarra : '') + '" style="width:' + pct + '%;"></div></div>';
+
+      if (d.alerta_limite) {
+        var acoesLimite = '';
+        if (d.alerta_limite.nivel === 'critico') {
+          if (d.proximo_plano) {
+            var proximoInfo = INFO_PLANO[d.proximo_plano] || { nome: d.proximo_plano };
+            acoesLimite = '<div class="aviso-limite-acoes">' +
+              '<button class="btn btn-ghost btn-pequeno" id="btn-conhecer-proximo-plano">Conhecer Plano ' + proximoInfo.nome + '</button>' +
+              '<button class="btn btn-pequeno" id="btn-realizar-upgrade-limite">Realizar Upgrade</button>' +
+            '</div>';
+          } else {
+            acoesLimite = '<div style="margin-top:4px;">Seu plano já é o mais completo disponível.</div>';
+          }
+        }
+        blocoUso += '<div class="aviso-limite nivel-' + d.alerta_limite.nivel + '">' + d.alerta_limite.mensagem + acoesLimite + '</div>';
+      }
     }
+
+    // Botão(ões) principal(is) -- dois botões de renovação quando há alerta
+    // de vencimento (item 5), senão um botão só cujo rótulo/ação varia
+    // conforme o plano (item 4: avançado não tem "Gerenciar Plano", só
+    // renovação direta via "Pagar Plano").
+    var botoesAcao = '';
+    if (estado.papel === 'admin') {
+      if (alerta) {
+        botoesAcao = '<div class="card-plano-acoes">' +
+          '<button class="btn" id="btn-pagar-agora-plano">Pagar Agora</button>' +
+          '<button class="btn btn-ghost" id="btn-ver-detalhes-plano">Ver Detalhes do Plano</button>' +
+        '</div>';
+      } else {
+        var rotuloBotao = d.plano === 'avancado' ? 'Pagar Plano' : 'Gerenciar Plano';
+        botoesAcao = '<button class="btn btn-ghost" id="btn-gerenciar-plano">' + rotuloBotao + '</button>';
+      }
+    }
+
     bloco.innerHTML =
       '<div class="card-plano pago' + classeAlertaPlano(alerta) + '">' +
         '<div>' +
           '<div class="card-plano-titulo">' + tituloPago + '<span class="badge-plano">' + info.nome + '</span></div>' +
           '<div class="card-plano-info">' + infoPago + '</div>' +
-          avisoLimite +
+          blocoUso +
         '</div>' +
-        (estado.papel === 'admin' ? '<button class="btn' + (alerta ? '' : ' btn-ghost') + '" id="btn-gerenciar-plano">' + (alerta ? 'Renovar Plano' : 'Gerenciar Plano') + '</button>' : '') +
+        botoesAcao +
       '</div>';
+
     if (estado.papel === 'admin') {
-      document.getElementById('btn-gerenciar-plano').onclick = abrirModalContratarPlano;
+      if (alerta) {
+        document.getElementById('btn-pagar-agora-plano').onclick = function() {
+          abrirModalContratarPlano(d.plano_renovacao_sugerido || d.plano);
+        };
+        document.getElementById('btn-ver-detalhes-plano').onclick = function() { abrirModalContratarPlano(); };
+      } else {
+        document.getElementById('btn-gerenciar-plano').onclick = function() {
+          abrirModalContratarPlano(d.plano === 'avancado' ? 'avancado' : null);
+        };
+      }
+      if (d.alerta_limite && d.alerta_limite.nivel === 'critico' && d.proximo_plano) {
+        document.getElementById('btn-conhecer-proximo-plano').onclick = function() {
+          abrirModalContratarPlano();
+          selecionarOpcaoPlano(d.proximo_plano);
+        };
+        document.getElementById('btn-realizar-upgrade-limite').onclick = function() {
+          abrirModalContratarPlano(d.proximo_plano);
+        };
+      }
+    }
+
+    // Desabilita proativamente o "+ Novo associado" quando o limite já foi
+    // atingido -- só cobre admin/diretoria (únicos que carregam esse card);
+    // o bloqueio de verdade (item 7) é sempre o 403 do backend, isso é só
+    // evitar abrir o formulário pra descobrir o erro depois.
+    var btnNovoAssociado = document.getElementById('btn-novo-associado');
+    if (btnNovoAssociado && btnNovoAssociado.style.display !== 'none') {
+      var limiteAtingido = d.alerta_limite && d.alerta_limite.nivel === 'critico';
+      btnNovoAssociado.disabled = !!limiteAtingido;
+      btnNovoAssociado.title = limiteAtingido ? 'Limite de associados do plano atingido -- faça upgrade para cadastrar mais' : '';
     }
   }
 
@@ -1978,10 +2065,14 @@
     document.getElementById('tela-dashboard').style.display = 'none';
     document.getElementById('tela-trial-expirado').style.display = 'flex';
   }
-  document.getElementById('btn-contratar-trial-expirado').onclick = abrirModalContratarPlano;
+  document.getElementById('btn-contratar-trial-expirado').onclick = function() { abrirModalContratarPlano(); };
 
   // ---------- Modal Contratar/Trocar de plano ----------
-  function abrirModalContratarPlano() {
+  // planoPreSelecionado (novo, item 4/5, 30/07/2026): quando informado,
+  // pula direto pra tela de pagamento com esse plano já escolhido -- usado
+  // por "Pagar Agora"/"Pagar Plano"/"Realizar Upgrade", que já sabem qual
+  // plano usar e não precisam passar pela grade de escolha.
+  function abrirModalContratarPlano(planoPreSelecionado) {
     if (estado.papel !== 'admin') return;
     planoEscolhidoContratacao = null;
     comprovantePlanoSelecionadoBase64 = null;
@@ -1990,6 +2081,7 @@
     document.getElementById('btn-enviar-comprovante-plano').style.display = 'none';
     document.getElementById('erro-contratar-plano').style.display = 'none';
     document.getElementById('nome-arquivo-comprovante-plano').textContent = '';
+    document.getElementById('aviso-renovacao-inteligente').style.display = 'none';
 
     if (planoAtualDados && planoAtualDados.solicitacao_pendente) {
       var s = planoAtualDados.solicitacao_pendente;
@@ -1999,16 +2091,54 @@
         new Date(s.solicitado_em).toLocaleDateString('pt-BR') + '. Aguarde a aprovação do pagamento.</p>';
     } else {
       renderizarOpcoesPlano();
+      renderizarAvisoRenovacaoInteligente();
+      if (planoPreSelecionado) {
+        selecionarOpcaoPlano(planoPreSelecionado);
+        avancarParaPagamentoPlano();
+      }
     }
 
     document.getElementById('overlay-modal-contratar-plano').style.display = 'flex';
+  }
+
+  // Renovação inteligente (item 6, 30/07/2026): avisa quando a associação
+  // cresceu além do limite do plano atual e reoferece continuar com o plano
+  // sugerido em vez do atual, ou ver a grade de comparação normal.
+  function renderizarAvisoRenovacaoInteligente() {
+    var container = document.getElementById('aviso-renovacao-inteligente');
+    var d = planoAtualDados;
+    if (!d || !d.plano_renovacao_sugerido) {
+      container.style.display = 'none';
+      container.innerHTML = '';
+      return;
+    }
+    var infoAtual = INFO_PLANO[d.plano] || { nome: d.plano };
+    var infoSugerido = INFO_PLANO[d.plano_renovacao_sugerido] || { nome: d.plano_renovacao_sugerido };
+    container.innerHTML =
+      '<div class="aviso-limite nivel-alerta" style="margin-top:0; margin-bottom:14px;">' +
+        'Sua associação possui ' + d.total_associados + ' associados cadastrados. O Plano ' + infoAtual.nome +
+        ' não atende mais sua necessidade. Na renovação será utilizado o Plano ' + infoSugerido.nome + '.' +
+        '<div class="aviso-limite-acoes">' +
+          '<button class="btn btn-pequeno" id="btn-continuar-renovacao-sugerida">Continuar Renovação</button>' +
+          '<button class="btn btn-ghost btn-pequeno" id="btn-ver-comparativo-planos">Ver Comparativo dos Planos</button>' +
+        '</div>' +
+      '</div>';
+    container.style.display = 'block';
+    document.getElementById('btn-continuar-renovacao-sugerida').onclick = function() {
+      selecionarOpcaoPlano(d.plano_renovacao_sugerido);
+      avancarParaPagamentoPlano();
+    };
+    document.getElementById('btn-ver-comparativo-planos').onclick = function() {
+      container.style.display = 'none';
+    };
   }
 
   function renderizarOpcoesPlano() {
     var totalAssociados = (planoAtualDados && planoAtualDados.total_associados) || 0;
     var container = document.getElementById('opcoes-plano');
     var html = '';
-    ['basico', 'intermediario', 'avancado'].forEach(function(chave) {
+    var planosParaExibir = (planoAtualDados && planoAtualDados.planos_gerenciaveis) || ['basico', 'intermediario', 'avancado'];
+    planosParaExibir.forEach(function(chave) {
       var info = INFO_PLANO[chave];
       var precos = PRECOS_PLANO[chave];
       var valorComAtual = precos.base + precos.porAssociado * totalAssociados;
@@ -2030,7 +2160,10 @@
     });
   }
 
-  document.getElementById('btn-avancar-pagamento-plano').onclick = function() {
+  // Extraída pra função nomeada (30/07/2026) pra poder ser chamada tanto
+  // pelo clique normal quanto programaticamente quando um plano já vem
+  // pré-selecionado (ver abrirModalContratarPlano/renderizarAvisoRenovacaoInteligente).
+  function avancarParaPagamentoPlano() {
     var erroEl = document.getElementById('erro-contratar-plano');
     erroEl.style.display = 'none';
     if (!planoEscolhidoContratacao) {
@@ -2058,7 +2191,8 @@
     document.getElementById('bloco-escolha-plano').style.display = 'none';
     document.getElementById('bloco-pagamento-plano').style.display = 'block';
     document.getElementById('btn-enviar-comprovante-plano').style.display = 'inline-block';
-  };
+  }
+  document.getElementById('btn-avancar-pagamento-plano').onclick = avancarParaPagamentoPlano;
 
   document.getElementById('btn-copiar-pix-plano').onclick = function() {
     var campo = document.getElementById('pix-copia-cola-plano');
@@ -3212,6 +3346,17 @@
     .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
     .then(function(res) {
       if (!res.ok) {
+        // Bloqueio por limite do plano (item 7, 30/07/2026) -- fecha a
+        // ficha e já abre o modal de plano (só admin, que é quem consegue
+        // fazer algo a respeito; atendimento/operador só veem o aviso).
+        if (res.data.codigo === 'LIMITE_ASSOCIADOS_ATINGIDO') {
+          document.getElementById('overlay-modal').style.display = 'none';
+          mostrarToast(res.data.erro, true);
+          if (estado.papel === 'admin') {
+            abrirModalContratarPlano(planoAtualDados ? planoAtualDados.proximo_plano : null);
+          }
+          return;
+        }
         mostrarToast(res.data.erro || 'Erro ao salvar', true);
         return;
       }

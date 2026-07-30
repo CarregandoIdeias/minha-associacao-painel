@@ -6,6 +6,66 @@ backend (`../minha-associacao-backend`, ou `CarregandoIdeias/minha-associacao-ba
 no GitHub) para o sistema completo — é lá que vive a documentação de
 segurança, RLS, modelo de dados e rotas da API.
 
+## Controle inteligente de limite de associados + sugestão de upgrade (`index.html`, 30/07/2026)
+
+Ver `backend/CLAUDE.md` pra os campos novos de `GET /plano`
+(`alerta_limite`, `proximo_plano`, `planos_gerenciaveis`,
+`plano_renovacao_sugerido`) e a decisão de manter o upgrade/renovação
+100% dentro do fluxo manual de contratação já existente (Pix +
+comprovante + aprovação do Super Admin) — nada de pagamento automático
+novo. Só `index.html` muda (`portal.html`/`superadmin.html` não gerenciam
+plano).
+
+**`renderizarBlocoPlano()`** reescrita pra planos pagos: além do texto de
+sempre, ganhou barra de uso (`.barra-uso-plano`, associados X/Y, cor
+muda conforme `alerta_limite.nivel`) e um banner por faixa
+(`.aviso-limite`) — 80% é só um aviso neutro, 90% mostra vagas restantes
+com destaque amarelo, 100% mostra vermelho + os botões "Conhecer Plano
+X"/"Realizar Upgrade" (ou "Seu plano já é o mais completo disponível"
+quando não há `proximo_plano`, caso que na prática só ocorre se
+`alerta_limite` existisse no avançado — não ocorre, avançado não tem
+teto). Dias até o vencimento agora aparecem sempre no card, não só
+dentro da mensagem de alerta.
+
+**Botão principal do card** varia por cenário: com alerta de vencimento
+ativo, vira dois botões ("Pagar Agora" pula direto pro pagamento do plano
+atual ou do sugerido pela renovação inteligente; "Ver Detalhes do Plano"
+abre a grade de escolha normal). Sem alerta de vencimento, um botão só —
+rótulo "Pagar Plano" no plano Avançado (pula direto pro pagamento, sem
+grade de escolha, porque não há upgrade possível), "Gerenciar Plano" nos
+demais.
+
+**`abrirModalContratarPlano(planoPreSelecionado)`** ganhou um parâmetro
+opcional (era sem parâmetro) — quando informado, pula a grade de escolha
+e vai direto pra tela de pagamento com esse plano. Os 3 pontos que já
+chamavam essa função sem intenção de pré-selecionar (`btn-contratar-dashboard`,
+`btn-contratar-trial-expirado`, o antigo `btn-gerenciar-plano` genérico)
+precisaram trocar de `.onclick = abrirModalContratarPlano` (referência
+direta) para `.onclick = function() { abrirModalContratarPlano(); }` —
+senão o clique passaria o próprio `Event` do DOM como se fosse o plano
+pré-selecionado.
+
+**`renderizarOpcoesPlano()`** não mostra mais sempre os 3 planos — usa
+`planoAtualDados.planos_gerenciaveis` (intermediário só oferece avançado,
+nunca downgrade).
+
+**Renovação inteligente (item 6)**: banner novo dentro do modal
+(`#aviso-renovacao-inteligente`, `renderizarAvisoRenovacaoInteligente()`)
+aparece quando `plano_renovacao_sugerido` vem preenchido — "Continuar
+Renovação" pula pro pagamento do plano sugerido, "Ver Comparativo dos
+Planos" só esconde o banner (a grade de escolha de sempre já está visível
+atrás dele).
+
+**Bloqueio de cadastro (item 7)**: `btn-salvar-associado` trata
+`codigo: 'LIMITE_ASSOCIADOS_ATINGIDO'` como caso especial — fecha a ficha,
+mostra o erro em toast e, se quem tentou é `admin`, já abre o modal de
+plano pré-selecionado no `proximo_plano` sugerido. Quem não é admin
+(atendimento/operador também podem cadastrar associado) só vê o aviso —
+não tem como gerenciar plano mesmo. O botão "+ Novo associado" também
+fica desabilitado proativamente quando `alerta_limite.nivel === 'critico'`
+(só cobre admin/diretoria, que são os únicos que carregam esse card) —
+é só UX, a proteção de verdade é sempre o 403 do backend.
+
 ## Modal de boas-vindas no primeiro acesso (`index.html` e `portal.html`, 30/07/2026)
 
 Ver `backend/CLAUDE.md` pra a coluna nova (`usuarios.boas_vindas_visto_em`)
