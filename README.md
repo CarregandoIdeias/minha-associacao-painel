@@ -267,9 +267,13 @@ Cada card de comunicado mostra estatísticas de leitura — Enviado para /
 Lido por / Pendente / Taxa de leitura (cor muda conforme a taxa) — e um
 botão **"Ver leituras"**, que abre um modal com 2 abas: "Associados que
 leram" (nome, data, hora) e "Associados que não leram" (nome/e-mail),
-busca por nome, exportação Excel/PDF. Consome `GET
+busca por nome, exportação em PDF (Excel removido em 29/07 — ver
+"Auditoria de segurança" no `CLAUDE.md`, ~10 vulnerabilidades sem
+correção na cadeia de dependência do `exceljs`). Consome `GET
 /comunicados/:id/leituras` e `/leituras/exportar/:formato`, novos no
-backend.
+backend. Cada comunicado enviado pelo Super Admin (broadcast, 28/07 —
+ver seção própria abaixo) ganha o selo **"Comunicado oficial"** e não
+mostra os botões Editar/Excluir, mesmo para admin/diretoria.
 
 ## Acessos: Usuários + Auditoria (27/07/2026)
 
@@ -282,13 +286,24 @@ da ficha do associado):
   sem coluna nova) e botões **Redefinir senha** (gera provisória nova,
   reaproveita o modal de credenciais que já existia pra usuário novo) e
   **Reativar** (antes, uma vez desativado não tinha como reverter pela
-  UI)
+  UI). **Perfis de acesso granulares** (28/07): além de admin/diretoria/
+  associado, `#usuario-papel` ganhou 4 opções novas — Financeiro,
+  Atendimento, Operador, Somente Consulta — cada um com uma matriz
+  própria de permissões (ver `PERMISSOES`/`podeFazer()`, novo padrão
+  reutilizável, espelha exatamente o que cada `autorizar(...)` do
+  backend aceita pra não haver divergência entre "o botão aparece" e "a
+  chamada funciona"). Atribuir um desses 4 papéis exige plano
+  Intermediário+ (gating por plano, 29/07) — as opções ficam desabilitadas
+  no `<select>` quando o plano não atende, exceto se já é o papel atual
+  de quem está sendo editado (grandfathering)
 - **Auditoria**: mesma experiência da tela "Auditoria" do
   `superadmin.html` (filtros de usuário/módulo/tipo de ação/período,
-  paginação, modal de detalhes com diff antes/depois, exportar
-  Excel/PDF), só que já filtrada pra essa associação — consome `GET
-  /auditoria`, novo no backend, sem filtro de "associação" nem módulo
-  "administradores" (não fazem sentido num tenant só)
+  paginação, modal de detalhes com diff antes/depois, exportação em
+  PDF — Excel removido em 29/07), só que já filtrada pra essa associação —
+  consome `GET /auditoria`, novo no backend, sem filtro de "associação"
+  nem módulo "administradores" (não fazem sentido num tenant só). Exige
+  plano Avançado (`#btn-aba-acessos-auditoria` some se o plano não
+  atende, gating por plano, 29/07)
 
 **"Parametrização"** (chave Pix + alertas de vencimento de cobrança —
 mesmo conteúdo que já existia) saiu da sidebar por completo: só é
@@ -330,9 +345,18 @@ suporte), ativar/desativar, redefinir senha.
 **Auditoria** (26/07/2026): tela cross-tenant sobre `logs_auditoria` —
 filtros (usuário, associação, módulo, tipo de ação, período, ordenação),
 tabela paginada, modal de detalhes com diff `dados_anteriores`/
-`dados_novos` lado a lado, exportação Excel/PDF. Mesma UX foi replicada
+`dados_novos` lado a lado, exportação em PDF (Excel removido em 29/07,
+ver "Removido: exportação Excel" abaixo). Mesma UX foi replicada
 pra dentro de cada associação (só os próprios logs) em 27/07/2026 — ver
 "Acessos: Usuários + Auditoria" acima.
+
+**Comunicados** (28/07/2026, nova aba na sidebar, entre "Contratações" e
+"Config. Pix", visível pra `super_admin`/`administrador`, oculta pra
+`suporte`): formulário simples (título + conteúdo) que publica um aviso
+no mural de **todas** as associações ativas de uma vez
+(`POST /superadmin/comunicados-plataforma`) — confirmação via
+`confirmarAcao()` antes de enviar (irreversível). Reaproveita o mural que
+cada associação já tem, sem tela de leitura nova.
 
 **Contratações** (26/07/2026): fila de aprovação de solicitações de
 contratação de plano pago (Pix da própria plataforma + comprovante
@@ -390,10 +414,11 @@ funcionalidades reais do produto. Bloco de segurança (RLS, senhas com
 hash, conexão criptografada — mesmas garantias documentadas no
 `README.md` do backend, em linguagem simples pro público leigo). Preços
 em 3 planos por **porte** da associação (pequeno/médio/grande = mesmos
-valores de básico/profissional/enterprise em
-`backend/utils/precos.js` — não são preços novos, só reapresentados por
-porte em vez de nome de plano), com fórmula visível (base + valor por
-associado) e exemplo de cálculo por card. Teste grátis de 15 dias sem
+valores de básico/intermediário/avançado em
+`backend/utils/precos.js` — planos renomeados de profissional/enterprise
+em 29/07/2026, mesmos preços e faixas, só o rótulo — não são preços
+novos, só reapresentados por porte em vez de nome de plano), com fórmula
+visível (base + valor por associado) e exemplo de cálculo por card. Teste grátis de 15 dias sem
 cartão de crédito (decisão de negócio do usuário, reduzir fricção de
 entrada) — hoje é só texto de marketing, **não existe fluxo de trial
 automatizado no backend ainda** (o botão de CTA não faz nada, é só link
@@ -429,6 +454,117 @@ pública, antes de qualquer login.
   elemento quando ambas mexem nos mesmos lados — usar propriedades
   longhand (`padding-top`, etc.) quando for necessário que uma delas
   sobrescreva só parte do espaçamento.
+
+## Gating de funcionalidades por plano + planos renomeados (29/07/2026)
+
+Plano `profissional`/`enterprise` renomeados para `intermediario`/
+`avancado` em todo o front (mesmos preços/faixas, só o rótulo — ver
+`backend/CLAUDE.md` pra migration). `PRECOS_PLANO`/`INFO_PLANO`/
+`ROTULOS_PLANO` atualizados em `index.html`/`superadmin.html`.
+
+Novo helper `planoAtende(nivelMinimo)` em `index.html`/`portal.html`
+(espelha `NIVEL_PLANO`/`planoAtendeNivel` do backend, `estado.plano`
+decodificado do próprio JWT, só pra decisão de UI — o bloqueio real é
+sempre o backend). Usado em 5 pontos: editar alertas de vencimento
+(Intermediário+), atribuir perfil de acesso granular (Intermediário+,
+ver "Acessos" acima), exportar leituras de comunicado (Intermediário+),
+aba Auditoria (Avançado), botão "Ver carteirinha" no portal
+(Intermediário+, ver "Portal do associado" abaixo).
+
+## Removido: exportação Excel (29/07/2026)
+
+Consequência de `exceljs` ter sido removido do backend inteiro (~10
+vulnerabilidades sem correção disponível em nenhuma versão publicada,
+decisão do usuário — ver `backend/CLAUDE.md`/`README.md`). Removidos os
+3 botões "Exportar Excel" (`superadmin.html`, `index.html` × 2 —
+auditoria e leituras de comunicado) e simplificadas as 3 funções JS
+correspondentes (`exportarLogs`, `exportarAuditoria`,
+`exportarLeiturasComunicado`) pra não receberem mais parâmetro
+`formato` — só PDF existe agora.
+
+## Portal do associado — mini-dashboard, ficha completa, carteirinha, logo (28/07/2026)
+
+Vários pedidos do mesmo dia, todos em `portal.html` (exceto a logo, em
+`index.html`):
+
+- **Início** (novo item de sidebar, primeiro da lista, landing page do
+  login): dois cards — "Situação financeira" (badge de status, próxima
+  cobrança pendente com botão "Pagar com Pix") e "Comunicados" (badge de
+  não lidos, 3 mais recentes). Só reaproveita rotas já existentes, nenhuma
+  nova.
+- **Meus Dados** virou ficha completa: 3 seções (Dados pessoais,
+  Endereço, Plano e situação) em vez do resumo de 4 linhas de antes — só
+  leitura, sem edição (associado não edita a própria ficha, só a foto).
+- **Nova aba "Financeiro"**: a tabela "Minhas cobranças" saiu de dentro
+  de "Meus Dados" e virou seção própria.
+- **Carteirinha digital** (plano Intermediário+): botão "Ver carteirinha"
+  abre um cartão com foto/nome/associação/categoria/status + QR code
+  (`ASSOCIADO:<id>`, reaproveita a lib `qrcode-generator` já usada pro
+  Pix) — cosmético/identificador, sem endpoint de verificação por scan
+  ainda.
+- **Header**: passou a mostrar o nome da associação (`GET
+  /configuracoes/identidade`) no lugar do e-mail do associado.
+- **Logo da associação** (`index.html`, dentro de "Parametrização"):
+  admin pode trocar a própria logo (`PUT /configuracoes/logo`, novo no
+  backend) — antes só o Super Admin conseguia.
+
+## Modal de boas-vindas no primeiro acesso (30/07/2026)
+
+Modal novo em `index.html` (admin/diretoria) e `portal.html` (associado),
+mostrado uma única vez no primeiro login de cada usuário — mesmo padrão
+visual `.overlay`/`.modal` de sempre.
+
+- **`index.html`**: nome da associação, plano, limite de associados,
+  dias restantes de trial (se aplicável). Aberto de dentro de
+  `carregarPlano()` quando `GET /plano` devolve `boas_vindas_pendente:
+  true` — reaproveita a chamada que `entrarNoDashboard()` já fazia.
+- **`portal.html`**: nome da associação + lista do que dá pra fazer no
+  portal (Pix, comunicados, foto, carteirinha — este último item some se
+  o plano não for Intermediário+). Aberto de dentro de `carregarInicio()`
+  (`GET /portal/meus-dados`).
+
+Botão "Começar a usar a plataforma" fecha o modal na hora e dispara
+`PATCH /auth/boas-vindas-visto` em paralelo (fire-and-forget) — a flag
+fica gravada no banco (`usuarios.boas_vindas_visto_em`), não em
+`localStorage`, então não reaparece ao trocar de navegador/limpar cache.
+
+## Controle inteligente de limite de associados + sugestão de upgrade (30/07/2026, `index.html`)
+
+Reverte a decisão anterior de "limite só avisa, nunca bloqueia" —
+confirmado com o usuário antes de implementar (ver `backend/CLAUDE.md`
+pros 3 pontos de conflito resolvidos com a spec original).
+
+`renderizarBlocoPlano()` (card do Dashboard) ganhou, pra planos pagos:
+barra de uso (associados X/Y, cor muda por faixa), aviso por faixa de uso
+(80% neutro, 90% "restam N vagas", 100% crítico + botões "Conhecer Plano
+X"/"Realizar Upgrade"), dias até o vencimento sempre visíveis (não só
+dentro do alerta). Botão principal varia: dois botões ("Pagar Agora"/"Ver
+Detalhes do Plano") quando há alerta de vencimento; um botão só, rótulo
+"Pagar Plano" no Avançado (pula direto pro pagamento) ou "Gerenciar
+Plano" nos demais.
+
+`abrirModalContratarPlano(planoPreSelecionado)` ganhou um parâmetro
+opcional — quando informado, pula a grade de escolha e vai direto pra
+tela de pagamento. `renderizarOpcoesPlano()` usa
+`planoAtualDados.planos_gerenciaveis` (do backend) em vez de sempre
+mostrar os 3 planos — Intermediário só oferece Avançado, nunca
+downgrade pelo cliente.
+
+**Renovação inteligente**: banner novo dentro do modal
+(`#aviso-renovacao-inteligente`) quando `plano_renovacao_sugerido` vem
+preenchido (associação cresceu além do limite do plano atual) — sugere
+migrar pro plano compatível.
+
+**Bloqueio de cadastro**: `btn-salvar-associado` trata
+`codigo: 'LIMITE_ASSOCIADOS_ATINGIDO'` (403) como caso especial — fecha a
+ficha, mostra o erro e, se admin, já abre o modal de plano pré-selecionado
+no próximo plano sugerido. O botão "+ Novo associado" também fica
+desabilitado proativamente no nível crítico (só UX — a proteção real é
+sempre o 403 do backend).
+
+Todo o fluxo de upgrade/renovação continua usando a contratação manual já
+existente (Pix + comprovante + aprovação do Super Admin) — nenhuma
+infraestrutura de pagamento nova.
 
 ## Convenções
 
