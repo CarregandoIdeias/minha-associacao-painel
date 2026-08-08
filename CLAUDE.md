@@ -1,5 +1,17 @@
 # CLAUDE.md — painel
 
+## `manual.html` atualizado depois do cadastro de associação virar tela (08/08/2026)
+
+Passo 3 da seção Super Admin ("Associações — cadastrar e gerenciar
+clientes") reescrito pra descrever a tela nova em vez do modal antigo:
+menciona que "+ Nova associação" abre uma tela própria (não fala mais
+como se fosse um formulário curto dentro de um popup), lista os grupos de
+campo que existem agora (identificação, contato, endereço, logo,
+responsável, plano) e explica que "Editar" abre essa mesma tela já
+preenchida, com Voltar/Cancelar devolvendo sem salvar. Ver seção abaixo
+("Cadastro/edição de associação virou tela própria...") pro detalhe
+completo da mudança em `superadmin.html`.
+
 ## Cadastro/edição de associação virou tela própria, não é mais modal (08/08/2026)
 
 Pedido do usuário: o modal `#overlay-modal-associacao` tinha campo demais
