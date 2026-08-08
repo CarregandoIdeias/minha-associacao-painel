@@ -146,6 +146,18 @@
   .ap-feature .ico { width: 32px; height: 32px; border-radius: 8px; background: var(--accent-soft); color: var(--accent); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .ap-feature p { font-size: 14px; color: var(--text-muted); font-weight: 300; }
 
+  /* ---------- tabela comparativa de planos ---------- */
+  .ap-plan-table-wrap { overflow-x: auto; margin-bottom: 32px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-card); }
+  .ap-plan-table { width: 100%; min-width: 620px; border-collapse: collapse; font-size: 13.5px; }
+  .ap-plan-table th, .ap-plan-table td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border); }
+  .ap-plan-table thead th { background: var(--bg-alt); font-weight: 700; color: var(--text); white-space: nowrap; }
+  .ap-plan-table th:not(:first-child), .ap-plan-table td:not(:first-child) { text-align: center; }
+  .ap-plan-table tbody tr:last-child td { border-bottom: none; }
+  .ap-plan-table td:first-child { color: var(--text); font-weight: 500; }
+  .ap-plan-table .sim { color: var(--success); font-weight: 700; }
+  .ap-plan-table .nao { color: var(--text-muted); opacity: .55; }
+  .ap-plan-table-note { font-size: 12.5px; color: var(--text-muted); font-weight: 300; margin: -18px 0 32px; }
+
   /* ---------- callout box ---------- */
   .ap-callout { background: var(--bg-card); border: 1px solid var(--accent); border-radius: 12px; padding: 18px 22px; display: flex; gap: 14px; align-items: flex-start; margin-bottom: 32px; }
   .ap-callout .ico { flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: #0A0A0A; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; }
@@ -329,6 +341,52 @@
         <div class="ico">i</div>
         <p><strong>Sobre os planos:</strong> o ASSOCIA PLUS tem três planos — <strong>Básico</strong>, <strong>Intermediário</strong> e <strong>Avançado</strong>. Cadastro de associados, cobrança por Pix e mural de comunicados funcionam em qualquer um deles. Alguns recursos extras — perfis de acesso além de Diretoria, personalizar o prazo de alerta de vencimento, exportar relatórios em PDF, carteirinha digital do associado e a tela de Auditoria — só ficam disponíveis a partir do Intermediário ou do Avançado. Ao longo deste guia, esses pontos aparecem marcados com uma etiqueta indicando o plano necessário. O plano atual da associação e a opção de fazer upgrade aparecem no card do Dashboard (passo 2 abaixo).</p>
       </div>
+
+      <div class="ap-plan-table-wrap ap-reveal">
+        <table class="ap-plan-table">
+          <thead>
+            <tr>
+              <th>Recurso</th>
+              <th>Trial</th>
+              <th>Básico</th>
+              <th>Intermediário</th>
+              <th>Avançado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Cadastro de associados, cobrança por Pix, mural de comunicados, Dashboard e Portal do Associado</td>
+              <td class="sim">✓</td><td class="sim">✓</td><td class="sim">✓</td><td class="sim">✓</td>
+            </tr>
+            <tr>
+              <td>Prazo do alerta de vencimento personalizável</td>
+              <td class="sim">✓</td><td class="nao">—</td><td class="sim">✓</td><td class="sim">✓</td>
+            </tr>
+            <tr>
+              <td>Perfis de acesso granulares (Financeiro, Atendimento, Operador, Somente Consulta)</td>
+              <td class="sim">✓</td><td class="nao">—</td><td class="sim">✓</td><td class="sim">✓</td>
+            </tr>
+            <tr>
+              <td>Exportar leituras de comunicado em PDF</td>
+              <td class="sim">✓</td><td class="nao">—</td><td class="sim">✓</td><td class="sim">✓</td>
+            </tr>
+            <tr>
+              <td>Carteirinha digital do associado</td>
+              <td class="sim">✓</td><td class="nao">—</td><td class="sim">✓</td><td class="sim">✓</td>
+            </tr>
+            <tr>
+              <td>Aba Auditoria</td>
+              <td class="sim">✓</td><td class="nao">—</td><td class="nao">—</td><td class="sim">✓</td>
+            </tr>
+            <tr>
+              <td>Limite de associados (só aviso — nunca bloqueia o cadastro)</td>
+              <td>sem limite</td><td>até 50</td><td>até 200</td><td>sem limite</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="ap-plan-table-note ap-reveal">Durante o Trial (duração definida pelo Super Admin ao cadastrar a associação, padrão 15 dias) todos os recursos ficam liberados, mesmo os que normalmente exigem Intermediário ou Avançado. Recursos já em uso continuam funcionando mesmo se a associação trocar pra um plano que não os inclua mais — o que fica bloqueado é atribuir/configurar algo novo além do que o plano atual permite.</p>
+
       <div class="ap-section-head ap-reveal">
         <span class="tag">Passo a passo</span>
         <h2>Do login à gestão do dia a dia</h2>

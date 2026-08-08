@@ -1,5 +1,28 @@
 # CLAUDE.md — painel
 
+## `manual.html` ganhou tabela comparativa de planos (08/08/2026)
+
+Pedido do usuário depois de perguntar se o manual já mostrava o que cada
+plano contempla — não mostrava: a informação estava só espalhada em
+etiquetas `<span class="quem">` pontuais por recurso + um parágrafo de
+resumo. Adicionada `.ap-plan-table-wrap` (novo componente CSS, card com
+`overflow-x: auto` próprio — testado em 375px sem estourar a largura da
+página, mesmo cuidado já documentado pra tabelas largas no resto do
+projeto) logo depois do callout "Sobre os planos", na seção Painel da
+Associação: Trial/Básico/Intermediário/Avançado lado a lado, com ✓/— por
+recurso, mais uma linha separada pro limite de associados (que é só aviso,
+nunca bloqueia).
+
+**Importante — o conteúdo da tabela reflete só o que o backend aplica de
+verdade** (`backend/CLAUDE.md`, seção "Gating de funcionalidades por
+plano"), **não** a lista de vendas da `landing.html`. A landing promete
+itens que não têm nenhum gate real no código (SLA garantido, atendimento
+dedicado, integração com sistemas externos, customizações sob demanda) —
+decisão consciente de não copiar esses pontos pro manual, que é
+documentação de uso real, não material comercial. Se a matriz real de
+gating mudar (novo recurso gated, mudança de nível mínimo), atualizar as
+duas tabelas juntas: esta e a de `backend/CLAUDE.md`.
+
 ## `manual.html` atualizado depois do cadastro de associação virar tela (08/08/2026)
 
 Passo 3 da seção Super Admin ("Associações — cadastrar e gerenciar
