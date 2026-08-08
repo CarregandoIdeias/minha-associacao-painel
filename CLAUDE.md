@@ -1,5 +1,62 @@
 # CLAUDE.md — painel
 
+## Cadastro/edição de associação virou tela própria, não é mais modal (08/08/2026)
+
+Pedido do usuário: o modal `#overlay-modal-associacao` tinha campo demais
+(identificação, contato, endereço, logo, admin inicial, plano, cobrança,
+situação) e ficava maçante de preencher dentro de um overlay de 480px com
+scroll interno. O modal foi **removido por completo** e o formulário virou
+`#secao-cadastro-associacao`, uma `.secao-conteudo` normal dentro do
+`.content-area` — sem item na sidebar (só se chega por "+ Nova associação",
+pelo "Editar" da lista ou pelo "Editar dados da associação" da tela de
+detalhe), mesmo padrão de `parametrizacao`/`meu-perfil`.
+
+**Todos os ids dos campos foram mantidos** (`assoc-nome`, `assoc-plano`,
+`editar-associacao-id`, `logo-preview`, `bloco-admin-inicial`,
+`campo-ativo-associacao`, `btn-salvar-associacao`...) — por isso
+`abrirEdicaoAssociacao`, `btn-salvar-associacao`, `resetarLogoPreview` e
+`atualizarPlaceholderMensalidade` continuaram funcionando sem alteração de
+lógica. O que mudou de nome: `titulo-modal-associacao` →
+`titulo-cadastro-associacao`, `btn-cancelar-modal-associacao` →
+`btn-cancelar-cadastro-associacao`.
+
+Detalhes que quebram se forem "simplificados" de volta:
+- `campo-ativo-associacao` agora é uma seção do formulário, então o JS
+  mostra ele com `display: 'block'` — era `'flex'` (o checkbox tem o
+  próprio wrapper flex dentro).
+- `abrirTelaCadastroAssociacao(origem)` sempre esconde
+  `#tela-detalhe-associacao` e devolve `#tela-dashboard` para `flex`,
+  porque a tela de detalhe vive **fora** do `.app-layout` — vir de lá pro
+  formulário sem isso deixaria a tela em branco.
+- `voltarDoCadastroAssociacao()` usa `origemCadastroAssociacao` pra
+  devolver pro lugar certo (lista ou ficha de detalhe da associação). Os
+  dois handlers de sucesso do salvar chamam essa função em vez de fechar
+  overlay — e **não** chamam mais `carregarAssociacoes()` direto, porque
+  `ativarSecaoSuperAdmin('associacoes')` já faz isso (evita fetch dobrado).
+- `ativarSecaoSuperAdmin('cadastro-associacao')` acende `#aba-associacoes`
+  na sidebar de propósito, pra não ficar nenhum item aceso durante o
+  cadastro.
+
+**Bug real introduzido por essa mudança e corrigido no mesmo dia**, achado
+testando o fluxo ponta a ponta contra staging: `#btn-voltar-lista` (o
+"← Voltar" da ficha de detalhe) só alternava as duas telas de topo
+(`tela-detalhe-associacao` / `tela-dashboard`) e chamava
+`carregarAssociacoes()` — nunca precisou reativar seção nenhuma, porque
+antes o formulário era um modal e a seção ativa continuava sendo
+`associacoes`. Agora, quem fizer ficha → "Editar dados da associação" →
+Voltar → Voltar caía **de volta no formulário de edição** em vez da lista,
+porque `cadastro-associacao` tinha ficado como seção ativa. Passou a
+chamar `ativarSecaoSuperAdmin('associacoes')`. Lição: ao transformar
+qualquer modal em seção, procurar todo lugar que assume "a seção ativa não
+mudou" — quem só mostra/esconde as telas de topo é o candidato natural.
+
+CSS novo, reaproveitável em qualquer formulário grande futuro:
+`.form-tela-secao` / `.form-tela-secao-titulo` / `.form-tela-secao-ajuda`
+(blocos temáticos separados por linha), `.form-grid` (grid responsivo,
+`repeat(auto-fit, minmax(230px, 1fr))`, vira 1 coluna sozinho no mobile
+sem media query), `.campo-largo` (ocupa a linha toda) e
+`.form-tela-footer`. Conferido em 1280px e 375px, sem scroll horizontal.
+
 Contexto rápido para sessões de IA. Ver `README.md` deste repositório para
 mais detalhes do front-end, e o `README.md`/`CLAUDE.md` do repositório do
 backend (`../minha-associacao-backend`, ou `CarregandoIdeias/minha-associacao-backend`

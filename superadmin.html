@@ -164,6 +164,15 @@
   .logo-preview { width: 56px; height: 56px; border-radius: 12px; background: var(--accent-soft); display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; }
   .logo-preview img { width: 100%; height: 100%; object-fit: cover; }
 
+  /* Formulário em tela cheia (cadastro/edição de associação -- era modal) */
+  .form-tela-secao { padding: 22px; border-bottom: 1px solid var(--border); }
+  .form-tela-secao-titulo { font-size: 12px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 4px; }
+  .form-tela-secao-ajuda { font-size: 12.5px; color: var(--text-muted); line-height: 1.5; margin-bottom: 16px; }
+  .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 0 16px; }
+  .form-grid .campo { min-width: 0; }
+  .campo-largo { grid-column: 1 / -1; }
+  .form-tela-footer { display: flex; justify-content: flex-end; gap: 10px; padding: 18px 22px; }
+
   @media (max-width: 1200px) {
     .content-area { padding: 28px 32px; }
     .sidebar { width: 220px; padding: 20px 12px; }
@@ -559,6 +568,147 @@
       </div>
     </div>
 
+    <!-- Cadastro/edição de associação: tela própria, não modal (o formulário
+         é grande demais pra caber bem num overlay). Não tem item na sidebar --
+         só se chega por "+ Nova associação" ou pelo botão Editar. -->
+    <div id="secao-cadastro-associacao" class="secao-conteudo">
+      <div class="detalhe-header">
+        <div>
+          <h1 id="titulo-cadastro-associacao">Nova associação</h1>
+          <p class="texto-ajuda" style="margin-bottom:0;" id="subtitulo-cadastro-associacao">Preencha os dados da associação e do admin inicial.</p>
+        </div>
+        <button class="btn btn-ghost" id="btn-voltar-cadastro-associacao">← Voltar</button>
+      </div>
+
+      <div class="painel">
+        <input type="hidden" id="editar-associacao-id" value="">
+
+        <div class="form-tela-secao">
+          <div class="form-tela-secao-titulo">Identificação</div>
+          <p class="form-tela-secao-ajuda">Como a associação é registrada e identificada na plataforma.</p>
+          <div class="form-grid">
+            <div class="campo campo-largo"><label>Nome da associação</label><input type="text" id="assoc-nome"></div>
+            <div class="campo">
+              <label>Tipo</label>
+              <select id="assoc-tipo">
+                <option value="moradores">Moradores/bairro</option>
+                <option value="classe_profissional">Classe/profissional</option>
+                <option value="esportiva_recreativa">Esportiva/recreativa</option>
+                <option value="ong_beneficente">ONG/beneficente</option>
+                <option value="outra" selected>Outra</option>
+              </select>
+            </div>
+            <div class="campo"><label>Número de cadastro (CNPJ)</label><input type="text" id="assoc-cnpj"></div>
+          </div>
+        </div>
+
+        <div class="form-tela-secao">
+          <div class="form-tela-secao-titulo">Contato</div>
+          <p class="form-tela-secao-ajuda">O e-mail informado aqui também é o login do admin inicial dessa associação.</p>
+          <div class="form-grid">
+            <div class="campo"><label>E-mail</label><input type="email" id="assoc-email"></div>
+            <div class="campo"><label>Telefone</label><input type="text" id="assoc-telefone"></div>
+            <div class="campo"><label>Site</label><input type="text" id="assoc-site" placeholder="https://..."></div>
+          </div>
+        </div>
+
+        <div class="form-tela-secao">
+          <div class="form-tela-secao-titulo">Endereço</div>
+          <div class="form-grid">
+            <div class="campo campo-largo"><label>Endereço</label><input type="text" id="assoc-endereco"></div>
+            <div class="campo"><label>Cidade</label><input type="text" id="assoc-cidade"></div>
+            <div class="campo"><label>UF</label><input type="text" id="assoc-estado" maxlength="2" style="text-transform:uppercase;"></div>
+            <div class="campo"><label>CEP</label><input type="text" id="assoc-cep"></div>
+          </div>
+        </div>
+
+        <div class="form-tela-secao">
+          <div class="form-tela-secao-titulo">Identidade visual</div>
+          <p class="form-tela-secao-ajuda">A logo aparece no cabeçalho do painel da própria associação.</p>
+          <div class="campo" style="margin-bottom:0;">
+            <label>Logo</label>
+            <div class="logo-upload">
+              <div class="logo-preview" id="logo-preview">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="24" height="24" style="color:var(--accent);"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/></svg>
+              </div>
+              <input type="file" id="input-logo-associacao" accept="image/*" style="display:none;">
+              <button type="button" class="btn btn-ghost" id="btn-selecionar-logo">Escolher logo</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-tela-secao">
+          <div class="form-tela-secao-titulo">Responsável</div>
+          <p class="form-tela-secao-ajuda" id="ajuda-admin-inicial">O admin inicial loga com o e-mail informado acima. A senha provisória é gerada automaticamente e aparece só uma vez, depois de criar.</p>
+          <div class="form-grid">
+            <!-- Só no cadastro: numa associação já existente o admin é gerido
+                 pela aba Usuário da tela de detalhe, não por aqui. -->
+            <div class="campo" id="bloco-admin-inicial"><label>Nome do admin</label><input type="text" id="assoc-nome-admin"></div>
+            <div class="campo"><label>CPF do responsável (opcional)</label><input type="text" id="assoc-cpf-responsavel"></div>
+          </div>
+        </div>
+
+        <div class="form-tela-secao">
+          <div class="form-tela-secao-titulo">Plano e cobrança</div>
+          <p class="form-tela-secao-ajuda">Deixe o valor da mensalidade em branco para usar o valor sugerido pela tabela de preços do plano.</p>
+          <div class="form-grid">
+            <div class="campo">
+              <label>Plano</label>
+              <select id="assoc-plano">
+                <option value="trial">Trial</option>
+                <option value="basico">Básico</option>
+                <option value="intermediario">Intermediário</option>
+                <option value="avancado">Avançado</option>
+              </select>
+            </div>
+            <div class="campo" id="campo-trial-dias">
+              <label>Duração do trial (dias)</label>
+              <input type="number" min="1" max="365" id="assoc-trial-dias" value="15">
+            </div>
+            <div class="campo"><label>Valor da mensalidade</label><input type="number" step="0.01" min="0" id="assoc-valor-mensalidade" placeholder="calculado automaticamente"></div>
+            <div class="campo"><label>Vencimento da assinatura</label><input type="date" id="assoc-vencimento-assinatura"></div>
+            <div class="campo">
+              <label>Forma de cobrança</label>
+              <select id="assoc-forma-cobranca">
+                <option value="">—</option>
+                <option value="pix">Pix</option>
+                <option value="boleto">Boleto</option>
+                <option value="cartao">Cartão</option>
+                <option value="dinheiro">Dinheiro</option>
+                <option value="outro">Outro</option>
+              </select>
+            </div>
+            <div class="campo">
+              <label>Avisar do vencimento com quantos dias de antecedência?</label>
+              <select id="assoc-dias-alerta-assinatura">
+                <option value="30">30 dias</option>
+                <option value="20">20 dias</option>
+                <option value="15">15 dias</option>
+                <option value="10">10 dias</option>
+                <option value="7">7 dias</option>
+                <option value="3">3 dias</option>
+              </select>
+            </div>
+            <p class="form-tela-secao-ajuda campo-largo" style="margin-bottom:0;">O aviso define quando o card de alerta de renovação começa a aparecer no Dashboard da associação.</p>
+          </div>
+        </div>
+
+        <div class="form-tela-secao" id="campo-ativo-associacao" style="display:none;">
+          <div class="form-tela-secao-titulo">Situação</div>
+          <p class="form-tela-secao-ajuda">Uma associação bloqueada continua com os dados preservados, mas ninguém dela consegue acessar o painel.</p>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <input type="checkbox" id="assoc-ativo" style="width:auto;">
+            <label for="assoc-ativo" style="margin-bottom:0; font-size:14px;">Associação ativa</label>
+          </div>
+        </div>
+
+        <div class="form-tela-footer">
+          <button class="btn btn-ghost" id="btn-cancelar-cadastro-associacao">Cancelar</button>
+          <button class="btn" id="btn-salvar-associacao">Criar associação</button>
+        </div>
+      </div>
+    </div>
+
     <div id="secao-acessos" class="secao-conteudo">
       <div class="abas-ficha">
         <button type="button" class="aba-ficha ativa" id="btn-aba-acessos-administradores">Administradores</button>
@@ -763,107 +913,6 @@
       </div>
     </div>
   </main>
-</div>
-
-<!-- ===== MODAL NOVA/EDITAR ASSOCIAÇÃO ===== -->
-<div class="overlay" id="overlay-modal-associacao">
-  <div class="modal">
-    <h3 id="titulo-modal-associacao">Nova associação</h3>
-    <input type="hidden" id="editar-associacao-id" value="">
-
-    <div class="campo"><label>Nome da associação</label><input type="text" id="assoc-nome"></div>
-    <div class="campo">
-      <label>Tipo</label>
-      <select id="assoc-tipo">
-        <option value="moradores">Moradores/bairro</option>
-        <option value="classe_profissional">Classe/profissional</option>
-        <option value="esportiva_recreativa">Esportiva/recreativa</option>
-        <option value="ong_beneficente">ONG/beneficente</option>
-        <option value="outra" selected>Outra</option>
-      </select>
-    </div>
-    <div class="campo"><label>E-mail (também é o login do admin inicial)</label><input type="email" id="assoc-email"></div>
-    <div class="campo"><label>Telefone</label><input type="text" id="assoc-telefone"></div>
-    <div class="campo"><label>Endereço</label><input type="text" id="assoc-endereco"></div>
-    <div style="display:flex; gap:10px;">
-      <div class="campo" style="flex:1;"><label>Cidade</label><input type="text" id="assoc-cidade"></div>
-      <div class="campo" style="width:80px;"><label>UF</label><input type="text" id="assoc-estado" maxlength="2" style="text-transform:uppercase;"></div>
-    </div>
-    <div class="campo"><label>Número de cadastro (CNPJ)</label><input type="text" id="assoc-cnpj"></div>
-    <div class="campo"><label>Site</label><input type="text" id="assoc-site" placeholder="https://..."></div>
-    <div class="campo"><label>CEP</label><input type="text" id="assoc-cep" style="max-width:140px;"></div>
-    <div class="campo">
-      <label>Logo</label>
-      <div class="logo-upload">
-        <div class="logo-preview" id="logo-preview">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="24" height="24" style="color:var(--accent);"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/></svg>
-        </div>
-        <input type="file" id="input-logo-associacao" accept="image/*" style="display:none;">
-        <button type="button" class="btn btn-ghost" id="btn-selecionar-logo">Escolher logo</button>
-      </div>
-    </div>
-
-    <div id="bloco-admin-inicial">
-      <hr style="border-color:var(--border); margin:18px 0;">
-      <p style="font-size:13px; font-weight:600; margin-bottom:12px;">Admin inicial dessa associação</p>
-      <p style="font-size:12.5px; color:var(--text-muted); margin-bottom:12px;">Loga com o e-mail acima. A senha provisória é gerada automaticamente e aparece só uma vez, depois de criar.</p>
-      <div class="campo"><label>Nome do admin</label><input type="text" id="assoc-nome-admin"></div>
-    </div>
-    <div class="campo"><label>CPF do responsável (opcional)</label><input type="text" id="assoc-cpf-responsavel"></div>
-
-    <hr style="border-color:var(--border); margin:18px 0;">
-    <p style="font-size:13px; font-weight:600; margin-bottom:12px;">Plano contratado</p>
-    <div class="campo">
-      <label>Plano</label>
-      <select id="assoc-plano">
-        <option value="trial">Trial</option>
-        <option value="basico">Básico</option>
-        <option value="intermediario">Intermediário</option>
-        <option value="avancado">Avançado</option>
-      </select>
-    </div>
-    <div class="campo" id="campo-trial-dias">
-      <label>Duração do trial (dias)</label>
-      <input type="number" min="1" max="365" id="assoc-trial-dias" value="15">
-    </div>
-    <div style="display:flex; gap:10px;">
-      <div class="campo" style="flex:1;"><label>Valor da mensalidade</label><input type="number" step="0.01" min="0" id="assoc-valor-mensalidade" placeholder="calculado automaticamente"></div>
-      <div class="campo" style="flex:1;"><label>Vencimento da assinatura</label><input type="date" id="assoc-vencimento-assinatura"></div>
-    </div>
-    <div class="campo">
-      <label>Alertar vencimento da assinatura com quantos dias de antecedência?</label>
-      <select id="assoc-dias-alerta-assinatura">
-        <option value="30">30 dias</option>
-        <option value="20">20 dias</option>
-        <option value="15">15 dias</option>
-        <option value="10">10 dias</option>
-        <option value="7">7 dias</option>
-        <option value="3">3 dias</option>
-      </select>
-      <p style="font-size:12.5px; color:var(--text-muted); margin-top:6px;">Define quando o card de alerta de renovação começa a aparecer no Dashboard da associação.</p>
-    </div>
-    <div class="campo">
-      <label>Forma de cobrança</label>
-      <select id="assoc-forma-cobranca">
-        <option value="">—</option>
-        <option value="pix">Pix</option>
-        <option value="boleto">Boleto</option>
-        <option value="cartao">Cartão</option>
-        <option value="dinheiro">Dinheiro</option>
-        <option value="outro">Outro</option>
-      </select>
-    </div>
-
-    <div class="campo" id="campo-ativo-associacao" style="display:none; align-items:center; gap:10px; display:flex;">
-      <input type="checkbox" id="assoc-ativo" style="width:auto;">
-      <label for="assoc-ativo" style="margin-bottom:0;">Associação ativa</label>
-    </div>
-
-    <div class="modal-actions">
-      <button class="btn btn-ghost" id="btn-cancelar-modal-associacao">Cancelar</button>
-      <button class="btn" id="btn-salvar-associacao">Criar associação</button>
-    </div>
-  </div>
 </div>
 
 <!-- ===== MODAL CREDENCIAIS GERADAS ===== -->
@@ -1270,14 +1319,18 @@
 
   // ---------- Navegação (sidebar) ----------
   function ativarSecaoSuperAdmin(nome) {
-    // 'parametrizacao' e 'meu-perfil' não têm item próprio na sidebar (só
-    // alcançáveis pelo menu do avatar, ver dropdown-perfil) -- por isso o
-    // "if (item)" antes de mexer na classe .ativa da sidebar.
-    ['dashboard', 'associacoes', 'acessos', 'contratacoes', 'comunicados-plataforma', 'parametrizacao', 'meu-perfil'].forEach(function(secao) {
+    // 'parametrizacao', 'meu-perfil' e 'cadastro-associacao' não têm item
+    // próprio na sidebar (as duas primeiras só são alcançáveis pelo menu do
+    // avatar, ver dropdown-perfil; a última pelos botões de nova/editar
+    // associação) -- por isso o "if (item)" antes de mexer na classe .ativa.
+    ['dashboard', 'associacoes', 'cadastro-associacao', 'acessos', 'contratacoes', 'comunicados-plataforma', 'parametrizacao', 'meu-perfil'].forEach(function(secao) {
       var item = document.getElementById('aba-' + secao);
       if (item) item.classList.toggle('ativa', secao === nome);
       document.getElementById('secao-' + secao).classList.toggle('ativa', secao === nome);
     });
+    // A tela de cadastro fica "dentro" de Associações pra sidebar não ficar
+    // sem nenhum item aceso enquanto ela está aberta.
+    if (nome === 'cadastro-associacao') document.getElementById('aba-associacoes').classList.add('ativa');
     if (nome === 'associacoes') carregarAssociacoes();
     // "Acessos" tem 2 sub-abas internas: Administradores e Auditoria (mesmo
     // padrão do Painel da Associação). Administradores só existe pra quem é
@@ -1650,8 +1703,36 @@
     leitor.readAsDataURL(arquivo);
   };
 
+  // ---------- Tela de cadastro/edição de associação ----------
+  // Era um modal; virou tela própria porque o formulário é grande demais pra
+  // preencher dentro de um overlay. 'origemCadastroAssociacao' guarda de onde
+  // o usuário veio, pra o Voltar/salvar devolverem pro lugar certo.
+  var origemCadastroAssociacao = 'lista';
+
+  function abrirTelaCadastroAssociacao(origem) {
+    origemCadastroAssociacao = origem || 'lista';
+    // Vindo da tela de detalhe (que fica fora do .app-layout), é preciso
+    // devolver o layout com sidebar antes de trocar de seção.
+    document.getElementById('tela-detalhe-associacao').style.display = 'none';
+    document.getElementById('tela-dashboard').style.display = 'flex';
+    ativarSecaoSuperAdmin('cadastro-associacao');
+    window.scrollTo(0, 0);
+  }
+
+  function voltarDoCadastroAssociacao() {
+    if (origemCadastroAssociacao === 'detalhe' && associacaoDetalheAtual) {
+      abrirDetalheAssociacao(associacaoDetalheAtual);
+      return;
+    }
+    ativarSecaoSuperAdmin('associacoes');
+  }
+
+  document.getElementById('btn-voltar-cadastro-associacao').onclick = voltarDoCadastroAssociacao;
+  document.getElementById('btn-cancelar-cadastro-associacao').onclick = voltarDoCadastroAssociacao;
+
   document.getElementById('btn-nova-associacao').onclick = function() {
-    document.getElementById('titulo-modal-associacao').textContent = 'Nova associação';
+    document.getElementById('titulo-cadastro-associacao').textContent = 'Nova associação';
+    document.getElementById('subtitulo-cadastro-associacao').textContent = 'Preencha os dados da associação e do admin inicial.';
     document.getElementById('editar-associacao-id').value = '';
     [
       'assoc-nome', 'assoc-email', 'assoc-telefone', 'assoc-endereco', 'assoc-cidade', 'assoc-estado',
@@ -1666,20 +1747,18 @@
     resetarLogoPreview(null);
     atualizarPlaceholderMensalidade(0);
     document.getElementById('bloco-admin-inicial').style.display = 'block';
+    document.getElementById('ajuda-admin-inicial').style.display = 'block';
     document.getElementById('campo-ativo-associacao').style.display = 'none';
     document.getElementById('btn-salvar-associacao').textContent = 'Criar associação';
-    document.getElementById('overlay-modal-associacao').style.display = 'flex';
+    abrirTelaCadastroAssociacao('lista');
   };
 
-  document.getElementById('btn-cancelar-modal-associacao').onclick = function() {
-    document.getElementById('overlay-modal-associacao').style.display = 'none';
-  };
-
-  function abrirEdicaoAssociacao(id) {
+  function abrirEdicaoAssociacao(id, origem) {
     fetch(API_URL + '/superadmin/associacoes/' + id, { headers: { 'Authorization': 'Bearer ' + estado.token }, cache: 'no-store' })
     .then(function(resp) { return resp.json(); })
     .then(function(a) {
-      document.getElementById('titulo-modal-associacao').textContent = 'Editar associação';
+      document.getElementById('titulo-cadastro-associacao').textContent = 'Editar associação';
+      document.getElementById('subtitulo-cadastro-associacao').textContent = a.nome;
       document.getElementById('editar-associacao-id').value = a.id;
       document.getElementById('assoc-nome').value = a.nome;
       document.getElementById('assoc-tipo').value = a.tipo || 'outra';
@@ -1702,9 +1781,10 @@
       resetarLogoPreview(a.logo_url);
       atualizarPlaceholderMensalidade(a.total_associados);
       document.getElementById('bloco-admin-inicial').style.display = 'none';
-      document.getElementById('campo-ativo-associacao').style.display = 'flex';
+      document.getElementById('ajuda-admin-inicial').style.display = 'none';
+      document.getElementById('campo-ativo-associacao').style.display = 'block';
       document.getElementById('btn-salvar-associacao').textContent = 'Salvar';
-      document.getElementById('overlay-modal-associacao').style.display = 'flex';
+      abrirTelaCadastroAssociacao(origem);
     })
     .catch(function() { mostrarToast('Erro ao carregar dados da associação', true); });
   }
@@ -1772,10 +1852,9 @@
       .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
       .then(function(res) {
         if (!res.ok) { mostrarToast(res.data.erro || 'Erro ao salvar', true); return; }
-        document.getElementById('overlay-modal-associacao').style.display = 'none';
         mostrarToast('Associação atualizada!');
-        carregarAssociacoes();
         carregarDashboard();
+        voltarDoCadastroAssociacao();
       })
       .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
       return;
@@ -1799,13 +1878,12 @@
     .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, data: data }; }); })
     .then(function(res) {
       if (!res.ok) { mostrarToast(res.data.erro || 'Erro ao criar associação', true); return; }
-      document.getElementById('overlay-modal-associacao').style.display = 'none';
+      voltarDoCadastroAssociacao();
       abrirModalCredenciais(
         res.data.admin.email, res.data.senha_provisoria,
         'Associação criada!',
         'Essa senha só aparece agora — copie e envie para o responsável pela associação. No primeiro login, o sistema vai pedir para ele definir uma senha nova.'
       );
-      carregarAssociacoes();
       carregarDashboard();
     })
     .catch(function() { mostrarToast('Erro ao conectar ao servidor', true); });
@@ -1884,7 +1962,10 @@
   document.getElementById('btn-voltar-lista').onclick = function() {
     document.getElementById('tela-detalhe-associacao').style.display = 'none';
     document.getElementById('tela-dashboard').style.display = 'flex';
-    carregarAssociacoes();
+    // Precisa reativar a seção, não só mostrar o layout: quem veio da ficha
+    // pro formulário de edição deixou 'cadastro-associacao' como seção ativa,
+    // e sem isso o Voltar cairia de novo no formulário em vez da lista.
+    ativarSecaoSuperAdmin('associacoes');
   };
 
   document.querySelectorAll('.aba-detalhe').forEach(function(btn) {
@@ -1961,7 +2042,7 @@
   };
 
   document.getElementById('btn-editar-associacao-detalhe').onclick = function() {
-    abrirEdicaoAssociacao(associacaoDetalheAtual);
+    abrirEdicaoAssociacao(associacaoDetalheAtual, 'detalhe');
   };
 
   // ---------- Administradores da plataforma ----------
