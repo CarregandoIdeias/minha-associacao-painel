@@ -3237,10 +3237,20 @@
     });
   }
 
+  // Escapa também as ASPAS, não só < > & (a versão antiga usava
+  // textContent->innerHTML, que deixa " e ' passarem intactos). Sem isso o
+  // valor fica seguro em contexto de texto mas ESCAPA de um atributo --
+  // observacao do associado ia pra title="..." e um payload tipo
+  // `x" onmouseover="..."` virava XSS armazenado, rodando na sessão de quem
+  // abrisse a lista (com o JWT no localStorage). Ver auditoria de 07/08/2026.
   function escapeHtml(texto) {
-    var div = document.createElement('div');
-    div.textContent = texto;
-    return div.innerHTML;
+    if (texto === null || texto === undefined) return '';
+    return String(texto)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
   }
 
   // Modal de confirmação genérico — substitui o confirm() nativo do navegador

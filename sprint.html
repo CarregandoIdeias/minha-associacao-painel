@@ -293,10 +293,17 @@
     setTimeout(function() { t.className = 'toast'; }, 3000);
   }
 
+  // Escapa também as ASPAS -- ver comentário completo em index.html
+  // (a versão antiga, textContent->innerHTML, deixava " e ' passarem e
+  // permitia escapar de um atributo HTML). Auditoria de 07/08/2026.
   function escapeHtml(texto) {
-    var div = document.createElement('div');
-    div.textContent = texto || '';
-    return div.innerHTML;
+    if (texto === null || texto === undefined) return '';
+    return String(texto)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
   }
 
   function confirmarAcao(opcoes) {
