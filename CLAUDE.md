@@ -6,6 +6,51 @@ backend (`../minha-associacao-backend`, ou `CarregandoIdeias/minha-associacao-ba
 no GitHub) para o sistema completo — é lá que vive a documentação de
 segurança, RLS, modelo de dados e rotas da API.
 
+## `escapeHtml` passou a escapar aspas — XSS por quebra de atributo (07/08/2026)
+
+Auditoria de segurança pedida ao fechar o **primeiro cliente real** (o
+quadro completo, incluindo a parte de backend e os 3 itens de severidade
+baixa, está em `backend/CLAUDE.md`).
+
+O `escapeHtml` dos 4 arquivos (`index.html`, `superadmin.html`,
+`portal.html`, `sprint.html`) era o truque clássico de
+`textContent -> innerHTML`. Isso escapa `<`, `>` e `&` — **mas não escapa
+aspas**, porque a serialização de um nó de texto não precisa escapá-las.
+Resultado: seguro em contexto de texto (a maioria esmagadora dos usos, e
+todos estavam corretos), mas **inseguro dentro de atributo**.
+
+E havia um uso em atributo com campo livre: `index.html`, na lista de
+Associados, punha `escapeHtml(a.observacao)` dentro de `title="..."`. Um
+`atendimento`/`operador` gravava `x" onmouseover="..."` na observação, o
+`admin` abria a lista, o script rodava na sessão dele e pegava o JWT do
+`localStorage` — escalação de privilégio que derrotava os perfis
+granulares de 28/07.
+
+**Confirmado em navegador de verdade, antes e depois**, com flag resetado
+a cada caso:
+
+| Payload | Antigo | Novo |
+|---|---|---|
+| `x" onmouseover=…` | `title+onmouseover+a+style` — **executou** | `title+style` |
+| `x' onmouseover=…` | `title+style` | `title+style` |
+| `<img src=x onerror=…>` | atributo `window.flag` injetado | `title+style` |
+
+Trocado por um `replace` explícito cobrindo `&`, `<`, `>`, `"` e `'`.
+**Nenhuma linha de renderização precisou mudar** — corrigir o helper
+conserta todos os contextos de atributo de uma vez, inclusive os que só
+estavam seguros por sorte (`class="badge ' + escapeHtml(a.status) + '"`
+depende de `status` ser enum no banco *e* ter whitelist na rota).
+
+Preserva o comportamento antigo pra `null`/`undefined` (string vazia, não
+`"null"`) — as duas variantes que existiam já faziam isso, uma via
+`texto || ''` e a outra pelo próprio `textContent`.
+
+**Cuidado pra não regredir:** se alguém "simplificar" isso de volta pro
+`textContent -> innerHTML`, o XSS volta silenciosamente em qualquer uso em
+atributo. A segunda camada (validação de `observacao` no backend) limita o
+estrago mas **não** substitui esse escape — ela permite aspas de
+propósito, porque aspas são legítimas em texto livre.
+
 ## `manual.html` atualizado com as mudanças recentes (30/07/2026)
 
 Depois de implementar boas-vindas/controle de limite, o manual (guia
