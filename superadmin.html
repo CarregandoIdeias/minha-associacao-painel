@@ -1790,7 +1790,16 @@
       document.getElementById('assoc-vencimento-assinatura').value = a.vencimento_assinatura ? a.vencimento_assinatura.substring(0, 10) : '';
       document.getElementById('assoc-forma-cobranca').value = a.forma_cobranca || '';
       document.getElementById('assoc-ativo').checked = !!a.ativo;
-      resetarLogoPreview(a.logo_url);
+      // Logo buscada à parte (auditoria de segurança Fase 3, 08/08/2026 --
+      // SEC-018): GET /superadmin/associacoes/:id não devolve mais logo_url
+      // (era a logo inteira em base64 numa resposta que quase nunca precisa
+      // dela). Não bloqueia o preenchimento do resto do formulário -- a
+      // prévia só aparece quando essa chamada separada responder.
+      resetarLogoPreview(null);
+      fetch(API_URL + '/superadmin/associacoes/' + id + '/logo', { headers: { 'Authorization': 'Bearer ' + estado.token }, cache: 'no-store' })
+        .then(function(resp) { return resp.ok ? resp.json() : null; })
+        .then(function(logoResp) { if (logoResp) resetarLogoPreview(logoResp.logo_url); })
+        .catch(function() {});
       atualizarPlaceholderMensalidade(a.total_associados);
       document.getElementById('bloco-admin-inicial').style.display = 'none';
       document.getElementById('ajuda-admin-inicial').style.display = 'none';

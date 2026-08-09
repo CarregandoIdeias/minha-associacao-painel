@@ -861,8 +861,8 @@
 <div id="tela-trial-expirado">
   <div class="bloqueio-caixa">
     <div class="icone-bloqueio">⏳</div>
-    <h2>Seu período de avaliação terminou</h2>
-    <p>Todos os dados da sua associação foram preservados. Para continuar usando a plataforma, contrate um dos planos abaixo.</p>
+    <h2 id="titulo-bloqueio-acesso">Seu período de avaliação terminou</h2>
+    <p id="texto-bloqueio-acesso">Todos os dados da sua associação foram preservados. Para continuar usando a plataforma, contrate um dos planos abaixo.</p>
     <button class="btn" style="width:100%;" id="btn-contratar-trial-expirado">Contratar Plano</button>
     <p class="aviso-dados">Já enviou o comprovante? Aguarde a aprovação — assim que confirmado, o acesso volta automaticamente.</p>
     <p style="text-align:center; margin-top:18px; font-size:13px;">
@@ -1834,8 +1834,16 @@
       // do dashboard -- só o admin realmente depende dessa tela.
       if (!res.ok) return;
       planoAtualDados = res.data;
+      // bloqueio_assinatura_vencida (auditoria de segurança Fase 3,
+      // 08/08/2026 -- SEC-015): diferente de status === 'vencida' (que já é
+      // true no primeiro dia de atraso, só informativo/badge) -- este campo
+      // vem calculado pelo backend com a tolerância de dias já aplicada, é
+      // a fonte de verdade de quando bloquear de fato (mesmo cálculo que
+      // bloquearAssinaturaVencida usa pra devolver 403 nas outras rotas).
       if (res.data.status === 'trial_expirado') {
-        mostrarTelaTrialExpirado();
+        mostrarTelaBloqueio('trial_expirado');
+      } else if (res.data.bloqueio_assinatura_vencida) {
+        mostrarTelaBloqueio('assinatura_vencida');
       } else {
         document.getElementById('tela-trial-expirado').style.display = 'none';
         document.getElementById('tela-dashboard').style.display = 'flex';
@@ -2060,8 +2068,24 @@
     if (intervaloContadorTrial) { clearInterval(intervaloContadorTrial); intervaloContadorTrial = null; }
   }
 
-  function mostrarTelaTrialExpirado() {
+  // Mesma tela/CSS pros dois motivos de bloqueio (trial vencido ou
+  // assinatura paga vencida além da tolerância, SEC-015) -- só o texto
+  // muda, via os ids adicionados no <h2>/<p> (painel/index.html).
+  var TEXTOS_BLOQUEIO_ACESSO = {
+    trial_expirado: {
+      titulo: 'Seu período de avaliação terminou',
+      texto: 'Todos os dados da sua associação foram preservados. Para continuar usando a plataforma, contrate um dos planos abaixo.',
+    },
+    assinatura_vencida: {
+      titulo: 'Sua assinatura está vencida',
+      texto: 'Todos os dados da sua associação foram preservados. Regularize o pagamento para continuar usando a plataforma.',
+    },
+  };
+  function mostrarTelaBloqueio(motivo) {
     pararContadorTrial();
+    var t = TEXTOS_BLOQUEIO_ACESSO[motivo] || TEXTOS_BLOQUEIO_ACESSO.trial_expirado;
+    document.getElementById('titulo-bloqueio-acesso').textContent = t.titulo;
+    document.getElementById('texto-bloqueio-acesso').textContent = t.texto;
     document.getElementById('tela-dashboard').style.display = 'none';
     document.getElementById('tela-trial-expirado').style.display = 'flex';
   }

@@ -1870,8 +1870,14 @@
   // associação expirado -- ver middleware/auth.js bloquearTrialExpirado),
   // troca a tela inteira por um aviso simples. O associado não gerencia
   // plano, então não tem fluxo de contratação aqui, só uma explicação.
+  // Mesmo tratamento pros dois códigos de bloqueio de acesso -- trial
+  // vencido (TRIAL_EXPIRADO) e assinatura paga vencida além da tolerância
+  // (ASSINATURA_VENCIDA, auditoria de segurança Fase 3, 08/08/2026 --
+  // SEC-015). O texto da tela já é genérico o bastante pros dois casos
+  // ("regularizar o plano"), não precisou de texto dinâmico aqui como em
+  // painel/index.html.
   function tratarTrialExpirado(dadosResposta) {
-    if (dadosResposta && dadosResposta.codigo === 'TRIAL_EXPIRADO') {
+    if (dadosResposta && (dadosResposta.codigo === 'TRIAL_EXPIRADO' || dadosResposta.codigo === 'ASSINATURA_VENCIDA')) {
       document.getElementById('tela-dashboard').style.display = 'none';
       document.getElementById('tela-trial-expirado').style.display = 'flex';
       return true;
