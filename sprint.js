@@ -3,7 +3,7 @@
   var API_URL = (function() {
     var h = location.hostname;
     if (h === 'localhost' || h === '127.0.0.1' || h.indexOf('staging') !== -1) {
-      return 'https://associa-plus-backend-staging.onrender.com';
+      return 'https://minha-associacao-backend-staging.onrender.com';
     }
     return 'https://associa-plus-backend.onrender.com';
   })();
