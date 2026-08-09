@@ -4,7 +4,7 @@ Front-end da plataforma SaaS de gestão de associações. HTML/CSS/JS puro,
 sem framework e sem build step — os dois arquivos deste repositório são
 publicados exatamente como estão.
 
-Backend (API): repositório separado, `CarregandoIdeias/minha-associacao-backend`.
+Backend (API): repositório separado, `CarregandoIdeias/associa-plus-backend`.
 Ver o `README.md` de lá para o quadro completo do sistema (rotas, modelo
 de dados, segurança). Este README cobre só o front-end.
 

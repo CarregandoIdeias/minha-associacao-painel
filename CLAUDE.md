@@ -168,7 +168,7 @@ sem media query), `.campo-largo` (ocupa a linha toda) e
 
 Contexto rápido para sessões de IA. Ver `README.md` deste repositório para
 mais detalhes do front-end, e o `README.md`/`CLAUDE.md` do repositório do
-backend (`../minha-associacao-backend`, ou `CarregandoIdeias/minha-associacao-backend`
+backend (`../backend` neste checkout local, ou `CarregandoIdeias/associa-plus-backend`
 no GitHub) para o sistema completo — é lá que vive a documentação de
 segurança, RLS, modelo de dados e rotas da API.
 
