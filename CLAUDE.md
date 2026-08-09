@@ -1,5 +1,79 @@
 # CLAUDE.md — painel
 
+## JS saiu do HTML e a CSP perdeu o `'unsafe-inline'` (08/08/2026, Fase 4 da auditoria)
+
+**Mudança estrutural: os HTML não são mais autocontidos.** Cada página com
+JS agora carrega um `.js` externo de mesmo nome base (`index.html` →
+`index.js`, e assim para `superadmin`, `portal`, `sprint`, `landing`,
+`manual`, `intranet` — `privacidade.html` não tem script). A tag fica na
+mesma posição do bloco antigo (fim do body, **sem `defer`/`async`**), pra
+preservar ordem e momento de execução; continuam scripts clássicos, não
+módulos, então as funções seguem globais como antes.
+
+Isso existiu por um motivo só: **remover `'unsafe-inline'` de `script-src`**
+no `vercel.json`. Enquanto houvesse um `<script>` inline ou um `onclick=`
+em atributo, a CSP tinha que permitir inline — e permitir inline é o que
+deixou o XSS de 07/08 chegar até o fim (roubar o JWT do `localStorage`).
+Agora, um XSS futuro que consiga injetar script é **bloqueado pelo
+navegador**. Confirmado em produção injetando os dois vetores de propósito:
+`<script>` inline e `onmouseover=` em atributo, ambos recusados com
+violação explícita no console.
+
+**`style-src` mantém `'unsafe-inline'` de propósito** — o HTML usa
+`style="..."` em centenas de lugares, e injeção de CSS é um vetor
+incomparavelmente mais fraco que script. Tirar isso seria outro refactor do
+mesmo tamanho com uma fração do benefício.
+
+### Delegação de evento — o padrão que substituiu os `onclick=`
+
+Os 31 `onclick="funcao('id')"` que eram montados dentro de string JS viraram
+atributos `data-*` + um listener delegado por arquivo:
+
+```js
+var ACOES_DELEGADAS = { abrirFichaAssociado: abrirFichaAssociado, /* ... */ };
+document.addEventListener('click', function(ev) {
+  var alvo = ev.target.closest('[data-acao]');
+  if (!alvo) return;
+  var acao = ACOES_DELEGADAS[alvo.getAttribute('data-acao')];
+  if (!acao) return;
+  var id = alvo.getAttribute('data-id');
+  var arg = alvo.getAttribute('data-arg');
+  if (arg === null) acao(id); else acao(id, arg);
+});
+```
+
+Três coisas que **não** podem ser "simplificadas" depois:
+
+1. **O mapa é explícito de propósito. Nunca usar `window[nome]()`.** Um
+   dispatch genérico transformaria qualquer `data-acao` injetado numa
+   chamada a função global arbitrária — trocaria um vetor de XSS por outro,
+   justamente na camada que existe pra fechar esse vetor.
+2. **`data-arg` é sempre string** (é atributo HTML). Quem precisa de outro
+   tipo converte na própria função — ver `alternarStatusAdministrador` em
+   `superadmin.js`, que normaliza `"true"`/`"false"` pra boolean. Sem isso,
+   `"false"` (truthy em JS) invertia os textos do modal **e** mandava
+   `ativo: "false"` pro backend, que exige boolean e responde 400.
+3. **O 2º argumento só é passado quando o atributo existe** (`arg === null`
+   → chama com 1 argumento). Mantém a aridade idêntica às chamadas antigas;
+   `null` e `undefined` não são a mesma coisa pra quem checa.
+
+Ao criar um botão de ação novo em lista/tabela: usar `data-acao`/`data-id`
+e registrar a função no mapa daquele arquivo — **não** voltar a escrever
+`onclick=`, que agora simplesmente não executa.
+
+### `.vercelignore` (08/08/2026)
+
+Arquivo novo. Impede o Vercel de servir `intranet.html` e `*.md` como
+páginas públicas — os dois estavam acessíveis a quem soubesse a URL.
+`intranet.html` expõe refs de infraestrutura (Supabase, Render, GitHub) e
+não tem autenticação nenhuma; `CLAUDE.md` (este arquivo) estava público com
+todo o histórico operacional. Continuam versionados e acessíveis
+localmente — só deixaram de ser URL pública.
+
+**Consequência**: a CSP não se aplica mais a `intranet.html` (ele não é
+servido). O JS dele foi externalizado junto assim mesmo, pra não virar
+armadilha caso alguém remova o ignore no futuro.
+
 ## `manual.html` ganhou tabela comparativa de planos (08/08/2026)
 
 Pedido do usuário depois de perguntar se o manual já mostrava o que cada
@@ -349,12 +423,18 @@ senha.
 
 ## O que é
 
-Front-end da plataforma de gestão de associações — três arquivos HTML
-autocontidos (`index.html`: painel da associação/admin-diretoria;
+Front-end da plataforma de gestão de associações — três aplicações
+independentes (`index.html`: painel da associação/admin-diretoria;
 `portal.html`: Portal do Associado; `superadmin.html`: painel do Super
-Admin), sem build step, publicados direto no Vercel. Cada um tem login,
-sessão (`localStorage`) e layout próprios — nenhum depende de import ou
-build dos outros.
+Admin), sem build step, publicadas direto no Vercel. Cada uma tem login,
+sessão (`localStorage`) e layout próprios — nenhuma depende de import ou
+build das outras.
+
+**Desde 08/08/2026 cada página é um par `X.html` + `X.js`** (o CSS segue
+inline no HTML; o JS não). Antes disso eram arquivos únicos autocontidos —
+a separação existiu pra permitir remover `'unsafe-inline'` da CSP, ver a
+seção no topo deste arquivo. Continua sem import entre elas: cada `.js` é
+independente e repete o que precisa (`escapeHtml`, `API_URL`, etc.).
 
 ## Manual — dois bugs de CSS corrigidos após o conteúdo novo (29/07/2026)
 
@@ -747,7 +827,7 @@ Corrigido nos 3 arquivos, sempre com o mesmo padrão — validar com regex estri
 
 **Se for adicionar um novo lugar que renderiza imagem/PDF vindo do banco**: reaproveitar uma dessas funções (ou copiar o padrão), nunca voltar a escrever `'<img src="' + valor + '">'`. A validação de formato no backend é a primeira camada, mas o front não pode confiar cegamente nela — as duas existem de propósito.
 
-Também: `painel/vercel.json` (novo) adiciona cabeçalhos de segurança via headers da Vercel, incluindo uma CSP. Ela mantém `'unsafe-inline'` em `script-src` porque todo o JS é inline nos HTML (tirar isso exigiria mover pra arquivo externo, mudança maior, não feita); o que a CSP resolve de verdade é restringir `connect-src`/`img-src`/`frame-ancestors`, cortando exfiltração de dado pra domínio externo caso algum XSS novo apareça no futuro.
+Também: `painel/vercel.json` (novo) adiciona cabeçalhos de segurança via headers da Vercel, incluindo uma CSP. ~~Ela mantém `'unsafe-inline'` em `script-src` porque todo o JS é inline nos HTML (tirar isso exigiria mover pra arquivo externo, mudança maior, não feita)~~ — **desatualizado desde 08/08/2026**: a mudança foi feita (ver a seção "JS saiu do HTML e a CSP perdeu o `'unsafe-inline'`" no topo deste arquivo), e `script-src` hoje é só `'self' https://cdn.jsdelivr.net`. Na época, o que a CSP resolvia era restringir `connect-src`/`img-src`/`frame-ancestors`, cortando exfiltração de dado pra domínio externo caso algum XSS novo aparecesse.
 
 ## Dashboard — identidade da associação no cabeçalho (27/07/2026, item de sprint)
 
@@ -1126,7 +1206,10 @@ mostrar uma ação que vai falhar).
 
 ## Convenções
 
-- Sem framework/bundler — tudo inline (CSS e JS dentro do próprio HTML).
+- Sem framework/bundler e sem build step. **O CSS continua inline no HTML;
+  o JS não** — desde 08/08/2026 cada página carrega um `.js` externo de
+  mesmo nome base (ver a seção sobre CSP no topo). Editar o `.js`
+  correspondente, não procurar `<script>` no HTML.
 - Estilo consistente: `var`/`function() {}`, não `const`/arrow — manter
   ao editar.
 - Padrão de modal "credenciais geradas" (senha provisória mostrada uma
