@@ -1487,13 +1487,25 @@
     });
   };
 
-  document.getElementById('btn-sair').onclick = function() {
+  // POST /superadmin/logout (auditoria de segurança Fase 2, 08/08/2026 --
+  // SEC-004): antes o botão só limpava o localStorage, sem nunca chamar a
+  // API -- o token continuava válido até expirar (até 8h) mesmo depois de
+  // "sair". Best-effort (mesmo padrão de fazerLogout em index.html): a
+  // saída não fica bloqueada esperando a resposta.
+  function fazerLogout() {
+    if (estado.token) {
+      fetch(API_URL + '/superadmin/logout', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + estado.token }
+      }).catch(function() { /* logout é best-effort, não bloqueia a saída */ });
+    }
     estado.token = null;
     estado.nome = null;
     limparSessao();
     document.getElementById('tela-dashboard').style.display = 'none';
     document.getElementById('tela-login').style.display = 'block';
-  };
+  }
+  document.getElementById('btn-sair').onclick = fazerLogout;
 
   function formatarMoeda(valor) {
     return 'R$ ' + parseFloat(valor || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
