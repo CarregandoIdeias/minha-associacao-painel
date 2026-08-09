@@ -1,0 +1,16 @@
+# Impede que o Vercel sirva estes arquivos como páginas públicas, mesmo
+# estando versionados no git. São documentação interna/ferramenta de
+# operação — não fazem parte do produto exposto aos clientes.
+#
+# Achado na auditoria de seguranca de 08/08/2026 (SEC-009): intranet.html
+# nao tem autenticacao nenhuma e expõe refs de infraestrutura (Supabase,
+# Render, GitHub) para qualquer visitante. CLAUDE.md tambem estava publico
+# (nao intencional, achado na mesma checagem) e e ainda mais sensivel --
+# tem o historico operacional completo, incidentes reais e raciocinio de
+# seguranca. README.md e vercel.json ja nao eram servidos pelo Vercel por
+# padrao (confirmado antes desta mudanca).
+#
+# Continuam acessiveis localmente (git, editor, ou rodando o painel local
+# via .claude/launch.json) -- so param de ser uma URL publica.
+intranet.html
+*.md
